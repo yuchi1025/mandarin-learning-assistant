@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandarin Learning Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="page">
+        <section class="hero">
+            <p class="eyebrow">Prototype v0</p>
+            <h1>AI Mandarin Learning Assistant</h1>
+            <p class="intro">
+                Search by Chinese word, pinyin, or English meaning.
+                This version uses a small mock database only.
+            </p>
+        </section>
+
+        <section class="search-panel">
+            <form method="post" class="search-form">
+                <input
+                    type="text"
+                    name="query"
+                    placeholder="Try: 你好, xue xi, or friend"
+                    value="{{ query }}"
+                    required
+                >
+                <button type="submit">Search</button>
+            </form>
+        </section>
+
+        {% if query and not results %}
+            <section class="empty-state">
+                <p>No results found for "<strong>{{ query }}</strong>". Try another word.</p>
+            </section>
+        {% endif %}
+
+        {% for item in results %}
+            <section class="result-card">
+                <div class="card-header">
+                    <h2>{{ item.word }}</h2>
+                    <span>{{ item.pinyin }}</span>
+                </div>
+                <p><strong>English meaning:</strong> {{ item.english }}</p>
+                <p><strong>Simple explanation:</strong> {{ item.explanation }}</p>
+                <div>
+                    <strong>Example sentences:</strong>
+                    <ul>
+                        {% for sentence in item.examples %}
+                            <li>{{ sentence }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </section>
+        {% endfor %}
+    </main>
+</body>
+</html>
