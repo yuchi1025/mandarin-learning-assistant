@@ -9,7 +9,7 @@
 <body>
     <main class="page">
         <section class="hero">
-            <p class="eyebrow">Prototype v0</p>
+            <p class="eyebrow">v1</p>
             <h1>AI Mandarin Learning Assistant</h1>
             <p class="intro">
                 Search by Chinese word, pinyin, or English meaning.
@@ -17,43 +17,237 @@
             </p>
         </section>
 
-        <section class="search-panel">
-            <form method="post" class="search-form">
-                <input
-                    type="text"
-                    name="query"
-                    placeholder="Try: 你好, xue xi, or friend"
-                    value="{{ query }}"
-                    required
-                >
-                <button type="submit">Search</button>
-            </form>
-        </section>
+        <nav class="mode-switch">
+            <a href="{{ url_for('home', mode='search') }}" class="{% if mode == 'search' %}active{% endif %}">
+                Search Mode
+            </a>
+            <a href="{{ url_for('home', mode='quiz') }}" class="{% if mode == 'quiz' %}active{% endif %}">
+                Quiz Mode
+            </a>
+        </nav>
 
-        {% if query and not results %}
-            <section class="empty-state">
-                <p>No results found for "<strong>{{ query }}</strong>". Try another word.</p>
+        {% if mode == 'search' %}
+            <section class="search-panel">
+                <form method="post" class="search-form">
+                    <input type="hidden" name="form_type" value="search">
+                    <input
+                        id="search-input"
+                        type="text"
+                        name="query"
+                        placeholder="Try: 你好, xue xi, or friend"
+                        value="{{ query }}"
+                        required
+                    >
+                    <button type="submit">Search</button>
+                </form>
             </section>
+
+            {% if query and not results %}
+                <section class="empty-state">
+                    <p>No results found for "<strong>{{ query }}</strong>". Try another word.</p>
+                </section>
+            {% endif %}
+
+            {% for item in results %}
+                <section class="result-card">
+                    <div class="card-header">
+                        <div class="word-block">
+                            <div class="word-line">
+                                <h2>{{ item.word }}</h2>
+                                <button
+                                    type="button"
+                                    class="audio-button inline-audio-button"
+                                    data-speak="{{ item.word }}"
+                                    aria-label="Play pronunciation for {{ item.word }}"
+                                    title="Play pronunciation"
+                                >
+                                    <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon">
+                                        <path d="M3 10v4h4l5 4V6L7 10H3z"></path>
+                                        <path d="M16 8a5 5 0 0 1 0 8"></path>
+                                        <path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"></path>
+                                    </svg>
+                                </button>
+                                <span class="part-of-speech">{{ item.part_of_speech }}</span>
+                            </div>
+                            <span>{{ item.pinyin }}</span>
+                        </div>
+                    </div>
+                    <p><strong>Meaning:</strong> {{ item.english }}</p>
+                    <p><strong>Simple explanation:</strong> {{ item.explanation }}</p>
+                    <div>
+                        <strong>Example sentences:</strong>
+                        <ul>
+                            {% for sentence in item.examples %}
+                                <li class="example-item">
+                                    <button
+                                        type="button"
+                                        class="audio-button sentence-audio"
+                                        data-speak="{{ sentence.text }}"
+                                        aria-label="Play sentence audio"
+                                        title="Play sentence audio"
+                                    >
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon">
+                                            <path d="M3 10v4h4l5 4V6L7 10H3z"></path>
+                                            <path d="M16 8a5 5 0 0 1 0 8"></path>
+                                            <path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"></path>
+                                        </svg>
+                                    </button>
+                                    <div class="example-text">
+                                        <span class="example-hanzi">{{ sentence.text }}</span>
+                                        <span class="example-pinyin">{{ sentence.pinyin }}</span>
+                                        {% if sentence.translation %}
+                                            <span class="example-translation">{{ sentence.translation }}</span>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </section>
+            {% endfor %}
         {% endif %}
 
-        {% for item in results %}
-            <section class="result-card">
-                <div class="card-header">
-                    <h2>{{ item.word }}</h2>
-                    <span>{{ item.pinyin }}</span>
+        {% if mode == 'quiz' %}
+            <section class="quiz-card">
+                <div class="quiz-header">
+                    <p class="eyebrow">Easy Quiz</p>
+                    <h2>What does this Mandarin word mean?</h2>
                 </div>
-                <p><strong>English meaning:</strong> {{ item.english }}</p>
-                <p><strong>Simple explanation:</strong> {{ item.explanation }}</p>
-                <div>
-                    <strong>Example sentences:</strong>
-                    <ul>
-                        {% for sentence in item.examples %}
-                            <li>{{ sentence }}</li>
+                <p class="quiz-word">{{ quiz.word }} <span>({{ quiz.pinyin }})</span></p>
+                <form method="post" class="quiz-form" data-correct-answer="{{ quiz.correct_answer }}" data-next-url="{{ url_for('home', mode='quiz') }}">
+                    <input type="hidden" name="form_type" value="quiz">
+                    <input type="hidden" name="question_word" value="{{ quiz.word }}">
+                    {% for recent_word in recent_words %}
+                        <input type="hidden" name="recent_word" value="{{ recent_word }}">
+                    {% endfor %}
+                    <div class="quiz-options">
+                        {% for choice in quiz.choices %}
+                            <input type="hidden" name="choice" value="{{ choice }}">
+                            <label class="quiz-option{% if quiz_feedback and choice == quiz_feedback.selected_answer %} option-wrong{% endif %}">
+                                <input
+                                    type="radio"
+                                    name="selected_answer"
+                                    value="{{ choice }}"
+                                    {% if quiz_feedback and choice == quiz_feedback.selected_answer %}checked{% endif %}
+                                    required
+                                >
+                                <span>{{ choice }}</span>
+                            </label>
                         {% endfor %}
-                    </ul>
-                </div>
+                    </div>
+                </form>
+
+                {% if quiz_feedback %}
+                    <div class="quiz-feedback wrong">
+                        <p>
+                            "{{ quiz_feedback.selected_answer }}" matches
+                            "{{ quiz_feedback.wrong_word }}" ({{ quiz_feedback.wrong_pinyin }}),
+                            not "{{ quiz.word }}". Try again.
+                        </p>
+                    </div>
+                {% endif %}
             </section>
-        {% endfor %}
+        {% endif %}
     </main>
+
+    {% if mode == 'search' %}
+        <script>
+            window.addEventListener("load", function () {
+                const searchInput = document.getElementById("search-input");
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+                }
+            });
+        </script>
+    {% endif %}
+
+    <script>
+        function speakMandarin(text) {
+            if (!window.speechSynthesis) {
+                window.alert("Your browser does not support built-in audio playback.");
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "zh-CN";
+            utterance.rate = 0.9;
+
+            const voices = window.speechSynthesis.getVoices();
+            const chineseVoice = voices.find(function (voice) {
+                return voice.lang && voice.lang.toLowerCase().startsWith("zh");
+            });
+
+            if (chineseVoice) {
+                utterance.voice = chineseVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function bindAudioButtons() {
+            const buttons = document.querySelectorAll("[data-speak]");
+            buttons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    speakMandarin(button.dataset.speak);
+                });
+            });
+        }
+
+        function bindQuizOptions() {
+            const quizForm = document.querySelector(".quiz-form");
+            if (!quizForm) {
+                return;
+            }
+
+            const radios = quizForm.querySelectorAll('input[name="selected_answer"]');
+            const correctAnswer = quizForm.dataset.correctAnswer;
+            const nextUrl = quizForm.dataset.nextUrl;
+            const recentWords = Array.from(quizForm.querySelectorAll('input[name="recent_word"]')).map(function (input) {
+                return input.value;
+            });
+            const currentWord = quizForm.querySelector('input[name="question_word"]').value;
+
+            radios.forEach(function (radio) {
+                radio.addEventListener("change", function () {
+                    if (radio.value === correctAnswer) {
+                        quizForm.querySelectorAll(".quiz-option").forEach(function (option) {
+                            option.classList.remove("option-wrong");
+                        });
+
+                        const feedback = document.querySelector(".quiz-feedback");
+                        if (feedback) {
+                            feedback.remove();
+                        }
+
+                        const option = radio.closest(".quiz-option");
+                        if (option) {
+                            option.classList.add("option-correct");
+                        }
+
+                        radios.forEach(function (item) {
+                            item.disabled = true;
+                        });
+
+                        window.setTimeout(function () {
+                            const params = new URLSearchParams();
+                            params.set("mode", "quiz");
+                            recentWords.concat([currentWord]).slice(-5).forEach(function (word) {
+                                params.append("recent_word", word);
+                            });
+                            window.location.href = nextUrl + "&" + params.toString().replace(/^mode=quiz&?/, "");
+                        }, 220);
+                    } else {
+                        quizForm.submit();
+                    }
+                });
+            });
+        }
+
+        window.addEventListener("load", bindAudioButtons);
+        window.addEventListener("load", bindQuizOptions);
+    </script>
 </body>
 </html>
