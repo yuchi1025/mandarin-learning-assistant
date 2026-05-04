@@ -9,11 +9,10 @@
 <body>
     <main class="page">
         <section class="hero">
-            <p class="eyebrow">v1</p>
-            <h1>AI Mandarin Learning Assistant</h1>
+            <p class="eyebrow">v2</p>
+            <h1>Mandarin Learning Assistant</h1>
             <p class="intro">
                 Search by Chinese word, pinyin, or English meaning.
-                This version uses a small mock database only.
             </p>
         </section>
 
@@ -42,9 +41,15 @@
                 </form>
             </section>
 
-            {% if query and not results %}
+            {% if query and not results and not ai_pending %}
                 <section class="empty-state">
                     <p>No results found for "<strong>{{ query }}</strong>". Try another word.</p>
+                </section>
+            {% endif %}
+
+            {% if ai_pending %}
+                <section class="result-card ai-result-card ai-loading-card" id="ai-result-card" data-ai-query="{{ query }}">
+                    <div class="ai-loading-placeholder"></div>
                 </section>
             {% endif %}
 
@@ -187,13 +192,138 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        function bindAudioButtons() {
-            const buttons = document.querySelectorAll("[data-speak]");
-            buttons.forEach(function (button) {
-                button.addEventListener("click", function () {
-                    speakMandarin(button.dataset.speak);
-                });
+        function attachAudioHandler(button) {
+            if (button.dataset.audioBound === "true") {
+                return;
+            }
+
+            button.addEventListener("click", function () {
+                speakMandarin(button.dataset.speak);
             });
+            button.dataset.audioBound = "true";
+        }
+
+        function bindAudioButtons(root) {
+            const scope = root || document;
+            const buttons = scope.querySelectorAll("[data-speak]");
+            buttons.forEach(function (button) {
+                attachAudioHandler(button);
+            });
+        }
+
+        function escapeHtml(value) {
+            return value
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
+        }
+
+        function renderExample(sentence) {
+            const translation = sentence.translation
+                ? `<span class="example-translation">${escapeHtml(sentence.translation)}</span>`
+                : "";
+
+            return `
+                <li class="example-item">
+                    <button
+                        type="button"
+                        class="audio-button sentence-audio"
+                        data-speak="${escapeHtml(sentence.text)}"
+                        aria-label="Play sentence audio"
+                        title="Play sentence audio"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon">
+                            <path d="M3 10v4h4l5 4V6L7 10H3z"></path>
+                            <path d="M16 8a5 5 0 0 1 0 8"></path>
+                            <path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"></path>
+                        </svg>
+                    </button>
+                    <div class="example-text">
+                        <span class="example-hanzi">${escapeHtml(sentence.text)}</span>
+                        <span class="example-pinyin">${escapeHtml(sentence.pinyin)}</span>
+                        ${translation}
+                    </div>
+                </li>
+            `;
+        }
+
+        function renderAiResult(card, item) {
+            const pinyinLine = item.pinyin ? `<span>${escapeHtml(item.pinyin)}</span>` : "";
+            const meaningLine = item.english ? `<p><strong>Meaning:</strong> ${escapeHtml(item.english)}</p>` : "";
+            const examplesBlock = item.examples && item.examples.length
+                ? `
+                    <div>
+                        <strong>Example sentences:</strong>
+                        <ul>
+                            ${item.examples.map(renderExample).join("")}
+                        </ul>
+                    </div>
+                `
+                : "";
+
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="word-block">
+                        <div class="word-line">
+                            <h2>${escapeHtml(item.word)}</h2>
+                            <button
+                                type="button"
+                                class="audio-button inline-audio-button"
+                                data-speak="${escapeHtml(item.word)}"
+                                aria-label="Play pronunciation for ${escapeHtml(item.word)}"
+                                title="Play pronunciation"
+                            >
+                                <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon">
+                                    <path d="M3 10v4h4l5 4V6L7 10H3z"></path>
+                                    <path d="M16 8a5 5 0 0 1 0 8"></path>
+                                    <path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"></path>
+                                </svg>
+                            </button>
+                            <span class="part-of-speech">${escapeHtml(item.part_of_speech)}</span>
+                        </div>
+                        ${pinyinLine}
+                    </div>
+                </div>
+                ${meaningLine}
+                <p><strong>Simple explanation:</strong> ${escapeHtml(item.explanation)}</p>
+                ${examplesBlock}
+            `;
+            bindAudioButtons(card);
+        }
+
+        function renderAiError(card, message) {
+            card.classList.remove("ai-loading-card");
+            card.innerHTML = `
+                <p><strong>AI explanation unavailable:</strong> ${escapeHtml(message)}</p>
+            `;
+        }
+
+        function loadAiResult() {
+            const card = document.getElementById("ai-result-card");
+            if (!card) {
+                return;
+            }
+
+            const query = card.dataset.aiQuery;
+            fetch(`/api/ai-explanation?query=${encodeURIComponent(query)}`)
+                .then(function (response) {
+                    return response.json().then(function (data) {
+                        return { status: response.status, data: data };
+                    });
+                })
+                .then(function (payload) {
+                    card.classList.remove("ai-loading-card");
+                    if (!payload.data.ok) {
+                        renderAiError(card, payload.data.error || "Unknown error.");
+                        return;
+                    }
+                    renderAiResult(card, payload.data.result);
+                })
+                .catch(function () {
+                    renderAiError(card, "Could not reach the local AI service.");
+                });
         }
 
         function bindQuizOptions() {
@@ -248,6 +378,7 @@
 
         window.addEventListener("load", bindAudioButtons);
         window.addEventListener("load", bindQuizOptions);
+        window.addEventListener("load", loadAiResult);
     </script>
 </body>
 </html>

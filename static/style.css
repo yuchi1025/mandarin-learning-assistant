@@ -176,6 +176,26 @@ h1 {
     margin-bottom: 18px;
 }
 
+.ai-result-card {
+    border-style: dashed;
+}
+
+.ai-loading-card {
+    opacity: 0.88;
+    min-height: 132px;
+    display: flex;
+    align-items: center;
+}
+
+.ai-loading-placeholder {
+    width: 100%;
+    height: 88px;
+    border-radius: 14px;
+    background: linear-gradient(90deg, rgba(233, 200, 184, 0.25), rgba(233, 200, 184, 0.6), rgba(233, 200, 184, 0.25));
+    background-size: 220% 100%;
+    animation: ai-pulse 1.2s ease-in-out infinite;
+}
+
 .card-header {
     display: flex;
     align-items: baseline;
@@ -306,5 +326,15 @@ ul {
 
     .search-form button {
         padding: 14px 16px;
+    }
+}
+
+@keyframes ai-pulse {
+    0% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0 50%;
     }
 }
