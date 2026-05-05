@@ -1,0 +1,2036 @@
+[
+  {
+    "word": "你好",
+    "pinyin": "ni hao",
+    "english": "hello",
+    "explanation": "A common greeting used when meeting someone.",
+    "examples": [
+      "你好！很高兴认识你。 (Hello! Nice to meet you.)",
+      "老师说：'你好，同学们。' (The teacher said, 'Hello, students.')"
+    ],
+    "part_of_speech": "greeting"
+  },
+  {
+    "word": "谢谢",
+    "pinyin": "xie xie",
+    "english": "thank you",
+    "explanation": "Used to show gratitude when someone helps you or gives you something.",
+    "examples": [
+      "谢谢你的帮助。 (Thank you for your help.)",
+      "我收到礼物后说谢谢。 (I said thank you after receiving the gift.)"
+    ],
+    "part_of_speech": "expression"
+  },
+  {
+    "word": "学习",
+    "pinyin": "xue xi",
+    "english": "to study; learning",
+    "explanation": "Used when talking about studying, practicing, or learning something new.",
+    "examples": [
+      "我每天学习汉语。 (I study Mandarin every day.)",
+      "学习新词很重要。 (Learning new words is important.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "朋友",
+    "pinyin": "peng you",
+    "english": "friend",
+    "explanation": "Refers to a person you know well and like.",
+    "examples": [
+      "她是我的好朋友。 (She is my good friend.)",
+      "我和朋友一起去公园。 (I go to the park with my friend.)"
+    ],
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "吃饭",
+    "pinyin": "chi fan",
+    "english": "to eat a meal",
+    "explanation": "Having a meal, whether alone or with others.",
+    "examples": [
+      "我们下班以后一起去吃饭吧。 (Let’s go eat together after work.)",
+      "我今天中午在公司食堂吃饭。 (I ate lunch at the company cafeteria today.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "喝水",
+    "pinyin": "he shui",
+    "english": "to drink water",
+    "explanation": "Drinking water or staying hydrated.",
+    "examples": [
+      "天气这么热，你要多喝水。 (It’s so hot, you should drink more water.)",
+      "我每天早上起床都会先喝水。 (I drink water first thing every morning.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "多少钱",
+    "pinyin": "duo shao qian",
+    "english": "how much money",
+    "explanation": "The price of something.",
+    "examples": [
+      "请问这个手机现在多少钱？ (How much is this phone now?)",
+      "这双鞋打折以后是多少钱？ (How much are these shoes after discount?)"
+    ],
+    "part_of_speech": "question phrase"
+  },
+  {
+    "word": "可以",
+    "pinyin": "ke yi",
+    "english": "can; may",
+    "explanation": "Expresses permission, ability, or possibility.",
+    "examples": [
+      "我可以在这里坐一会儿吗？ (Can I sit here for a while?)",
+      "你今天晚上可以陪我去吗？ (Can you go with me tonight?)"
+    ],
+    "part_of_speech": "modal verb"
+  },
+  {
+    "word": "不要",
+    "pinyin": "bu yao",
+    "english": "don’t want; don’t",
+    "explanation": "Refusal or prohibition.",
+    "examples": [
+      "我今天不太饿，所以不要吃饭。 (I’m not very hungry today, so I don’t want to eat.)",
+      "你走路的时候不要看手机。 (Don’t look at your phone while walking.)"
+    ],
+    "part_of_speech": "verb phrase"
+  },
+  {
+    "word": "现在",
+    "pinyin": "xian zai",
+    "english": "now",
+    "explanation": "The present moment.",
+    "examples": [
+      "我现在正在家里看电视节目。 (I am watching TV at home now.)",
+      "你现在方便接电话聊天吗？ (Are you free to take a call now?)"
+    ],
+    "part_of_speech": "time word"
+  },
+  {
+    "word": "等一下",
+    "pinyin": "deng yi xia",
+    "english": "wait a moment",
+    "explanation": "A brief pause or short wait.",
+    "examples": [
+      "你先别走，等一下我马上回来。 (Don’t leave yet, wait a moment, I’ll be back soon.)",
+      "请等一下，我还没准备好出门。 (Please wait a moment, I’m not ready to go out yet.)"
+    ],
+    "part_of_speech": "phrase"
+  },
+  {
+    "word": "为什么",
+    "pinyin": "wei shen me",
+    "english": "why",
+    "explanation": "A question about reasons or causes.",
+    "examples": [
+      "你今天为什么没有来上班呢？ (Why didn’t you come to work today?)",
+      "这个东西为什么这么贵呢？ (Why is this item so expensive?)"
+    ],
+    "part_of_speech": "question word"
+  },
+  {
+    "word": "因为",
+    "pinyin": "yin wei",
+    "english": "because",
+    "explanation": "Introduces a reason or explanation.",
+    "examples": [
+      "因为今天下大雨，所以我没出门。 (Because it rained heavily today, I didn’t go out.)",
+      "我累了，因为昨天晚上睡得太晚。 (I’m tired because I slept too late last night.)"
+    ],
+    "part_of_speech": "conjunction"
+  },
+  {
+    "word": "知道",
+    "pinyin": "zhi dao",
+    "english": "to know",
+    "explanation": "Having information or awareness about something.",
+    "examples": [
+      "我早就知道这件事情的结果了。 (I already knew the result of this matter.)",
+      "你知道附近哪里有好吃的吗？ (Do you know where to find good food nearby?)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "觉得",
+    "pinyin": "jue de",
+    "english": "to feel; to think",
+    "explanation": "Personal opinion, judgment, or feeling.",
+    "examples": [
+      "我觉得这部电影真的很好看。 (I think this movie is really good.)",
+      "你觉得我们应该几点出发比较好？ (What time do you think we should leave?)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "喜欢",
+    "pinyin": "xi huan",
+    "english": "to like",
+    "explanation": "A positive preference or enjoyment.",
+    "examples": [
+      "我很喜欢周末在家休息看书。 (I really like staying home and reading on weekends.)",
+      "她特别喜欢喝冰的奶茶。 (She especially likes drinking iced milk tea.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "不喜欢",
+    "pinyin": "bu xi huan",
+    "english": "to dislike",
+    "explanation": "A negative preference or lack of enjoyment.",
+    "examples": [
+      "我不喜欢早上太早起床上班。 (I don’t like waking up too early for work.)",
+      "他不喜欢在下雨天出门活动。 (He doesn’t like going out on rainy days.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "工作",
+    "pinyin": "gong zuo",
+    "english": "work; job",
+    "explanation": "Tasks, duties, or employment.",
+    "examples": [
+      "我最近工作很忙，经常要加班。 (I’ve been very busy with work and often work overtime.)",
+      "她找到了一份离家很近的工作。 (She found a job close to home.)"
+    ],
+    "part_of_speech": "noun / verb"
+  },
+  {
+    "word": "下班",
+    "pinyin": "xia ban",
+    "english": "to get off work",
+    "explanation": "Finishing the workday.",
+    "examples": [
+      "我今天晚上六点准时下班回家。 (I get off work at six and go home.)",
+      "你下班以后想不想一起去吃饭？ (Do you want to eat together after work?)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "上班",
+    "pinyin": "shang ban",
+    "english": "to go to work",
+    "explanation": "Starting the workday or being at work.",
+    "examples": [
+      "我每天早上八点准时去公司上班。 (I go to work at 8 every morning.)",
+      "他今天身体不舒服，没有去上班。 (He didn’t go to work today because he felt unwell.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "回家",
+    "pinyin": "hui jia",
+    "english": "to go home",
+    "explanation": "Returning to one’s home.",
+    "examples": [
+      "我下班以后直接坐地铁回家休息。 (I go straight home by MRT after work.)",
+      "周末的时候我常常回家看父母。 (I often go home to visit my parents on weekends.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "出去",
+    "pinyin": "chu qu",
+    "english": "to go out",
+    "explanation": "Leaving a place to spend time outside.",
+    "examples": [
+      "今天天气很好，我们一起出去走走吧。 (The weather is nice, let’s go out for a walk.)",
+      "他刚刚出去买东西，很快就回来。 (He just went out to buy something and will be back soon.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "进来",
+    "pinyin": "jin lai",
+    "english": "to come in",
+    "explanation": "Entering an indoor or enclosed space.",
+    "examples": [
+      "外面很冷，你快点进来坐一会儿。 (It’s cold outside, come in and sit for a while.)",
+      "老师叫学生一个一个地进来教室。 (The teacher asked students to come into the classroom one by one.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "看",
+    "pinyin": "kan",
+    "english": "to look; to watch",
+    "explanation": "Using the eyes to observe, watch, or read.",
+    "examples": [
+      "我晚上喜欢一个人在家看电影放松。 (I like watching movies at home alone at night.)",
+      "你可以帮我看看这个文件有没有问题吗？ (Can you help me check this document?)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "听",
+    "pinyin": "ting",
+    "english": "to listen",
+    "explanation": "Paying attention to sounds or spoken words.",
+    "examples": [
+      "我每天上下班的时候都会听音乐。 (I listen to music during my commute every day.)",
+      "请你认真听老师讲课的内容。 (Please listen carefully to the teacher.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "说",
+    "pinyin": "shuo",
+    "english": "to speak; to say",
+    "explanation": "Expressing thoughts through speech.",
+    "examples": [
+      "他会说三种语言，非常厉害。 (He can speak three languages, very impressive.)",
+      "我想跟你说一件很重要的事情。 (I want to tell you something important.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "买",
+    "pinyin": "mai",
+    "english": "to buy",
+    "explanation": "Obtaining something by paying money.",
+    "examples": [
+      "我打算周末去商场买一些新衣服。 (I plan to buy some new clothes at the mall this weekend.)",
+      "她在网上买了一部新的手机。 (She bought a new phone online.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "卖",
+    "pinyin": "mai",
+    "english": "to sell",
+    "explanation": "Exchanging goods for money.",
+    "examples": [
+      "这家店专门卖新鲜的水果和蔬菜。 (This shop sells fresh fruits and vegetables.)",
+      "他在网上卖自己做的手工艺品。 (He sells handmade crafts online.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "打开",
+    "pinyin": "da kai",
+    "english": "to open",
+    "explanation": "Making something accessible by unsealing or switching on.",
+    "examples": [
+      "请帮我打开这个箱子看看里面有什么。 (Please help me open this box and see what’s inside.)",
+      "我每天早上都会打开电脑开始工作。 (I turn on my computer every morning to start work.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "关上",
+    "pinyin": "guan shang",
+    "english": "to close",
+    "explanation": "Shutting or turning something off.",
+    "examples": [
+      "你出门的时候记得把门关上锁好。 (Remember to close and lock the door when you leave.)",
+      "晚上睡觉前请把窗户关上。 (Please close the window before sleeping.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "开始",
+    "pinyin": "kai shi",
+    "english": "to start",
+    "explanation": "The beginning of an action or event.",
+    "examples": [
+      "我们现在开始今天的会议讨论内容。 (Let’s start today’s meeting discussion now.)",
+      "电影还有十分钟就要开始了。 (The movie will start in ten minutes.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "结束",
+    "pinyin": "jie shu",
+    "english": "to end",
+    "explanation": "The conclusion or completion of something.",
+    "examples": [
+      "会议结束以后大家一起去吃晚饭。 (After the meeting ends, let’s have dinner together.)",
+      "课程结束的时候老师给了很多作业。 (The teacher gave a lot of homework at the end of class.)"
+    ],
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "累",
+    "pinyin": "lei",
+    "english": "tired",
+    "explanation": "A state of physical or mental fatigue.",
+    "examples": [
+      "我今天走了很多路，感觉特别累。 (I walked a lot today and feel especially tired.)",
+      "工作了一整天以后，他已经很累了。 (After working all day, he is already tired.)"
+    ],
+    "part_of_speech": "adjective"
+  },
+  {
+    "word": "开心",
+    "pinyin": "kai xin",
+    "english": "happy",
+    "explanation": "A feeling of joy or pleasure.",
+    "examples": [
+      "今天和朋友见面聊天让我很开心。 (Meeting and chatting with friends today made me happy.)",
+      "收到你的礼物我真的非常开心。 (I’m really happy to receive your gift.)"
+    ],
+    "part_of_speech": "adjective"
+  },
+  {
+    "word": "早上好",
+    "english": "good morning",
+    "part_of_speech": "greeting",
+    "explanation": "A polite greeting used in the morning.",
+    "examples": [
+      "早上好，你今天起得很早。 (Good morning, you got up early today.)",
+      "老师说：早上好，同学们。 (The teacher said: good morning, students.)"
+    ]
+  },
+  {
+    "word": "晚上好",
+    "english": "good evening",
+    "part_of_speech": "greeting",
+    "explanation": "A polite greeting used in the evening.",
+    "examples": [
+      "晚上好，欢迎来到我们家。 (Good evening, welcome to our home.)",
+      "晚上好，你吃饭了吗？ (Good evening, have you eaten?)"
+    ]
+  },
+  {
+    "word": "再见",
+    "english": "goodbye",
+    "part_of_speech": "expression",
+    "explanation": "Used when leaving or ending a conversation.",
+    "examples": [
+      "我要回家了，再见。 (I am going home, goodbye.)",
+      "下次见，再见。 (See you next time, goodbye.)"
+    ]
+  },
+  {
+    "word": "对不起",
+    "english": "sorry",
+    "part_of_speech": "expression",
+    "explanation": "Used to apologize.",
+    "examples": [
+      "对不起，我迟到了。 (Sorry, I am late.)",
+      "对不起，我听错了。 (Sorry, I heard wrong.)"
+    ]
+  },
+  {
+    "word": "没关系",
+    "english": "it is okay",
+    "part_of_speech": "expression",
+    "explanation": "Used to respond kindly to an apology.",
+    "examples": [
+      "没关系，下次小心一点。 (It is okay, be more careful next time.)",
+      "你不用担心，没关系。 (Do not worry, it is okay.)"
+    ]
+  },
+  {
+    "word": "请",
+    "english": "please",
+    "part_of_speech": "word",
+    "explanation": "A polite word used before requests.",
+    "examples": [
+      "请坐在这里。 (Please sit here.)",
+      "请帮我看一下。 (Please help me take a look.)"
+    ]
+  },
+  {
+    "word": "请问",
+    "english": "excuse me; may I ask",
+    "part_of_speech": "phrase",
+    "explanation": "A polite way to start a question.",
+    "examples": [
+      "请问，地铁站在哪里？ (Excuse me, where is the MRT station?)",
+      "请问，这个多少钱？ (May I ask, how much is this?)"
+    ]
+  },
+  {
+    "word": "没事",
+    "english": "no problem; nothing wrong",
+    "part_of_speech": "expression",
+    "explanation": "Used to say something is fine or not serious.",
+    "examples": [
+      "我没事，你不用担心。 (I am fine, do not worry.)",
+      "没事，我们可以再试一次。 (No problem, we can try again.)"
+    ]
+  },
+  {
+    "word": "是",
+    "english": "to be; yes",
+    "part_of_speech": "verb",
+    "explanation": "Used to identify or confirm something.",
+    "examples": [
+      "她是我的朋友。 (She is my friend.)",
+      "是，我明白了。 (Yes, I understand.)"
+    ]
+  },
+  {
+    "word": "不是",
+    "english": "is not; no",
+    "part_of_speech": "verb",
+    "explanation": "Used to deny identity or confirmation.",
+    "examples": [
+      "这不是我的手机。 (This is not my phone.)",
+      "不是，我今天不去。 (No, I am not going today.)"
+    ]
+  },
+  {
+    "word": "有",
+    "english": "to have; there is",
+    "part_of_speech": "verb",
+    "explanation": "Used for possession or existence.",
+    "examples": [
+      "我有一个问题。 (I have a question.)",
+      "附近有一家超市。 (There is a supermarket nearby.)"
+    ]
+  },
+  {
+    "word": "没有",
+    "english": "do not have; there is not",
+    "part_of_speech": "verb",
+    "explanation": "The negative form of having or existing.",
+    "examples": [
+      "我今天没有时间。 (I do not have time today.)",
+      "这里没有空位。 (There are no empty seats here.)"
+    ]
+  },
+  {
+    "word": "要",
+    "english": "to want; will",
+    "part_of_speech": "modal verb",
+    "explanation": "Used to express wanting or future intention.",
+    "examples": [
+      "我要一杯水。 (I want a cup of water.)",
+      "我明天要上班。 (I will work tomorrow.)"
+    ]
+  },
+  {
+    "word": "想",
+    "english": "to want; to think",
+    "part_of_speech": "verb",
+    "explanation": "Used for desires or thoughts.",
+    "examples": [
+      "我想喝咖啡。 (I want to drink coffee.)",
+      "你在想什么？ (What are you thinking about?)"
+    ]
+  },
+  {
+    "word": "会",
+    "english": "can; know how to",
+    "part_of_speech": "modal verb",
+    "explanation": "Used for learned ability or future likelihood.",
+    "examples": [
+      "我会说一点中文。 (I can speak a little Chinese.)",
+      "明天可能会下雨。 (It may rain tomorrow.)"
+    ]
+  },
+  {
+    "word": "能",
+    "english": "can; be able to",
+    "part_of_speech": "modal verb",
+    "explanation": "Used for ability or permission in a situation.",
+    "examples": [
+      "我今天不能去。 (I cannot go today.)",
+      "你能帮我一下吗？ (Can you help me?)"
+    ]
+  },
+  {
+    "word": "应该",
+    "english": "should",
+    "part_of_speech": "modal verb",
+    "explanation": "Used to express what is proper or expected.",
+    "examples": [
+      "你应该早点休息。 (You should rest earlier.)",
+      "我们应该准时到。 (We should arrive on time.)"
+    ]
+  },
+  {
+    "word": "需要",
+    "english": "to need",
+    "part_of_speech": "verb",
+    "explanation": "Used when something is necessary.",
+    "examples": [
+      "我需要你的帮助。 (I need your help.)",
+      "你需要买什么？ (What do you need to buy?)"
+    ]
+  },
+  {
+    "word": "找",
+    "english": "to look for",
+    "part_of_speech": "verb",
+    "explanation": "Trying to find someone or something.",
+    "examples": [
+      "我在找我的钥匙。 (I am looking for my keys.)",
+      "你找谁？ (Who are you looking for?)"
+    ]
+  },
+  {
+    "word": "给",
+    "english": "to give; for",
+    "part_of_speech": "verb",
+    "explanation": "Used for giving or doing something for someone.",
+    "examples": [
+      "请给我一杯水。 (Please give me a cup of water.)",
+      "我给妈妈打电话。 (I call my mother.)"
+    ]
+  },
+  {
+    "word": "带",
+    "english": "to bring; to carry",
+    "part_of_speech": "verb",
+    "explanation": "Taking something or someone along.",
+    "examples": [
+      "出门记得带手机。 (Remember to bring your phone when going out.)",
+      "我带你去车站。 (I will take you to the station.)"
+    ]
+  },
+  {
+    "word": "用",
+    "english": "to use",
+    "part_of_speech": "verb",
+    "explanation": "Using a tool, method, or object.",
+    "examples": [
+      "我用手机付款。 (I pay with my phone.)",
+      "这个怎么用？ (How do you use this?)"
+    ]
+  },
+  {
+    "word": "做",
+    "english": "to do; to make",
+    "part_of_speech": "verb",
+    "explanation": "Performing an action or making something.",
+    "examples": [
+      "你在做什么？ (What are you doing?)",
+      "我今晚做饭。 (I will cook tonight.)"
+    ]
+  },
+  {
+    "word": "去",
+    "english": "to go",
+    "part_of_speech": "verb",
+    "explanation": "Moving toward another place.",
+    "examples": [
+      "我去超市买东西。 (I am going to the supermarket to buy things.)",
+      "你要去哪里？ (Where are you going?)"
+    ]
+  },
+  {
+    "word": "来",
+    "english": "to come",
+    "part_of_speech": "verb",
+    "explanation": "Moving toward the speaker or place.",
+    "examples": [
+      "请明天再来。 (Please come again tomorrow.)",
+      "他今天会来吗？ (Will he come today?)"
+    ]
+  },
+  {
+    "word": "到",
+    "english": "to arrive",
+    "part_of_speech": "verb",
+    "explanation": "Reaching a place or time.",
+    "examples": [
+      "我已经到公司了。 (I have arrived at the office.)",
+      "你几点到家？ (What time do you get home?)"
+    ]
+  },
+  {
+    "word": "走",
+    "english": "to walk; to leave",
+    "part_of_speech": "verb",
+    "explanation": "Walking or leaving a place.",
+    "examples": [
+      "我们走路去学校。 (We walk to school.)",
+      "时间不早了，我要走了。 (It is late, I have to leave.)"
+    ]
+  },
+  {
+    "word": "坐",
+    "english": "to sit; to take transport",
+    "part_of_speech": "verb",
+    "explanation": "Sitting down or taking a vehicle.",
+    "examples": [
+      "请坐。 (Please sit.)",
+      "我每天坐地铁上班。 (I take the MRT to work every day.)"
+    ]
+  },
+  {
+    "word": "住",
+    "english": "to live; to stay",
+    "part_of_speech": "verb",
+    "explanation": "Living or staying somewhere.",
+    "examples": [
+      "我住在市中心。 (I live in the city center.)",
+      "你住几天？ (How many days will you stay?)"
+    ]
+  },
+  {
+    "word": "睡觉",
+    "english": "to sleep",
+    "part_of_speech": "verb",
+    "explanation": "Going to sleep or sleeping.",
+    "examples": [
+      "我晚上十一点睡觉。 (I sleep at 11 at night.)",
+      "孩子已经睡觉了。 (The child has already gone to sleep.)"
+    ]
+  },
+  {
+    "word": "起床",
+    "english": "to get up",
+    "part_of_speech": "verb",
+    "explanation": "Getting out of bed after sleeping.",
+    "examples": [
+      "我每天七点起床。 (I get up at seven every day.)",
+      "周末我想晚一点起床。 (I want to get up later on weekends.)"
+    ]
+  },
+  {
+    "word": "洗澡",
+    "english": "to shower",
+    "part_of_speech": "verb",
+    "explanation": "Washing the body.",
+    "examples": [
+      "运动以后我要洗澡。 (I need to shower after exercise.)",
+      "我晚上洗澡。 (I shower at night.)"
+    ]
+  },
+  {
+    "word": "洗手",
+    "english": "to wash hands",
+    "part_of_speech": "verb",
+    "explanation": "Cleaning the hands with water.",
+    "examples": [
+      "吃饭前要洗手。 (Wash your hands before eating.)",
+      "请先去洗手。 (Please wash your hands first.)"
+    ]
+  },
+  {
+    "word": "穿",
+    "english": "to wear",
+    "part_of_speech": "verb",
+    "explanation": "Putting clothes or shoes on the body.",
+    "examples": [
+      "今天很冷，要穿外套。 (It is cold today, wear a jacket.)",
+      "她穿红色的裙子。 (She is wearing a red dress.)"
+    ]
+  },
+  {
+    "word": "拿",
+    "english": "to take; to hold",
+    "part_of_speech": "verb",
+    "explanation": "Holding or taking something.",
+    "examples": [
+      "请帮我拿一下包。 (Please help me hold the bag.)",
+      "我去拿快递。 (I will go get the package.)"
+    ]
+  },
+  {
+    "word": "放",
+    "english": "to put; to place",
+    "part_of_speech": "verb",
+    "explanation": "Putting something somewhere.",
+    "examples": [
+      "请把书放在桌子上。 (Please put the book on the table.)",
+      "手机不要放这里。 (Do not put the phone here.)"
+    ]
+  },
+  {
+    "word": "送",
+    "english": "to send; to give as a gift",
+    "part_of_speech": "verb",
+    "explanation": "Delivering something or giving a gift.",
+    "examples": [
+      "我送你回家。 (I will take you home.)",
+      "他送我一本书。 (He gave me a book as a gift.)"
+    ]
+  },
+  {
+    "word": "帮忙",
+    "english": "to help",
+    "part_of_speech": "verb",
+    "explanation": "Helping someone do something.",
+    "examples": [
+      "你可以帮忙吗？ (Can you help?)",
+      "谢谢你今天帮忙。 (Thank you for helping today.)"
+    ]
+  },
+  {
+    "word": "问",
+    "english": "to ask",
+    "part_of_speech": "verb",
+    "explanation": "Asking a question.",
+    "examples": [
+      "我想问一个问题。 (I want to ask a question.)",
+      "你可以问老师。 (You can ask the teacher.)"
+    ]
+  },
+  {
+    "word": "回答",
+    "english": "to answer",
+    "part_of_speech": "verb",
+    "explanation": "Giving an answer to a question.",
+    "examples": [
+      "请回答我的问题。 (Please answer my question.)",
+      "他回答得很快。 (He answered quickly.)"
+    ]
+  },
+  {
+    "word": "懂",
+    "english": "to understand",
+    "part_of_speech": "verb",
+    "explanation": "Understanding meaning or information.",
+    "examples": [
+      "我听不懂。 (I do not understand what I hear.)",
+      "你懂这个意思吗？ (Do you understand this meaning?)"
+    ]
+  },
+  {
+    "word": "明白",
+    "english": "to understand; clear",
+    "part_of_speech": "verb",
+    "explanation": "Understanding clearly.",
+    "examples": [
+      "我明白你的意思。 (I understand what you mean.)",
+      "现在明白了吗？ (Do you understand now?)"
+    ]
+  },
+  {
+    "word": "认识",
+    "english": "to know; to recognize",
+    "part_of_speech": "verb",
+    "explanation": "Knowing a person or recognizing something.",
+    "examples": [
+      "我认识她。 (I know her.)",
+      "你认识这个字吗？ (Do you recognize this character?)"
+    ]
+  },
+  {
+    "word": "记得",
+    "english": "to remember",
+    "part_of_speech": "verb",
+    "explanation": "Keeping something in memory.",
+    "examples": [
+      "你记得带钥匙。 (Remember to bring your keys.)",
+      "我不记得他的名字。 (I do not remember his name.)"
+    ]
+  },
+  {
+    "word": "忘记",
+    "english": "to forget",
+    "part_of_speech": "verb",
+    "explanation": "Not remembering something.",
+    "examples": [
+      "我忘记带钱包了。 (I forgot to bring my wallet.)",
+      "别忘记明天的会议。 (Do not forget tomorrow’s meeting.)"
+    ]
+  },
+  {
+    "word": "时间",
+    "english": "time",
+    "part_of_speech": "noun",
+    "explanation": "Minutes, hours, days, or available time.",
+    "examples": [
+      "你现在有时间吗？ (Do you have time now?)",
+      "时间过得很快。 (Time passes quickly.)"
+    ]
+  },
+  {
+    "word": "今天",
+    "english": "today",
+    "part_of_speech": "time word",
+    "explanation": "The current day.",
+    "examples": [
+      "今天星期二。 (Today is Tuesday.)",
+      "我今天很忙。 (I am busy today.)"
+    ]
+  },
+  {
+    "word": "明天",
+    "english": "tomorrow",
+    "part_of_speech": "time word",
+    "explanation": "The day after today.",
+    "examples": [
+      "明天我要上班。 (I have to work tomorrow.)",
+      "我们明天见。 (See you tomorrow.)"
+    ]
+  },
+  {
+    "word": "昨天",
+    "english": "yesterday",
+    "part_of_speech": "time word",
+    "explanation": "The day before today.",
+    "examples": [
+      "昨天我去了超市。 (I went to the supermarket yesterday.)",
+      "昨天晚上下雨了。 (It rained last night.)"
+    ]
+  },
+  {
+    "word": "早上",
+    "english": "morning",
+    "part_of_speech": "time word",
+    "explanation": "The early part of the day.",
+    "examples": [
+      "我早上喝咖啡。 (I drink coffee in the morning.)",
+      "早上路上人很多。 (There are many people on the road in the morning.)"
+    ]
+  },
+  {
+    "word": "中午",
+    "english": "noon",
+    "part_of_speech": "time word",
+    "explanation": "Around midday.",
+    "examples": [
+      "中午我们一起吃饭吧。 (Let us eat together at noon.)",
+      "我中午休息一小时。 (I rest for one hour at noon.)"
+    ]
+  },
+  {
+    "word": "晚上",
+    "english": "evening; night",
+    "part_of_speech": "time word",
+    "explanation": "The later part of the day.",
+    "examples": [
+      "晚上我想看电影。 (I want to watch a movie tonight.)",
+      "你晚上有空吗？ (Are you free tonight?)"
+    ]
+  },
+  {
+    "word": "周末",
+    "english": "weekend",
+    "part_of_speech": "time word",
+    "explanation": "Saturday and Sunday.",
+    "examples": [
+      "周末我想休息。 (I want to rest on the weekend.)",
+      "你周末有什么计划？ (What plans do you have for the weekend?)"
+    ]
+  },
+  {
+    "word": "家",
+    "english": "home; family",
+    "part_of_speech": "noun",
+    "explanation": "A home or family.",
+    "examples": [
+      "我家离学校很近。 (My home is close to school.)",
+      "她家有四个人。 (Her family has four people.)"
+    ]
+  },
+  {
+    "word": "学校",
+    "english": "school",
+    "part_of_speech": "noun",
+    "explanation": "A place for learning.",
+    "examples": [
+      "孩子们去学校上课。 (The children go to school for class.)",
+      "学校附近有公园。 (There is a park near the school.)"
+    ]
+  },
+  {
+    "word": "公司",
+    "english": "company; office",
+    "part_of_speech": "noun",
+    "explanation": "A business or workplace.",
+    "examples": [
+      "我在这家公司工作。 (I work at this company.)",
+      "公司离地铁站很近。 (The office is close to the MRT station.)"
+    ]
+  },
+  {
+    "word": "医院",
+    "english": "hospital",
+    "part_of_speech": "noun",
+    "explanation": "A place for medical care.",
+    "examples": [
+      "他生病了，要去医院。 (He is sick and needs to go to the hospital.)",
+      "医院在前面。 (The hospital is ahead.)"
+    ]
+  },
+  {
+    "word": "商店",
+    "english": "shop; store",
+    "part_of_speech": "noun",
+    "explanation": "A place where people buy things.",
+    "examples": [
+      "这家商店几点关门？ (What time does this store close?)",
+      "商店里有很多水果。 (There are many fruits in the store.)"
+    ]
+  },
+  {
+    "word": "超市",
+    "english": "supermarket",
+    "part_of_speech": "noun",
+    "explanation": "A large store for food and daily items.",
+    "examples": [
+      "我去超市买牛奶。 (I go to the supermarket to buy milk.)",
+      "超市今天打折。 (The supermarket has discounts today.)"
+    ]
+  },
+  {
+    "word": "饭店",
+    "english": "restaurant; hotel",
+    "part_of_speech": "noun",
+    "explanation": "A place to eat meals, and sometimes a hotel depending on context.",
+    "examples": [
+      "这家饭店很好吃。 (This restaurant is good.)",
+      "我们晚上去饭店吃饭。 (We will eat at a restaurant tonight.)"
+    ]
+  },
+  {
+    "word": "车站",
+    "english": "station",
+    "part_of_speech": "noun",
+    "explanation": "A place to take buses, trains, or other transport.",
+    "examples": [
+      "车站离这里远吗？ (Is the station far from here?)",
+      "我在车站等你。 (I will wait for you at the station.)"
+    ]
+  },
+  {
+    "word": "地铁",
+    "english": "MRT; subway",
+    "part_of_speech": "noun",
+    "explanation": "An underground or urban train system.",
+    "examples": [
+      "我每天坐地铁上班。 (I take the MRT to work every day.)",
+      "地铁站在哪里？ (Where is the subway station?)"
+    ]
+  },
+  {
+    "word": "公交车",
+    "english": "bus",
+    "part_of_speech": "noun",
+    "explanation": "Public road transport.",
+    "examples": [
+      "我坐公交车去学校。 (I take the bus to school.)",
+      "公交车来了。 (The bus is here.)"
+    ]
+  },
+  {
+    "word": "出租车",
+    "english": "taxi",
+    "part_of_speech": "noun",
+    "explanation": "A paid car service.",
+    "examples": [
+      "下雨了，我们坐出租车吧。 (It is raining, let us take a taxi.)",
+      "出租车在门口等。 (The taxi is waiting at the door.)"
+    ]
+  },
+  {
+    "word": "手机",
+    "english": "mobile phone",
+    "part_of_speech": "noun",
+    "explanation": "A phone used for calls, messages, and apps.",
+    "examples": [
+      "我的手机没电了。 (My phone is out of battery.)",
+      "请不要一直看手机。 (Please do not keep looking at your phone.)"
+    ]
+  },
+  {
+    "word": "电脑",
+    "english": "computer",
+    "part_of_speech": "noun",
+    "explanation": "An electronic device for work, study, and browsing.",
+    "examples": [
+      "我用电脑工作。 (I use a computer for work.)",
+      "这台电脑有点慢。 (This computer is a little slow.)"
+    ]
+  },
+  {
+    "word": "钥匙",
+    "english": "key",
+    "part_of_speech": "noun",
+    "explanation": "A small object used to open a lock.",
+    "examples": [
+      "我忘记带钥匙了。 (I forgot to bring my keys.)",
+      "钥匙在桌子上。 (The key is on the table.)"
+    ]
+  },
+  {
+    "word": "钱包",
+    "english": "wallet",
+    "part_of_speech": "noun",
+    "explanation": "A small case for money and cards.",
+    "examples": [
+      "我的钱包不见了。 (My wallet is missing.)",
+      "钱包里没有现金。 (There is no cash in the wallet.)"
+    ]
+  },
+  {
+    "word": "衣服",
+    "english": "clothes",
+    "part_of_speech": "noun",
+    "explanation": "Things people wear.",
+    "examples": [
+      "我想买新衣服。 (I want to buy new clothes.)",
+      "这些衣服很干净。 (These clothes are very clean.)"
+    ]
+  },
+  {
+    "word": "鞋子",
+    "english": "shoes",
+    "part_of_speech": "noun",
+    "explanation": "Things worn on the feet.",
+    "examples": [
+      "这双鞋子很舒服。 (These shoes are comfortable.)",
+      "请把鞋子放门口。 (Please put your shoes at the door.)"
+    ]
+  },
+  {
+    "word": "水",
+    "english": "water",
+    "part_of_speech": "noun",
+    "explanation": "A common drink and liquid.",
+    "examples": [
+      "请给我一杯水。 (Please give me a cup of water.)",
+      "水太热了。 (The water is too hot.)"
+    ]
+  },
+  {
+    "word": "咖啡",
+    "english": "coffee",
+    "part_of_speech": "noun",
+    "explanation": "A common drink made from coffee beans.",
+    "examples": [
+      "我早上喝咖啡。 (I drink coffee in the morning.)",
+      "这杯咖啡不甜。 (This coffee is not sweet.)"
+    ]
+  },
+  {
+    "word": "茶",
+    "english": "tea",
+    "part_of_speech": "noun",
+    "explanation": "A common drink made from tea leaves.",
+    "examples": [
+      "你喜欢喝茶吗？ (Do you like drinking tea?)",
+      "这茶很好喝。 (This tea tastes good.)"
+    ]
+  },
+  {
+    "word": "饭",
+    "english": "rice; meal",
+    "part_of_speech": "noun",
+    "explanation": "Cooked rice or a meal.",
+    "examples": [
+      "饭好了，来吃吧。 (The meal is ready, come eat.)",
+      "我喜欢吃米饭。 (I like eating rice.)"
+    ]
+  },
+  {
+    "word": "面条",
+    "english": "noodles",
+    "part_of_speech": "noun",
+    "explanation": "Long thin food made from flour or starch.",
+    "examples": [
+      "我中午吃面条。 (I eat noodles at noon.)",
+      "这碗面条很好吃。 (This bowl of noodles is delicious.)"
+    ]
+  },
+  {
+    "word": "苹果",
+    "english": "apple",
+    "part_of_speech": "noun",
+    "explanation": "A common fruit.",
+    "examples": [
+      "我每天吃一个苹果。 (I eat an apple every day.)",
+      "这个苹果很甜。 (This apple is sweet.)"
+    ]
+  },
+  {
+    "word": "香蕉",
+    "english": "banana",
+    "part_of_speech": "noun",
+    "explanation": "A long yellow fruit.",
+    "examples": [
+      "孩子喜欢吃香蕉。 (The child likes eating bananas.)",
+      "香蕉在桌子上。 (The banana is on the table.)"
+    ]
+  },
+  {
+    "word": "鸡蛋",
+    "english": "egg",
+    "part_of_speech": "noun",
+    "explanation": "A common food used in many meals.",
+    "examples": [
+      "早餐我吃两个鸡蛋。 (I eat two eggs for breakfast.)",
+      "鸡蛋很新鲜。 (The eggs are fresh.)"
+    ]
+  },
+  {
+    "word": "牛奶",
+    "english": "milk",
+    "part_of_speech": "noun",
+    "explanation": "A common drink from cows.",
+    "examples": [
+      "我去超市买牛奶。 (I go to the supermarket to buy milk.)",
+      "这瓶牛奶快过期了。 (This bottle of milk will expire soon.)"
+    ]
+  },
+  {
+    "word": "热",
+    "english": "hot",
+    "part_of_speech": "adjective",
+    "explanation": "High temperature or feeling warm.",
+    "examples": [
+      "今天很热。 (Today is hot.)",
+      "这杯水太热了。 (This cup of water is too hot.)"
+    ]
+  },
+  {
+    "word": "冷",
+    "english": "cold",
+    "part_of_speech": "adjective",
+    "explanation": "Low temperature or feeling chilly.",
+    "examples": [
+      "外面很冷。 (It is cold outside.)",
+      "我想喝冷水。 (I want to drink cold water.)"
+    ]
+  },
+  {
+    "word": "好吃",
+    "english": "delicious",
+    "part_of_speech": "adjective",
+    "explanation": "Food that tastes good.",
+    "examples": [
+      "这个菜很好吃。 (This dish is delicious.)",
+      "那家饭店的面条好吃。 (The noodles at that restaurant are good.)"
+    ]
+  },
+  {
+    "word": "好喝",
+    "english": "tasty to drink",
+    "part_of_speech": "adjective",
+    "explanation": "A drink that tastes good.",
+    "examples": [
+      "这杯茶很好喝。 (This tea tastes good.)",
+      "咖啡好喝吗？ (Does the coffee taste good?)"
+    ]
+  },
+  {
+    "word": "漂亮",
+    "english": "beautiful",
+    "part_of_speech": "adjective",
+    "explanation": "Good-looking or attractive.",
+    "examples": [
+      "这件衣服很漂亮。 (This piece of clothing is beautiful.)",
+      "她的家很漂亮。 (Her home is beautiful.)"
+    ]
+  },
+  {
+    "word": "贵",
+    "english": "expensive",
+    "part_of_speech": "adjective",
+    "explanation": "Costing a lot of money.",
+    "examples": [
+      "这个手机太贵了。 (This phone is too expensive.)",
+      "这里的东西不贵。 (Things here are not expensive.)"
+    ]
+  },
+  {
+    "word": "便宜",
+    "english": "cheap; inexpensive",
+    "part_of_speech": "adjective",
+    "explanation": "Costing little money.",
+    "examples": [
+      "这个苹果很便宜。 (This apple is cheap.)",
+      "这家店的衣服便宜。 (The clothes in this shop are inexpensive.)"
+    ]
+  },
+  {
+    "word": "快",
+    "english": "fast",
+    "part_of_speech": "adjective",
+    "explanation": "High speed or soon.",
+    "examples": [
+      "地铁很快。 (The MRT is fast.)",
+      "快一点，我们要迟到了。 (Hurry up, we will be late.)"
+    ]
+  },
+  {
+    "word": "慢",
+    "english": "slow",
+    "part_of_speech": "adjective",
+    "explanation": "Low speed.",
+    "examples": [
+      "这台电脑很慢。 (This computer is slow.)",
+      "请说慢一点。 (Please speak a little slower.)"
+    ]
+  },
+  {
+    "word": "远",
+    "english": "far",
+    "part_of_speech": "adjective",
+    "explanation": "A long distance away.",
+    "examples": [
+      "学校离我家很远。 (The school is far from my home.)",
+      "车站远吗？ (Is the station far?)"
+    ]
+  },
+  {
+    "word": "近",
+    "english": "near",
+    "part_of_speech": "adjective",
+    "explanation": "A short distance away.",
+    "examples": [
+      "公司离地铁站很近。 (The office is near the MRT station.)",
+      "我家很近。 (My home is nearby.)"
+    ]
+  },
+  {
+    "word": "忙",
+    "english": "busy",
+    "part_of_speech": "adjective",
+    "explanation": "Having many things to do.",
+    "examples": [
+      "我今天很忙。 (I am very busy today.)",
+      "你最近忙不忙？ (Have you been busy recently?)"
+    ]
+  },
+  {
+    "word": "空",
+    "english": "free; empty",
+    "part_of_speech": "adjective",
+    "explanation": "Available or empty.",
+    "examples": [
+      "你现在有空吗？ (Are you free now?)",
+      "这里有空位。 (There is an empty seat here.)"
+    ]
+  },
+  {
+    "word": "新",
+    "english": "new",
+    "part_of_speech": "adjective",
+    "explanation": "Recently made, bought, or known.",
+    "examples": [
+      "我买了新手机。 (I bought a new phone.)",
+      "这是我的新朋友。 (This is my new friend.)"
+    ]
+  },
+  {
+    "word": "旧",
+    "english": "old; used",
+    "part_of_speech": "adjective",
+    "explanation": "Not new or used before.",
+    "examples": [
+      "这件衣服有点旧。 (This piece of clothing is a little old.)",
+      "旧电脑还能用。 (The old computer can still be used.)"
+    ]
+  },
+  {
+    "word": "大",
+    "english": "big",
+    "part_of_speech": "adjective",
+    "explanation": "Large in size or amount.",
+    "examples": [
+      "这个房间很大。 (This room is big.)",
+      "雨下得很大。 (The rain is heavy.)"
+    ]
+  },
+  {
+    "word": "小",
+    "english": "small",
+    "part_of_speech": "adjective",
+    "explanation": "Small in size or amount.",
+    "examples": [
+      "这个包太小了。 (This bag is too small.)",
+      "我有一个小问题。 (I have a small question.)"
+    ]
+  },
+  {
+    "word": "多",
+    "english": "many; much",
+    "part_of_speech": "adjective",
+    "explanation": "A large amount or number.",
+    "examples": [
+      "今天人很多。 (There are many people today.)",
+      "请多喝水。 (Please drink more water.)"
+    ]
+  },
+  {
+    "word": "少",
+    "english": "few; little",
+    "part_of_speech": "adjective",
+    "explanation": "A small amount or number.",
+    "examples": [
+      "这里人很少。 (There are few people here.)",
+      "我今天吃得很少。 (I ate very little today.)"
+    ]
+  },
+  {
+    "word": "怎么",
+    "english": "how",
+    "part_of_speech": "question word",
+    "explanation": "Used to ask method or manner.",
+    "examples": [
+      "这个字怎么读？ (How do you read this character?)",
+      "去车站怎么走？ (How do I get to the station?)"
+    ]
+  },
+  {
+    "word": "哪里",
+    "english": "where",
+    "part_of_speech": "question word",
+    "explanation": "Used to ask about place.",
+    "examples": [
+      "你在哪里？ (Where are you?)",
+      "洗手间在哪里？ (Where is the restroom?)"
+    ]
+  },
+  {
+    "word": "什么时候",
+    "english": "when",
+    "part_of_speech": "question word",
+    "explanation": "Used to ask about time.",
+    "examples": [
+      "你什么时候下班？ (When do you get off work?)",
+      "会议什么时候开始？ (When does the meeting start?)"
+    ]
+  },
+  {
+    "word": "谁",
+    "english": "who",
+    "part_of_speech": "question word",
+    "explanation": "Used to ask about a person.",
+    "examples": [
+      "他是谁？ (Who is he?)",
+      "你在等谁？ (Who are you waiting for?)"
+    ]
+  },
+  {
+    "word": "哪个",
+    "english": "which one",
+    "part_of_speech": "question word",
+    "explanation": "Used to choose among options.",
+    "examples": [
+      "你喜欢哪个？ (Which one do you like?)",
+      "哪个是你的包？ (Which one is your bag?)"
+    ]
+  },
+  {
+    "word": "几",
+    "english": "how many; what number",
+    "part_of_speech": "question word",
+    "explanation": "Used to ask small numbers or time.",
+    "examples": [
+      "现在几点？ (What time is it now?)",
+      "你家有几个人？ (How many people are in your family?)"
+    ]
+  },
+  {
+    "word": "很",
+    "english": "very",
+    "part_of_speech": "adverb",
+    "explanation": "A common degree word before adjectives.",
+    "examples": [
+      "今天很热。 (Today is very hot.)",
+      "她很开心。 (She is very happy.)"
+    ]
+  },
+  {
+    "word": "也",
+    "english": "also",
+    "part_of_speech": "adverb",
+    "explanation": "Used to say something is the same for another person or thing.",
+    "examples": [
+      "我也喜欢咖啡。 (I also like coffee.)",
+      "他也是学生。 (He is also a student.)"
+    ]
+  },
+  {
+    "word": "都",
+    "english": "all",
+    "part_of_speech": "adverb",
+    "explanation": "Used for all members of a group.",
+    "examples": [
+      "我们都在这里。 (We are all here.)",
+      "这些东西都很便宜。 (These things are all cheap.)"
+    ]
+  },
+  {
+    "word": "还",
+    "english": "still; also",
+    "part_of_speech": "adverb",
+    "explanation": "Used for continuation or adding something.",
+    "examples": [
+      "他还在工作。 (He is still working.)",
+      "我还想买苹果。 (I also want to buy apples.)"
+    ]
+  },
+  {
+    "word": "就",
+    "english": "then; just",
+    "part_of_speech": "adverb",
+    "explanation": "A common word for sequence, emphasis, or sooner-than-expected action.",
+    "examples": [
+      "我马上就来。 (I will come right away.)",
+      "到家以后就休息。 (Rest after getting home.)"
+    ]
+  },
+  {
+    "word": "但是",
+    "english": "but",
+    "part_of_speech": "conjunction",
+    "explanation": "Used to show contrast.",
+    "examples": [
+      "我想去，但是没有时间。 (I want to go, but I do not have time.)",
+      "这个好看，但是太贵。 (This looks good, but it is too expensive.)"
+    ]
+  },
+  {
+    "word": "所以",
+    "english": "so; therefore",
+    "part_of_speech": "conjunction",
+    "explanation": "Introduces a result.",
+    "examples": [
+      "今天下雨，所以我不出去。 (It is raining today, so I am not going out.)",
+      "我很累，所以想睡觉。 (I am tired, so I want to sleep.)"
+    ]
+  },
+  {
+    "word": "如果",
+    "english": "if",
+    "part_of_speech": "conjunction",
+    "explanation": "Introduces a condition.",
+    "examples": [
+      "如果下雨，我们就坐地铁。 (If it rains, we will take the MRT.)",
+      "如果你有空，请给我电话。 (If you are free, please call me.)"
+    ]
+  },
+  {
+    "word": "和",
+    "english": "and; with",
+    "part_of_speech": "conjunction",
+    "explanation": "Connects nouns or people.",
+    "examples": [
+      "我和朋友去吃饭。 (I go eat with a friend.)",
+      "我要苹果和香蕉。 (I want apples and bananas.)"
+    ]
+  },
+  {
+    "word": "在",
+    "english": "at; in; located at",
+    "part_of_speech": "word",
+    "explanation": "Used for location or ongoing action.",
+    "examples": [
+      "我在家。 (I am at home.)",
+      "他在看电视。 (He is watching TV.)"
+    ]
+  },
+  {
+    "word": "里",
+    "english": "inside",
+    "part_of_speech": "word",
+    "explanation": "Indicates inside a place or thing.",
+    "examples": [
+      "手机在包里。 (The phone is in the bag.)",
+      "房间里有人。 (There is someone in the room.)"
+    ]
+  },
+  {
+    "word": "上",
+    "english": "on; above",
+    "part_of_speech": "word",
+    "explanation": "Indicates on top of something or above.",
+    "examples": [
+      "书在桌子上。 (The book is on the table.)",
+      "我在网上买东西。 (I buy things online.)"
+    ]
+  },
+  {
+    "word": "下",
+    "english": "under; below",
+    "part_of_speech": "word",
+    "explanation": "Indicates under or below something.",
+    "examples": [
+      "鞋子在桌子下。 (The shoes are under the table.)",
+      "请往下看。 (Please look down.)"
+    ]
+  },
+  {
+    "word": "人",
+    "english": "person; people",
+    "part_of_speech": "noun",
+    "explanation": "Refers to a person or people.",
+    "examples": [
+      "这里有很多人。 (There are many people here.)",
+      "他是一个很好的人。 (He is a very good person.)"
+    ]
+  },
+  {
+    "word": "男人",
+    "english": "man",
+    "part_of_speech": "noun",
+    "explanation": "An adult male person.",
+    "examples": [
+      "那个男人是我的老师。 (That man is my teacher.)",
+      "门口有一个男人在等你。 (There is a man waiting for you at the door.)"
+    ]
+  },
+  {
+    "word": "女人",
+    "english": "woman",
+    "part_of_speech": "noun",
+    "explanation": "An adult female person.",
+    "examples": [
+      "那个女人在买水果。 (That woman is buying fruit.)",
+      "她是一个很忙的女人。 (She is a very busy woman.)"
+    ]
+  },
+  {
+    "word": "孩子",
+    "english": "child",
+    "part_of_speech": "noun",
+    "explanation": "A young person.",
+    "examples": [
+      "孩子在房间里睡觉。 (The child is sleeping in the room.)",
+      "这个孩子很喜欢苹果。 (This child really likes apples.)"
+    ]
+  },
+  {
+    "word": "爸爸",
+    "english": "dad; father",
+    "part_of_speech": "noun",
+    "explanation": "A casual word for father.",
+    "examples": [
+      "我爸爸今天不上班。 (My dad is not working today.)",
+      "爸爸在厨房做饭。 (Dad is cooking in the kitchen.)"
+    ]
+  },
+  {
+    "word": "妈妈",
+    "english": "mom; mother",
+    "part_of_speech": "noun",
+    "explanation": "A casual word for mother.",
+    "examples": [
+      "我妈妈喜欢喝茶。 (My mom likes drinking tea.)",
+      "妈妈给我打电话。 (Mom called me.)"
+    ]
+  },
+  {
+    "word": "哥哥",
+    "english": "older brother",
+    "part_of_speech": "noun",
+    "explanation": "An older male sibling.",
+    "examples": [
+      "我哥哥在公司工作。 (My older brother works at a company.)",
+      "哥哥今天回家吃饭。 (Older brother is coming home to eat today.)"
+    ]
+  },
+  {
+    "word": "姐姐",
+    "english": "older sister",
+    "part_of_speech": "noun",
+    "explanation": "An older female sibling.",
+    "examples": [
+      "我姐姐是老师。 (My older sister is a teacher.)",
+      "姐姐带我去买衣服。 (Older sister took me to buy clothes.)"
+    ]
+  },
+  {
+    "word": "弟弟",
+    "english": "younger brother",
+    "part_of_speech": "noun",
+    "explanation": "A younger male sibling.",
+    "examples": [
+      "我弟弟还在学校。 (My younger brother is still at school.)",
+      "弟弟喜欢看电视。 (Younger brother likes watching TV.)"
+    ]
+  },
+  {
+    "word": "妹妹",
+    "english": "younger sister",
+    "part_of_speech": "noun",
+    "explanation": "A younger female sibling.",
+    "examples": [
+      "我妹妹想喝牛奶。 (My younger sister wants to drink milk.)",
+      "妹妹在房间里听音乐。 (Younger sister is listening to music in the room.)"
+    ]
+  },
+  {
+    "word": "老师",
+    "english": "teacher",
+    "part_of_speech": "noun",
+    "explanation": "A person who teaches.",
+    "examples": [
+      "老师在教我们中文。 (The teacher is teaching us Chinese.)",
+      "我想问老师一个问题。 (I want to ask the teacher a question.)"
+    ]
+  },
+  {
+    "word": "学生",
+    "english": "student",
+    "part_of_speech": "noun",
+    "explanation": "A person who studies at school or in a class.",
+    "examples": [
+      "她是大学生。 (She is a university student.)",
+      "学生们都在教室里。 (The students are all in the classroom.)"
+    ]
+  },
+  {
+    "word": "同事",
+    "english": "coworker",
+    "part_of_speech": "noun",
+    "explanation": "A person who works with you.",
+    "examples": [
+      "我和同事一起吃午饭。 (I eat lunch with my coworker.)",
+      "这个同事很会帮忙。 (This coworker is very helpful.)"
+    ]
+  },
+  {
+    "word": "房间",
+    "english": "room",
+    "part_of_speech": "noun",
+    "explanation": "A room inside a building.",
+    "examples": [
+      "这个房间很干净。 (This room is very clean.)",
+      "我的手机在房间里。 (My phone is in the room.)"
+    ]
+  },
+  {
+    "word": "厨房",
+    "english": "kitchen",
+    "part_of_speech": "noun",
+    "explanation": "A room where people cook.",
+    "examples": [
+      "妈妈在厨房做饭。 (Mom is cooking in the kitchen.)",
+      "厨房里有很多东西。 (There are many things in the kitchen.)"
+    ]
+  },
+  {
+    "word": "洗手间",
+    "english": "restroom; bathroom",
+    "part_of_speech": "noun",
+    "explanation": "A restroom or bathroom.",
+    "examples": [
+      "请问，洗手间在哪里？ (Excuse me, where is the restroom?)",
+      "洗手间在前面。 (The restroom is ahead.)"
+    ]
+  },
+  {
+    "word": "门",
+    "english": "door",
+    "part_of_speech": "noun",
+    "explanation": "The entrance to a room or building.",
+    "examples": [
+      "请把门关上。 (Please close the door.)",
+      "他在门口等我。 (He is waiting for me at the door.)"
+    ]
+  },
+  {
+    "word": "窗户",
+    "english": "window",
+    "part_of_speech": "noun",
+    "explanation": "An opening with glass in a wall.",
+    "examples": [
+      "请打开窗户。 (Please open the window.)",
+      "窗户外面下雨了。 (It is raining outside the window.)"
+    ]
+  },
+  {
+    "word": "桌子",
+    "english": "table; desk",
+    "part_of_speech": "noun",
+    "explanation": "Furniture with a flat top for putting things on.",
+    "examples": [
+      "书在桌子上。 (The book is on the table.)",
+      "请把电脑放在桌子上。 (Please put the computer on the desk.)"
+    ]
+  },
+  {
+    "word": "椅子",
+    "english": "chair",
+    "part_of_speech": "noun",
+    "explanation": "Furniture used for sitting.",
+    "examples": [
+      "这把椅子很舒服。 (This chair is comfortable.)",
+      "请坐在那把椅子上。 (Please sit on that chair.)"
+    ]
+  },
+  {
+    "word": "书",
+    "english": "book",
+    "part_of_speech": "noun",
+    "explanation": "A written or printed work for reading.",
+    "examples": [
+      "我喜欢看书。 (I like reading books.)",
+      "这本书很有意思。 (This book is interesting.)"
+    ]
+  },
+  {
+    "word": "电视",
+    "english": "television",
+    "part_of_speech": "noun",
+    "explanation": "A device or program for watching shows.",
+    "examples": [
+      "我晚上看电视。 (I watch TV at night.)",
+      "电视在客厅里。 (The TV is in the living room.)"
+    ]
+  },
+  {
+    "word": "电影",
+    "english": "movie",
+    "part_of_speech": "noun",
+    "explanation": "A film people watch for entertainment.",
+    "examples": [
+      "这部电影很好看。 (This movie is very good.)",
+      "周末我们去看电影吧。 (Let us watch a movie this weekend.)"
+    ]
+  },
+  {
+    "word": "音乐",
+    "english": "music",
+    "part_of_speech": "noun",
+    "explanation": "Sounds arranged for listening and enjoyment.",
+    "examples": [
+      "我喜欢听音乐。 (I like listening to music.)",
+      "这首音乐很好听。 (This piece of music sounds good.)"
+    ]
+  },
+  {
+    "word": "电话",
+    "english": "phone call; telephone",
+    "part_of_speech": "noun",
+    "explanation": "A phone or a phone call.",
+    "examples": [
+      "我给你打电话。 (I will call you.)",
+      "电话响了。 (The phone rang.)"
+    ]
+  },
+  {
+    "word": "消息",
+    "english": "message; news",
+    "part_of_speech": "noun",
+    "explanation": "Information sent or received.",
+    "examples": [
+      "我收到你的消息了。 (I received your message.)",
+      "有消息请告诉我。 (Please tell me if there is news.)"
+    ]
+  },
+  {
+    "word": "照片",
+    "english": "photo",
+    "part_of_speech": "noun",
+    "explanation": "A picture taken with a camera or phone.",
+    "examples": [
+      "这张照片很好看。 (This photo looks good.)",
+      "请给我发一张照片。 (Please send me a photo.)"
+    ]
+  },
+  {
+    "word": "钱",
+    "english": "money",
+    "part_of_speech": "noun",
+    "explanation": "Money used to buy things.",
+    "examples": [
+      "我没有带钱。 (I did not bring money.)",
+      "这个要多少钱？ (How much money does this cost?)"
+    ]
+  },
+  {
+    "word": "卡",
+    "english": "card",
+    "part_of_speech": "noun",
+    "explanation": "A card used for payment, access, or identification.",
+    "examples": [
+      "我可以用卡付款吗？ (Can I pay by card?)",
+      "这张卡不能用了。 (This card cannot be used anymore.)"
+    ]
+  },
+  {
+    "word": "现金",
+    "english": "cash",
+    "part_of_speech": "noun",
+    "explanation": "Physical money such as notes and coins.",
+    "examples": [
+      "你有现金吗？ (Do you have cash?)",
+      "这里不能用现金。 (Cash cannot be used here.)"
+    ]
+  },
+  {
+    "word": "票",
+    "english": "ticket",
+    "part_of_speech": "noun",
+    "explanation": "A ticket for transport, movies, or events.",
+    "examples": [
+      "我买了两张电影票。 (I bought two movie tickets.)",
+      "请把票给我看一下。 (Please show me the ticket.)"
+    ]
+  },
+  {
+    "word": "机场",
+    "english": "airport",
+    "part_of_speech": "noun",
+    "explanation": "A place where planes arrive and leave.",
+    "examples": [
+      "我们几点去机场？ (What time are we going to the airport?)",
+      "机场离这里很远。 (The airport is far from here.)"
+    ]
+  },
+  {
+    "word": "火车",
+    "english": "train",
+    "part_of_speech": "noun",
+    "explanation": "A rail vehicle for travel.",
+    "examples": [
+      "我坐火车去那个城市。 (I take the train to that city.)",
+      "火车几点到？ (What time does the train arrive?)"
+    ]
+  },
+  {
+    "word": "飞机",
+    "english": "airplane",
+    "part_of_speech": "noun",
+    "explanation": "A vehicle that flies in the air.",
+    "examples": [
+      "飞机晚点了。 (The airplane is delayed.)",
+      "我明天坐飞机。 (I will take a plane tomorrow.)"
+    ]
+  },
+  {
+    "word": "路",
+    "english": "road; way",
+    "part_of_speech": "noun",
+    "explanation": "A road or a route to a place.",
+    "examples": [
+      "这条路很长。 (This road is very long.)",
+      "去车站的路怎么走？ (How do I get to the station?)"
+    ]
+  },
+  {
+    "word": "左边",
+    "english": "left side",
+    "part_of_speech": "noun",
+    "explanation": "The side on the left.",
+    "examples": [
+      "洗手间在左边。 (The restroom is on the left.)",
+      "请往左边走。 (Please walk to the left.)"
+    ]
+  },
+  {
+    "word": "右边",
+    "english": "right side",
+    "part_of_speech": "noun",
+    "explanation": "The side on the right.",
+    "examples": [
+      "商店在右边。 (The shop is on the right.)",
+      "请坐在我右边。 (Please sit on my right side.)"
+    ]
+  },
+  {
+    "word": "前面",
+    "english": "front; ahead",
+    "part_of_speech": "noun",
+    "explanation": "The area in front or ahead.",
+    "examples": [
+      "车站就在前面。 (The station is just ahead.)",
+      "请看前面。 (Please look at the front.)"
+    ]
+  },
+  {
+    "word": "后面",
+    "english": "behind; back",
+    "part_of_speech": "noun",
+    "explanation": "The area behind something.",
+    "examples": [
+      "他坐在我后面。 (He sits behind me.)",
+      "厨房在房子后面。 (The kitchen is behind the house.)"
+    ]
+  },
+  {
+    "word": "旁边",
+    "english": "beside; next to",
+    "part_of_speech": "noun",
+    "explanation": "The area next to something.",
+    "examples": [
+      "超市在学校旁边。 (The supermarket is next to the school.)",
+      "请坐在我旁边。 (Please sit next to me.)"
+    ]
+  },
+  {
+    "word": "问题",
+    "english": "question; problem",
+    "part_of_speech": "noun",
+    "explanation": "Something asked or something that needs solving.",
+    "examples": [
+      "我有一个问题。 (I have a question.)",
+      "这个问题不难。 (This problem is not difficult.)"
+    ]
+  },
+  {
+    "word": "事情",
+    "english": "matter; thing",
+    "part_of_speech": "noun",
+    "explanation": "An event, matter, or thing to deal with.",
+    "examples": [
+      "我有事情要做。 (I have something to do.)",
+      "这件事情很重要。 (This matter is very important.)"
+    ]
+  },
+  {
+    "word": "名字",
+    "english": "name",
+    "part_of_speech": "noun",
+    "explanation": "A word used to identify a person or thing.",
+    "examples": [
+      "你的名字是什么？ (What is your name?)",
+      "我忘记了他的名字。 (I forgot his name.)"
+    ]
+  },
+  {
+    "word": "天气",
+    "english": "weather",
+    "part_of_speech": "noun",
+    "explanation": "The condition outside, such as hot, cold, rain, or sun.",
+    "examples": [
+      "今天天气很好。 (The weather is good today.)",
+      "明天天气怎么样？ (How is the weather tomorrow?)"
+    ]
+  },
+  {
+    "word": "雨",
+    "english": "rain",
+    "part_of_speech": "noun",
+    "explanation": "Water falling from the sky.",
+    "examples": [
+      "外面下雨了。 (It is raining outside.)",
+      "今天的雨很大。 (The rain is heavy today.)"
+    ]
+  },
+  {
+    "word": "太阳",
+    "english": "sun",
+    "part_of_speech": "noun",
+    "explanation": "The bright star that gives light during the day.",
+    "examples": [
+      "今天太阳很大。 (The sun is strong today.)",
+      "太阳出来了。 (The sun came out.)"
+    ]
+  },
+  {
+    "word": "药",
+    "english": "medicine",
+    "part_of_speech": "noun",
+    "explanation": "Something taken to treat illness.",
+    "examples": [
+      "你吃药了吗？ (Have you taken medicine?)",
+      "医生给我开了药。 (The doctor prescribed medicine for me.)"
+    ]
+  },
+  {
+    "word": "身体",
+    "english": "body; health",
+    "part_of_speech": "noun",
+    "explanation": "The body or general health.",
+    "examples": [
+      "你身体怎么样？ (How is your health?)",
+      "身体不舒服就去医院。 (Go to the hospital if your body feels unwell.)"
+    ]
+  },
+  {
+    "word": "生病",
+    "english": "to get sick; sick",
+    "part_of_speech": "verb",
+    "explanation": "To become ill or be sick.",
+    "examples": [
+      "我今天生病了。 (I am sick today.)",
+      "他生病了，所以没有上班。 (He is sick, so he did not go to work.)"
+    ]
+  }
+]

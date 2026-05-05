@@ -9,7 +9,7 @@
 <body>
     <main class="page">
         <section class="hero">
-            <p class="eyebrow">v2</p>
+            <p class="eyebrow">v3</p>
             <h1>Mandarin Learning Assistant</h1>
             <p class="intro">
                 Search by Chinese word, pinyin, or English meaning.
@@ -27,7 +27,7 @@
 
         {% if mode == 'search' %}
             <section class="search-panel">
-                <form method="post" class="search-form">
+                <form method="post" class="search-form" id="search-form">
                     <input type="hidden" name="form_type" value="search">
                     <input
                         id="search-input"
@@ -41,6 +41,14 @@
                 </form>
             </section>
 
+            <section class="recent-searches" id="recent-searches" hidden>
+                <div class="recent-header">
+                    <h2>Recent Searches</h2>
+                    <button type="button" class="clear-recent-button" id="clear-recent-searches">Clear</button>
+                </div>
+                <div class="recent-search-list" id="recent-search-list"></div>
+            </section>
+
             {% if query and not results and not ai_pending %}
                 <section class="empty-state">
                     <p>No results found for "<strong>{{ query }}</strong>". Try another word.</p>
@@ -49,7 +57,9 @@
 
             {% if ai_pending %}
                 <section class="result-card ai-result-card ai-loading-card" id="ai-result-card" data-ai-query="{{ query }}">
-                    <div class="ai-loading-placeholder"></div>
+                    <div class="ai-loading-shell">
+                        <div class="ai-spinner" aria-hidden="true"></div>
+                    </div>
                 </section>
             {% endif %}
 
@@ -326,6 +336,72 @@
                 });
         }
 
+        function getRecentSearches() {
+            try {
+                return JSON.parse(window.localStorage.getItem("mandarin_recent_searches") || "[]");
+            } catch {
+                return [];
+            }
+        }
+
+        function setRecentSearches(items) {
+            window.localStorage.setItem("mandarin_recent_searches", JSON.stringify(items));
+        }
+
+        function saveRecentSearch(query) {
+            const value = query.trim();
+            if (!value) {
+                return;
+            }
+
+            const next = [value].concat(getRecentSearches().filter(function (item) {
+                return item !== value;
+            })).slice(0, 8);
+            setRecentSearches(next);
+        }
+
+        function runSearch(query) {
+            const form = document.getElementById("search-form");
+            const input = document.getElementById("search-input");
+            if (!form || !input) {
+                return;
+            }
+            input.value = query;
+            form.submit();
+        }
+
+        function renderRecentSearches() {
+            const wrapper = document.getElementById("recent-searches");
+            const list = document.getElementById("recent-search-list");
+            const clearButton = document.getElementById("clear-recent-searches");
+            if (!wrapper || !list || !clearButton) {
+                return;
+            }
+
+            const items = getRecentSearches();
+            if (!items.length) {
+                wrapper.hidden = true;
+                list.innerHTML = "";
+                return;
+            }
+
+            wrapper.hidden = false;
+            list.innerHTML = items.map(function (item) {
+                return `<button type="button" class="recent-search-chip">${escapeHtml(item)}</button>`;
+            }).join("");
+
+            list.querySelectorAll(".recent-search-chip").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    runSearch(button.textContent || "");
+                });
+            });
+
+            clearButton.onclick = function () {
+                setRecentSearches([]);
+                renderRecentSearches();
+            };
+        }
+
         function bindQuizOptions() {
             const quizForm = document.querySelector(".quiz-form");
             if (!quizForm) {
@@ -376,9 +452,17 @@
             });
         }
 
-        window.addEventListener("load", bindAudioButtons);
-        window.addEventListener("load", bindQuizOptions);
-        window.addEventListener("load", loadAiResult);
+        window.addEventListener("load", function () {
+            const input = document.getElementById("search-input");
+            if (input && input.value.trim()) {
+                saveRecentSearch(input.value);
+            }
+
+            bindAudioButtons();
+            bindQuizOptions();
+            renderRecentSearches();
+            loadAiResult();
+        });
     </script>
 </body>
 </html>
