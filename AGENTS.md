@@ -4,7 +4,7 @@
 
 This project is a beginner-friendly Flask web app for Mandarin learning.
 
-Current version: `v3`
+Current version: `v3.1`
 
 It currently has two user modes:
 
@@ -18,6 +18,7 @@ The app uses:
 - automated dictionary validation and pytest coverage
 - documentation screenshots in `assets/screenshots/`
 - recorded MP4 demo media in `assets/demo/`
+- logo assets in `assets/logo/`
 
 There is no required external paid API or external database.
 
@@ -101,7 +102,9 @@ If the result comes from AI:
 - `assets/screenshots/`
   - Search Mode, Search Result, and Quiz Mode screenshots for documentation/demo use
 - `assets/demo/`
-  - recorded MP4 demo showing search by Chinese, English, pinyin with tones, pinyin without tones, recent searches, audio playback, AI loading, and quiz feedback
+  - full-page recorded MP4 demo showing a visible cursor using Chinese search, English search, pinyin search with tone marks, pinyin search without tone marks, recent searches, synced audio playback, lion AI loading, and quiz feedback
+- `assets/logo/`
+  - brand banner and square app icon
 - `requirements.txt`
   - Python packages
 
@@ -113,7 +116,7 @@ If the result comes from AI:
 - Search performs an exact-match pass before fuzzy ranking.
 - Local AI fallback uses Ollama’s chat API.
 - The default AI explanation model is `gemma3`.
-- Demo recording can use a controlled browser workflow and generated speech audio so the MP4 is reproducible.
+- Demo recording should use a controlled browser workflow with a visible cursor overlay, full-page `1280x1400` capture, and generated speech audio synced to the audio-button clicks so the MP4 is reproducible.
 - The app is intentionally simple and suitable for learning/demo use.
 
 ## Validation and Tests
@@ -121,8 +124,9 @@ If the result comes from AI:
 - Validate dictionary data with `python3 scripts/validate_dictionary.py --expected-count 200`.
 - Run automated tests with `python3 -m pytest`.
 - Keep tests independent of Ollama and external network access.
-- Keep screenshots in `assets/screenshots/` if demo visuals are refreshed.
-- Keep demo videos in `assets/demo/`.
+- Keep screenshots in `assets/screenshots/` if demo visuals are refreshed, especially after logo or branding changes.
+- Keep demo videos in `assets/demo/` and re-record them when the UI branding changes.
+- Keep logo assets in `assets/logo/`.
 
 ## When Editing
 

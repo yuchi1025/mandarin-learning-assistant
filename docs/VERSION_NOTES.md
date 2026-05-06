@@ -23,19 +23,14 @@
 
 ## v3
 
-- Restructured the project into clearer top-level folders: `src/`, `tests/`, `docs/`, `scripts/`, `assets/`, and `data/`.
-- Moved the built-in dictionary out of `src/app.py` and into `data/dictionary.json`.
-- Expanded the daily-use Mandarin dictionary to 200 entries.
-- Added exact-match search behavior so exact Chinese, pinyin, or English searches return only the exact matching result.
-- Added recent searches backed by browser `localStorage`.
-- Replaced the quiet AI placeholder with a spinner-based loading state.
-- Hardened quiz generation by filtering unsuitable cached AI words and cleaning duplicate choices.
-- Added `scripts/validate_dictionary.py` to catch invalid JSON, missing fields, empty values, duplicate words, malformed examples, and unexpected entry counts.
-- Added pytest coverage for dictionary quality, search behavior, Flask route health, and invalid AI endpoint input.
-- Added a project `LICENSE` and updated documentation for the new run, validation, and test commands.
-- Added documentation screenshots under `assets/screenshots/` for Search Mode, Search Result, and Quiz Mode.
-- Added demo media under `assets/demo/` as an MP4 file.
-- Updated the MP4 demo to show a fuller user workflow: Chinese search, English search, pinyin search with tone marks, pinyin search without tone marks, recent searches, word and sentence audio playback, AI loading, one wrong quiz choice, then the correct quiz choice.
-- Used AI to help restructure the project, curate additional daily-use entries, add validation tooling, and create regression tests.
-- Changed the app from a compact prototype layout into a more maintainable project structure with data and tests separated from application logic.
-- UI progress: added recent searches and a cleaner AI loading spinner while preserving the existing search and quiz interface.
+- Built a more maintainable v3 project structure with `src/`, `tests/`, `docs/`, `scripts/`, `assets/`, and `data/`, a 200-entry JSON dictionary, exact-match search, recent searches, validation tooling, pytest coverage, screenshots, and MP4 demo media.
+- Used AI to help restructure the folders, move dictionary data out of Flask route logic, curate additional daily-use entries, tighten search behavior, add validation checks, create regression tests, and document the final workflow.
+- Changed the app from a compact local-AI prototype into a more submission-ready project with source code, data, tests, scripts, docs, screenshots, and demo assets separated into clear folders.
+- UI progress: added Recent Searches, a cleaner spinner-based AI loading state, stricter exact-match behavior, and safer quiz generation while preserving the existing Search Mode and Quiz Mode interface.
+
+## v3.1
+
+- Built a branded v3.1 polish update with a logo banner, square app icon, favicon, visible copyright line, refreshed screenshots, and a full-page recorded MP4 demo.
+- Used AI to help create and integrate logo assets, update documentation, refresh screenshots, and record a cursor-driven demo with synced audio and local AI loading.
+- Changed the project from a submission-ready v3 prototype into a more product-like personal learning assistant with clearer visual identity and stronger presentation materials.
+- UI progress: added visible app branding in the header and favicon, then refreshed the demo to show a full-page `1280x1400` workflow with Chinese search, English search, pinyin search, Recent Searches reuse, synced audio playback, `lion` AI loading, and quiz attempts.

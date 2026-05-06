@@ -4,13 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mandarin Learning Assistant</title>
+    <link rel="icon" type="image/png" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <main class="page">
         <section class="hero">
-            <p class="eyebrow">v3</p>
-            <h1>Mandarin Learning Assistant</h1>
+            <div class="hero-brand">
+                <img
+                    src="{{ url_for('asset_file', filename='logo/icon.png') }}"
+                    alt="Mandarin Learning Assistant logo"
+                    class="hero-logo"
+                >
+                <div class="hero-copy">
+                    <p class="eyebrow">v3.1</p>
+                    <h1>Mandarin Learning Assistant</h1>
+                    <p class="hero-credit">© 2026 Yuchi</p>
+                </div>
+            </div>
             <p class="intro">
                 Search by Chinese word, pinyin, or English meaning.
             </p>

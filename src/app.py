@@ -7,10 +7,11 @@ import unicodedata
 import urllib.error
 import urllib.request
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 from pypinyin import Style, lazy_pinyin
 
 app = Flask(__name__)
+ASSETS_DIR = Path(__file__).resolve().parent.parent / "assets"
 RECENT_QUIZ_LIMIT = 5
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/chat")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma3")
@@ -475,6 +476,11 @@ def ai_explanation():
         return jsonify({"ok": False, "error": error}), 503
 
     return jsonify({"ok": True, "result": result})
+
+
+@app.get("/assets/<path:filename>")
+def asset_file(filename):
+    return send_from_directory(ASSETS_DIR, filename)
 
 
 if __name__ == "__main__":

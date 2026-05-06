@@ -1,11 +1,18 @@
 # Mandarin Learning Assistant
 
+<p align="center"><small>Mandarin Learning Assistant · © 2026 Yuchi</small></p>
+
+![Mandarin Learning Assistant banner](assets/logo/brand-banner.png)
+
+Current version: `v3.1`
+
 ## Overview
 
 ### Problem
 
-- English-speaking beginners learning Mandarin often need word lookup, pinyin, pronunciation help, and simple practice in one place.
-- A fixed dictionary is helpful, but it cannot explain words outside its built-in list.
+- English-speaking beginners learning Mandarin often switch between separate tools for word lookup, pinyin, pronunciation, examples, and practice.
+- This slows down self-study because a fixed dictionary may not cover every word, while general AI answers may be inconsistent without structure.
+- The project targets one learner using a local study assistant for personal Mandarin practice.
 
 ### Outcome
 
@@ -13,24 +20,30 @@
 - Added tone-marked pinyin, browser audio, and local AI fallback through Ollama.
 - Added async AI loading and in-memory caching for a faster search experience.
 - Added quiz support for AI-learned words within the current app session.
-- Expanded the built-in daily-use Mandarin dictionary to 200 entries stored in a separate JSON file.
-- Added dictionary validation and pytest coverage for search, routes, and data quality.
-- Added app screenshots under `assets/screenshots/` for documentation and submission use.
-- Added a recorded MP4 demo under `assets/demo/` that shows search, audio playback, AI loading, recent searches, and quiz feedback.
+- Expanded the built-in daily-use Mandarin dictionary to `200` entries stored in a separate JSON file.
+- Added exact-match search so precise Chinese, pinyin, or English queries return only the exact result.
+- Added dictionary validation and `10` pytest tests for search, routes, and data quality.
+- Added app screenshots under `assets/screenshots/` for documentation and submission use, refreshed to show the logo branding.
+- Added a `52.48s` full-page recorded MP4 demo under `assets/demo/` that shows a visible cursor using Chinese search, English search, pinyin search with tone marks, pinyin search without tone marks, recent searches, synced word and sentence audio playback, local AI loading for `lion`, a wrong-then-correct quiz attempt, and a direct correct quiz attempt, refreshed to show the logo branding and `v3.1` badge.
+- Added a branded logo set under `assets/logo/` for the app banner and icon.
 
 ---
 
 ## Demo
 
-- Open the app and start in Search Mode.
-- Search by Chinese word, pinyin with tone marks, pinyin without tone marks, or English meaning.
-- Built-in dictionary matches return a normal word card immediately.
-- Unknown but valid words can load an AI-generated word card through local Ollama.
-- Word cards include the word, part of speech, pinyin, meaning, explanation, example sentences, sentence pinyin, and audio controls.
-- Recent search chips let users quickly repeat earlier searches in the same browser.
-- Switch to Quiz Mode to answer meaning questions.
-- Correct answers turn green and quickly move to the next question.
-- Wrong answers turn red and explain what the selected wrong option matched.
+From the learner's perspective:
+
+1. Open the app in Search Mode.
+2. Search by Chinese word, such as `学校`.
+3. Read the result card with pinyin, meaning, explanation, examples, and translations.
+4. Click the word audio button and the sentence audio button.
+5. Search by English meaning, such as `airport`.
+6. Search by pinyin with tone marks, such as `nǐ hǎo`.
+7. Search by pinyin without tone marks, such as `zuo bian`.
+8. Click a Recent Searches chip to return to an older lookup.
+9. Search an unknown word, such as `lion`, and watch the local AI loading state.
+10. Switch to Quiz Mode, choose a wrong answer, then choose the correct answer.
+11. Continue to the next quiz and choose a correct answer directly.
 
 Screenshots:
 
@@ -42,7 +55,7 @@ Demo media:
 
 - [Demo Video](assets/demo/demo.mp4)
 
-The demo video shows Chinese search, English search, pinyin search with tone marks, pinyin search without tone marks, recent searches, word and sentence audio playback, local AI loading for an unknown word, and a wrong-then-correct quiz attempt.
+The demo video shows a visible cursor performing Chinese search, English search, pinyin search with tone marks, pinyin search without tone marks, reuse of the Recent Searches chip, synced word and sentence audio playback, local AI loading for `lion`, a wrong-then-correct quiz attempt, and a direct correct quiz attempt. The screenshots and video were regenerated after the logo was added so the branding is visible in the product visuals.
 
 ---
 
@@ -68,12 +81,18 @@ The demo video shows Chinese search, English search, pinyin search with tone mar
 ## Development Approach with AI
 
 - AI tools and services used:
-  - Ollama for local AI explanation fallback
-  - `gemma3` as the default explanation model
-  - browser speech synthesis for pronunciation playback
+  - ChatGPT for early ideation, project scoping, and prompt suggestions before implementation
+  - Ollama for optional local AI explanation fallback when a word is not in the built-in dictionary
+  - `gemma3` as the default local explanation model because it produced better structured Mandarin explanations than smaller local models
+  - browser Speech Synthesis API for pronunciation playback without storing audio files
 - AI agent used:
-  - Codex for implementation, refactoring, testing, and documentation
+  - Codex as coding co-developer for Flask implementation, frontend iteration, refactoring, test creation, validation tooling, documentation, and demo asset generation
+- Process:
+  - Discussed the initial idea of an AI Mandarin Learning Assistant with ChatGPT.
+  - Used a ChatGPT-recommended starter prompt to begin the project in Codex.
+  - Iterated in Codex from a simple prototype into a structured v3.1 project with data, tests, validation, screenshots, and demo media.
 - Key prompts used:
+  - ChatGPT-recommended starter prompt for creating the first AI Mandarin Learning Assistant prototype
   - “Create a simple web-based AI Mandarin Learning Assistant prototype.”
   - “add an easy quiz part”
   - “add audios for the chinese word and sentences”
@@ -87,14 +106,16 @@ The demo video shows Chinese search, English search, pinyin search with tone mar
   - “create tests”
   - “record a demo video”
 - Key review decisions:
-  - tightened search ranking to reduce irrelevant matches
-  - displayed tone-marked pinyin while keeping tone-insensitive search
-  - kept async loading and caching for speed
-  - used `gemma3` by default for better local explanation quality
-  - added validation to reject obviously bad AI output
-  - separated dictionary data from application logic
-  - added automated tests for exact search behavior and route health
-  - used a recorded browser workflow for the MP4 demo instead of a screenshot slideshow
+  - Tightened search ranking to reduce irrelevant matches.
+  - Added exact-match short-circuiting after testing inputs like `when`, which previously returned too many broad matches.
+  - Displayed tone-marked pinyin while keeping tone-insensitive search for easier beginner input.
+  - Kept AI fallback asynchronous so the page can render immediately while the local model responds.
+  - Cached successful AI explanations in memory to make repeated AI lookups faster during the same session.
+  - Used `gemma3` by default because smaller local models produced weaker or less reliable Mandarin explanations.
+  - Added output validation to reject low-quality or malformed AI responses before showing them in the UI.
+  - Moved dictionary data into `data/dictionary.json` so content can grow without cluttering Flask route logic.
+  - Added a validation script and pytest tests to catch duplicate words, missing fields, broken search behavior, and route regressions.
+  - Used a recorded browser workflow for the MP4 demo instead of a screenshot slideshow so the interaction flow is clear.
 
 ---
 
@@ -154,6 +175,8 @@ export OLLAMA_MODEL=gemma3
 export OLLAMA_KEEP_ALIVE=15m
 ```
 
+The app still runs without Ollama. In that case, built-in dictionary lookup and quiz mode work normally, while unknown-word AI fallback returns an unavailable message.
+
 ---
 
 ## Data Validation
@@ -189,9 +212,7 @@ How to use the project.
   - `你好`
   - `ni hao`
   - `nǐ hǎo`
-  - `friend`
-  - `work`
-  - `苹果`
+  - `hello`
 - Expected behaviour:
   - dictionary words return immediate results
   - exact matches return only the exact result
@@ -219,9 +240,10 @@ Explanation of key folders.
 - `tests/` contains automated tests for dictionary quality, search behavior, and Flask routes.
 - `docs/` contains extended project documentation, including version notes.
 - `scripts/` contains automation and utility scripts, including dictionary validation.
+- `assets/logo/brand-banner.png` contains the wide logo banner.
+- `assets/logo/icon.png` contains the square app icon and favicon source.
 - `assets/screenshots/` contains app screenshots for Search Mode, Search Result, and Quiz Mode.
 - `assets/demo/demo.mp4` contains a recorded user workflow with search, audio, AI loading, recent searches, and quiz interaction.
-- `data/` contains optional datasets and local app data.
 - `requirements.txt` lists Python dependencies.
 - `AGENTS.md` contains internal implementation and editing guidance.
 
@@ -234,11 +256,16 @@ Explanation of key folders.
   - Tone-marked pinyin and browser audio added immediate learning value.
   - Async AI loading improved perceived speed.
   - Local Ollama fallback avoided the need for a paid API key.
+  - Moving the dictionary into JSON made content expansion easier.
+  - Tests and validation made later search and data changes safer.
 - What failed:
   - Smaller local models produced weaker Mandarin explanations.
   - Early AI prompting was too loose and sometimes returned poor results.
+  - Early fuzzy search returned too many results for exact English queries such as `when`.
+  - A screenshot slideshow did not demonstrate the real user flow well enough, so it was replaced with a recorded browser workflow.
 - Changes made:
   - tightened search ranking
+  - added exact-match-only behavior for exact Chinese, pinyin, and English searches
   - refined quiz behavior
   - moved AI fallback to an async endpoint
   - added in-memory caching
@@ -249,5 +276,6 @@ Explanation of key folders.
   - added dictionary validation and pytest tests
   - captured screenshots for the README/demo assets
   - recorded a user-flow MP4 demo with audio
+  - added logo assets for personal-product branding
 - Rationale:
-  - Keep the app beginner-friendly while making it more capable than a fixed dictionary-only prototype.
+  - Keep the app beginner-friendly while making it more capable than a fixed dictionary-only prototype, and keep the codebase structured enough to explain, test, and extend.
