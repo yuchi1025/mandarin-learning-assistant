@@ -5,14 +5,17 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+from pypinyin import Style, lazy_pinyin
 
-REQUIRED_FIELDS = {
+
+REQUIRED_FIELDS = [
     "word",
+    "pinyin",
     "english",
     "part_of_speech",
     "explanation",
     "examples",
-}
+]
 
 
 def validate_entries(entries, expected_count=None):
@@ -32,14 +35,24 @@ def validate_entries(entries, expected_count=None):
         label = f"entry {index} ({word or 'missing word'})"
         words.append(word)
 
-        missing_fields = sorted(REQUIRED_FIELDS - set(entry))
+        field_names = list(entry)
+        missing_fields = [field for field in REQUIRED_FIELDS if field not in entry]
         if missing_fields:
             errors.append(f"{label}: missing fields: {', '.join(missing_fields)}.")
+        if field_names != REQUIRED_FIELDS:
+            errors.append(f"{label}: fields should be ordered as: {', '.join(REQUIRED_FIELDS)}.")
 
-        for field in REQUIRED_FIELDS - {"examples"}:
+        for field in REQUIRED_FIELDS:
+            if field == "examples":
+                continue
             value = entry.get(field)
             if not isinstance(value, str) or not value.strip():
                 errors.append(f"{label}: `{field}` must be a non-empty string.")
+
+        pinyin = str(entry.get("pinyin", "")).strip()
+        expected_pinyin = " ".join(lazy_pinyin(word, style=Style.TONE)) if word else ""
+        if word and pinyin and pinyin != expected_pinyin:
+            errors.append(f"{label}: `pinyin` should be `{expected_pinyin}`.")
 
         examples = entry.get("examples")
         if not isinstance(examples, list) or not examples:

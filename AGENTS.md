@@ -4,7 +4,7 @@
 
 This project is a beginner-friendly Flask web app for Mandarin learning.
 
-Current version: `v3.1`
+Current version: `v3.1.1`
 
 It currently has two user modes:
 
@@ -17,7 +17,7 @@ The app uses:
 - optional local AI fallback through Ollama
 - automated dictionary validation and pytest coverage
 - documentation screenshots in `assets/screenshots/`
-- recorded MP4 demo media in `assets/demo/`
+- recorded MP4 and GIF demo media in `assets/demo/`
 - logo assets in `assets/logo/`
 
 There is no required external paid API or external database.
@@ -52,6 +52,7 @@ Each result card shows:
 - Example sentence pinyin
 - Example sentence translation
 - Audio buttons for the word and each sentence
+- Sentence audio should use cleaned speech text, while displayed sentence text may keep punctuation and quote marks.
 
 If the result comes from AI:
 
@@ -102,7 +103,8 @@ If the result comes from AI:
 - `assets/screenshots/`
   - Search Mode, Search Result, and Quiz Mode screenshots for documentation/demo use
 - `assets/demo/`
-  - full-page recorded MP4 demo showing a visible cursor using Chinese search, English search, pinyin search with tone marks, pinyin search without tone marks, recent searches, synced audio playback, lion AI loading, and quiz feedback
+  - full-page recorded MP4 demo showing a visible cursor using Chinese search, English search, pinyin search with tone marks, pinyin search without tone marks, recent searches, synced audio playback, AI loading for a word not in the built-in dictionary, a wrong-then-correct quiz attempt, and a direct correct quiz attempt
+  - compressed silent GIF preview generated from the MP4
 - `assets/logo/`
   - brand banner and square app icon
 - `requirements.txt`
@@ -123,9 +125,11 @@ If the result comes from AI:
 
 - Validate dictionary data with `python3 scripts/validate_dictionary.py --expected-count 200`.
 - Run automated tests with `python3 -m pytest`.
+- Dictionary validation should require stored tone-marked pinyin to match each Chinese word.
+- Dictionary validation should require the same field order for every entry: `word`, `pinyin`, `english`, `part_of_speech`, `explanation`, `examples`.
 - Keep tests independent of Ollama and external network access.
 - Keep screenshots in `assets/screenshots/` if demo visuals are refreshed, especially after logo or branding changes.
-- Keep demo videos in `assets/demo/` and re-record them when the UI branding changes.
+- Keep demo videos and GIF previews in `assets/demo/` and refresh them when the UI branding changes.
 - Keep logo assets in `assets/logo/`.
 
 ## When Editing
@@ -133,7 +137,8 @@ If the result comes from AI:
 - Keep the app beginner-friendly.
 - Prefer simple Flask patterns over heavy abstractions.
 - Keep dictionary entries in `data/dictionary.json`, not inline in `src/app.py`.
-- Preserve tone-marked display pinyin.
+- Preserve consistent dictionary field order.
+- Preserve tone-marked dictionary and display pinyin.
 - Preserve tone-insensitive pinyin search.
 - Preserve exact-match-only behavior for exact Chinese, pinyin, and English searches.
 - Preserve async AI loading and cache behavior.

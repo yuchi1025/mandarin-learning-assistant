@@ -30,7 +30,14 @@
 
 ## v3.1
 
-- Built a branded v3.1 polish update with a logo banner, square app icon, favicon, visible copyright line, refreshed screenshots, and a full-page recorded MP4 demo.
-- Used AI to help create and integrate logo assets, update documentation, refresh screenshots, and record a cursor-driven demo with synced audio and local AI loading.
+- Built a branded v3.1 polish update with a logo banner, square app icon, favicon, visible copyright line, refreshed screenshots, a full-page recorded MP4 demo, and a compressed GIF preview.
+- Used AI to help create and integrate logo assets, update documentation, refresh screenshots, record a cursor-driven demo with synced audio and local AI loading, and generate a GIF preview from the MP4.
 - Changed the project from a submission-ready v3 prototype into a more product-like personal learning assistant with clearer visual identity and stronger presentation materials.
 - UI progress: added visible app branding in the header and favicon, then refreshed the demo to show a full-page `1280x1400` workflow with Chinese search, English search, pinyin search, Recent Searches reuse, synced audio playback, `lion` AI loading, and quiz attempts.
+
+## v3.1.1
+
+- Built a final v3.1.1 cleanup update with sentence-audio cleanup, tone-marked dictionary pinyin, consistent dictionary field order, stricter pinyin validation, refreshed screenshots, refreshed MP4/GIF demo media, and stronger submission documentation.
+- Used AI to identify that example sentence audio could speak display quote marks, convert stored dictionary pinyin to tone-marked pinyin, improve README sections against the submission checklist, and correct demo audio timing after review.
+- Changed the project from a branded v3.1 demo into a more consistent submission-ready package with cleaned speech text, tone-marked data, consistent dictionary formatting, `13` passing tests, categorized key prompts, a review-points table, deeper project structure documentation, and a clearer reflection section.
+- UI progress: updated the visible version badge to `v3.1.1`, preserved the v3.1 interface and demo flow, refreshed screenshots and demo media to show tone-marked pinyin, and corrected MP4 word/sentence audio sync with cursor clicks.

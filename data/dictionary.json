@@ -1,380 +1,381 @@
 [
   {
     "word": "你好",
-    "pinyin": "ni hao",
+    "pinyin": "nǐ hǎo",
     "english": "hello",
+    "part_of_speech": "greeting",
     "explanation": "A common greeting used when meeting someone.",
     "examples": [
       "你好！很高兴认识你。 (Hello! Nice to meet you.)",
       "老师说：'你好，同学们。' (The teacher said, 'Hello, students.')"
-    ],
-    "part_of_speech": "greeting"
+    ]
   },
   {
     "word": "谢谢",
-    "pinyin": "xie xie",
+    "pinyin": "xiè xiè",
     "english": "thank you",
+    "part_of_speech": "expression",
     "explanation": "Used to show gratitude when someone helps you or gives you something.",
     "examples": [
       "谢谢你的帮助。 (Thank you for your help.)",
       "我收到礼物后说谢谢。 (I said thank you after receiving the gift.)"
-    ],
-    "part_of_speech": "expression"
+    ]
   },
   {
     "word": "学习",
-    "pinyin": "xue xi",
+    "pinyin": "xué xí",
     "english": "to study; learning",
+    "part_of_speech": "verb",
     "explanation": "Used when talking about studying, practicing, or learning something new.",
     "examples": [
       "我每天学习汉语。 (I study Mandarin every day.)",
       "学习新词很重要。 (Learning new words is important.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "朋友",
-    "pinyin": "peng you",
+    "pinyin": "péng yǒu",
     "english": "friend",
+    "part_of_speech": "noun",
     "explanation": "Refers to a person you know well and like.",
     "examples": [
       "她是我的好朋友。 (She is my good friend.)",
       "我和朋友一起去公园。 (I go to the park with my friend.)"
-    ],
-    "part_of_speech": "noun"
+    ]
   },
   {
     "word": "吃饭",
-    "pinyin": "chi fan",
+    "pinyin": "chī fàn",
     "english": "to eat a meal",
+    "part_of_speech": "verb",
     "explanation": "Having a meal, whether alone or with others.",
     "examples": [
       "我们下班以后一起去吃饭吧。 (Let’s go eat together after work.)",
       "我今天中午在公司食堂吃饭。 (I ate lunch at the company cafeteria today.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "喝水",
-    "pinyin": "he shui",
+    "pinyin": "hē shuǐ",
     "english": "to drink water",
+    "part_of_speech": "verb",
     "explanation": "Drinking water or staying hydrated.",
     "examples": [
       "天气这么热，你要多喝水。 (It’s so hot, you should drink more water.)",
       "我每天早上起床都会先喝水。 (I drink water first thing every morning.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "多少钱",
-    "pinyin": "duo shao qian",
+    "pinyin": "duō shǎo qián",
     "english": "how much money",
+    "part_of_speech": "question phrase",
     "explanation": "The price of something.",
     "examples": [
       "请问这个手机现在多少钱？ (How much is this phone now?)",
       "这双鞋打折以后是多少钱？ (How much are these shoes after discount?)"
-    ],
-    "part_of_speech": "question phrase"
+    ]
   },
   {
     "word": "可以",
-    "pinyin": "ke yi",
+    "pinyin": "kě yǐ",
     "english": "can; may",
+    "part_of_speech": "modal verb",
     "explanation": "Expresses permission, ability, or possibility.",
     "examples": [
       "我可以在这里坐一会儿吗？ (Can I sit here for a while?)",
       "你今天晚上可以陪我去吗？ (Can you go with me tonight?)"
-    ],
-    "part_of_speech": "modal verb"
+    ]
   },
   {
     "word": "不要",
-    "pinyin": "bu yao",
+    "pinyin": "bú yào",
     "english": "don’t want; don’t",
+    "part_of_speech": "verb phrase",
     "explanation": "Refusal or prohibition.",
     "examples": [
       "我今天不太饿，所以不要吃饭。 (I’m not very hungry today, so I don’t want to eat.)",
       "你走路的时候不要看手机。 (Don’t look at your phone while walking.)"
-    ],
-    "part_of_speech": "verb phrase"
+    ]
   },
   {
     "word": "现在",
-    "pinyin": "xian zai",
+    "pinyin": "xiàn zài",
     "english": "now",
+    "part_of_speech": "time word",
     "explanation": "The present moment.",
     "examples": [
       "我现在正在家里看电视节目。 (I am watching TV at home now.)",
       "你现在方便接电话聊天吗？ (Are you free to take a call now?)"
-    ],
-    "part_of_speech": "time word"
+    ]
   },
   {
     "word": "等一下",
-    "pinyin": "deng yi xia",
+    "pinyin": "děng yí xià",
     "english": "wait a moment",
+    "part_of_speech": "phrase",
     "explanation": "A brief pause or short wait.",
     "examples": [
       "你先别走，等一下我马上回来。 (Don’t leave yet, wait a moment, I’ll be back soon.)",
       "请等一下，我还没准备好出门。 (Please wait a moment, I’m not ready to go out yet.)"
-    ],
-    "part_of_speech": "phrase"
+    ]
   },
   {
     "word": "为什么",
-    "pinyin": "wei shen me",
+    "pinyin": "wèi shén me",
     "english": "why",
+    "part_of_speech": "question word",
     "explanation": "A question about reasons or causes.",
     "examples": [
       "你今天为什么没有来上班呢？ (Why didn’t you come to work today?)",
       "这个东西为什么这么贵呢？ (Why is this item so expensive?)"
-    ],
-    "part_of_speech": "question word"
+    ]
   },
   {
     "word": "因为",
-    "pinyin": "yin wei",
+    "pinyin": "yīn wèi",
     "english": "because",
+    "part_of_speech": "conjunction",
     "explanation": "Introduces a reason or explanation.",
     "examples": [
       "因为今天下大雨，所以我没出门。 (Because it rained heavily today, I didn’t go out.)",
       "我累了，因为昨天晚上睡得太晚。 (I’m tired because I slept too late last night.)"
-    ],
-    "part_of_speech": "conjunction"
+    ]
   },
   {
     "word": "知道",
-    "pinyin": "zhi dao",
+    "pinyin": "zhī dào",
     "english": "to know",
+    "part_of_speech": "verb",
     "explanation": "Having information or awareness about something.",
     "examples": [
       "我早就知道这件事情的结果了。 (I already knew the result of this matter.)",
       "你知道附近哪里有好吃的吗？ (Do you know where to find good food nearby?)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "觉得",
-    "pinyin": "jue de",
+    "pinyin": "jué de",
     "english": "to feel; to think",
+    "part_of_speech": "verb",
     "explanation": "Personal opinion, judgment, or feeling.",
     "examples": [
       "我觉得这部电影真的很好看。 (I think this movie is really good.)",
       "你觉得我们应该几点出发比较好？ (What time do you think we should leave?)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "喜欢",
-    "pinyin": "xi huan",
+    "pinyin": "xǐ huān",
     "english": "to like",
+    "part_of_speech": "verb",
     "explanation": "A positive preference or enjoyment.",
     "examples": [
       "我很喜欢周末在家休息看书。 (I really like staying home and reading on weekends.)",
       "她特别喜欢喝冰的奶茶。 (She especially likes drinking iced milk tea.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "不喜欢",
-    "pinyin": "bu xi huan",
+    "pinyin": "bù xǐ huān",
     "english": "to dislike",
+    "part_of_speech": "verb",
     "explanation": "A negative preference or lack of enjoyment.",
     "examples": [
       "我不喜欢早上太早起床上班。 (I don’t like waking up too early for work.)",
       "他不喜欢在下雨天出门活动。 (He doesn’t like going out on rainy days.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "工作",
-    "pinyin": "gong zuo",
+    "pinyin": "gōng zuò",
     "english": "work; job",
+    "part_of_speech": "noun / verb",
     "explanation": "Tasks, duties, or employment.",
     "examples": [
       "我最近工作很忙，经常要加班。 (I’ve been very busy with work and often work overtime.)",
       "她找到了一份离家很近的工作。 (She found a job close to home.)"
-    ],
-    "part_of_speech": "noun / verb"
+    ]
   },
   {
     "word": "下班",
-    "pinyin": "xia ban",
+    "pinyin": "xià bān",
     "english": "to get off work",
+    "part_of_speech": "verb",
     "explanation": "Finishing the workday.",
     "examples": [
       "我今天晚上六点准时下班回家。 (I get off work at six and go home.)",
       "你下班以后想不想一起去吃饭？ (Do you want to eat together after work?)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "上班",
-    "pinyin": "shang ban",
+    "pinyin": "shàng bān",
     "english": "to go to work",
+    "part_of_speech": "verb",
     "explanation": "Starting the workday or being at work.",
     "examples": [
       "我每天早上八点准时去公司上班。 (I go to work at 8 every morning.)",
       "他今天身体不舒服，没有去上班。 (He didn’t go to work today because he felt unwell.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "回家",
-    "pinyin": "hui jia",
+    "pinyin": "huí jiā",
     "english": "to go home",
+    "part_of_speech": "verb",
     "explanation": "Returning to one’s home.",
     "examples": [
       "我下班以后直接坐地铁回家休息。 (I go straight home by MRT after work.)",
       "周末的时候我常常回家看父母。 (I often go home to visit my parents on weekends.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "出去",
-    "pinyin": "chu qu",
+    "pinyin": "chū qù",
     "english": "to go out",
+    "part_of_speech": "verb",
     "explanation": "Leaving a place to spend time outside.",
     "examples": [
       "今天天气很好，我们一起出去走走吧。 (The weather is nice, let’s go out for a walk.)",
       "他刚刚出去买东西，很快就回来。 (He just went out to buy something and will be back soon.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "进来",
-    "pinyin": "jin lai",
+    "pinyin": "jìn lái",
     "english": "to come in",
+    "part_of_speech": "verb",
     "explanation": "Entering an indoor or enclosed space.",
     "examples": [
       "外面很冷，你快点进来坐一会儿。 (It’s cold outside, come in and sit for a while.)",
       "老师叫学生一个一个地进来教室。 (The teacher asked students to come into the classroom one by one.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "看",
-    "pinyin": "kan",
+    "pinyin": "kàn",
     "english": "to look; to watch",
+    "part_of_speech": "verb",
     "explanation": "Using the eyes to observe, watch, or read.",
     "examples": [
       "我晚上喜欢一个人在家看电影放松。 (I like watching movies at home alone at night.)",
       "你可以帮我看看这个文件有没有问题吗？ (Can you help me check this document?)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "听",
-    "pinyin": "ting",
+    "pinyin": "tīng",
     "english": "to listen",
+    "part_of_speech": "verb",
     "explanation": "Paying attention to sounds or spoken words.",
     "examples": [
       "我每天上下班的时候都会听音乐。 (I listen to music during my commute every day.)",
       "请你认真听老师讲课的内容。 (Please listen carefully to the teacher.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "说",
-    "pinyin": "shuo",
+    "pinyin": "shuō",
     "english": "to speak; to say",
+    "part_of_speech": "verb",
     "explanation": "Expressing thoughts through speech.",
     "examples": [
       "他会说三种语言，非常厉害。 (He can speak three languages, very impressive.)",
       "我想跟你说一件很重要的事情。 (I want to tell you something important.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "买",
-    "pinyin": "mai",
+    "pinyin": "mǎi",
     "english": "to buy",
+    "part_of_speech": "verb",
     "explanation": "Obtaining something by paying money.",
     "examples": [
       "我打算周末去商场买一些新衣服。 (I plan to buy some new clothes at the mall this weekend.)",
       "她在网上买了一部新的手机。 (She bought a new phone online.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "卖",
-    "pinyin": "mai",
+    "pinyin": "mài",
     "english": "to sell",
+    "part_of_speech": "verb",
     "explanation": "Exchanging goods for money.",
     "examples": [
       "这家店专门卖新鲜的水果和蔬菜。 (This shop sells fresh fruits and vegetables.)",
       "他在网上卖自己做的手工艺品。 (He sells handmade crafts online.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "打开",
-    "pinyin": "da kai",
+    "pinyin": "dǎ kāi",
     "english": "to open",
+    "part_of_speech": "verb",
     "explanation": "Making something accessible by unsealing or switching on.",
     "examples": [
       "请帮我打开这个箱子看看里面有什么。 (Please help me open this box and see what’s inside.)",
       "我每天早上都会打开电脑开始工作。 (I turn on my computer every morning to start work.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "关上",
-    "pinyin": "guan shang",
+    "pinyin": "guān shàng",
     "english": "to close",
+    "part_of_speech": "verb",
     "explanation": "Shutting or turning something off.",
     "examples": [
       "你出门的时候记得把门关上锁好。 (Remember to close and lock the door when you leave.)",
       "晚上睡觉前请把窗户关上。 (Please close the window before sleeping.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "开始",
-    "pinyin": "kai shi",
+    "pinyin": "kāi shǐ",
     "english": "to start",
+    "part_of_speech": "verb",
     "explanation": "The beginning of an action or event.",
     "examples": [
       "我们现在开始今天的会议讨论内容。 (Let’s start today’s meeting discussion now.)",
       "电影还有十分钟就要开始了。 (The movie will start in ten minutes.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "结束",
-    "pinyin": "jie shu",
+    "pinyin": "jié shù",
     "english": "to end",
+    "part_of_speech": "verb",
     "explanation": "The conclusion or completion of something.",
     "examples": [
       "会议结束以后大家一起去吃晚饭。 (After the meeting ends, let’s have dinner together.)",
       "课程结束的时候老师给了很多作业。 (The teacher gave a lot of homework at the end of class.)"
-    ],
-    "part_of_speech": "verb"
+    ]
   },
   {
     "word": "累",
-    "pinyin": "lei",
+    "pinyin": "lèi",
     "english": "tired",
+    "part_of_speech": "adjective",
     "explanation": "A state of physical or mental fatigue.",
     "examples": [
       "我今天走了很多路，感觉特别累。 (I walked a lot today and feel especially tired.)",
       "工作了一整天以后，他已经很累了。 (After working all day, he is already tired.)"
-    ],
-    "part_of_speech": "adjective"
+    ]
   },
   {
     "word": "开心",
-    "pinyin": "kai xin",
+    "pinyin": "kāi xīn",
     "english": "happy",
+    "part_of_speech": "adjective",
     "explanation": "A feeling of joy or pleasure.",
     "examples": [
       "今天和朋友见面聊天让我很开心。 (Meeting and chatting with friends today made me happy.)",
       "收到你的礼物我真的非常开心。 (I’m really happy to receive your gift.)"
-    ],
-    "part_of_speech": "adjective"
+    ]
   },
   {
     "word": "早上好",
+    "pinyin": "zǎo shàng hǎo",
     "english": "good morning",
     "part_of_speech": "greeting",
     "explanation": "A polite greeting used in the morning.",
@@ -385,6 +386,7 @@
   },
   {
     "word": "晚上好",
+    "pinyin": "wǎn shàng hǎo",
     "english": "good evening",
     "part_of_speech": "greeting",
     "explanation": "A polite greeting used in the evening.",
@@ -395,6 +397,7 @@
   },
   {
     "word": "再见",
+    "pinyin": "zài jiàn",
     "english": "goodbye",
     "part_of_speech": "expression",
     "explanation": "Used when leaving or ending a conversation.",
@@ -405,6 +408,7 @@
   },
   {
     "word": "对不起",
+    "pinyin": "duì bù qǐ",
     "english": "sorry",
     "part_of_speech": "expression",
     "explanation": "Used to apologize.",
@@ -415,6 +419,7 @@
   },
   {
     "word": "没关系",
+    "pinyin": "méi guān xì",
     "english": "it is okay",
     "part_of_speech": "expression",
     "explanation": "Used to respond kindly to an apology.",
@@ -425,6 +430,7 @@
   },
   {
     "word": "请",
+    "pinyin": "qǐng",
     "english": "please",
     "part_of_speech": "word",
     "explanation": "A polite word used before requests.",
@@ -435,6 +441,7 @@
   },
   {
     "word": "请问",
+    "pinyin": "qǐng wèn",
     "english": "excuse me; may I ask",
     "part_of_speech": "phrase",
     "explanation": "A polite way to start a question.",
@@ -445,6 +452,7 @@
   },
   {
     "word": "没事",
+    "pinyin": "méi shì",
     "english": "no problem; nothing wrong",
     "part_of_speech": "expression",
     "explanation": "Used to say something is fine or not serious.",
@@ -455,6 +463,7 @@
   },
   {
     "word": "是",
+    "pinyin": "shì",
     "english": "to be; yes",
     "part_of_speech": "verb",
     "explanation": "Used to identify or confirm something.",
@@ -465,6 +474,7 @@
   },
   {
     "word": "不是",
+    "pinyin": "bú shì",
     "english": "is not; no",
     "part_of_speech": "verb",
     "explanation": "Used to deny identity or confirmation.",
@@ -475,6 +485,7 @@
   },
   {
     "word": "有",
+    "pinyin": "yǒu",
     "english": "to have; there is",
     "part_of_speech": "verb",
     "explanation": "Used for possession or existence.",
@@ -485,6 +496,7 @@
   },
   {
     "word": "没有",
+    "pinyin": "méi yǒu",
     "english": "do not have; there is not",
     "part_of_speech": "verb",
     "explanation": "The negative form of having or existing.",
@@ -495,6 +507,7 @@
   },
   {
     "word": "要",
+    "pinyin": "yào",
     "english": "to want; will",
     "part_of_speech": "modal verb",
     "explanation": "Used to express wanting or future intention.",
@@ -505,6 +518,7 @@
   },
   {
     "word": "想",
+    "pinyin": "xiǎng",
     "english": "to want; to think",
     "part_of_speech": "verb",
     "explanation": "Used for desires or thoughts.",
@@ -515,6 +529,7 @@
   },
   {
     "word": "会",
+    "pinyin": "huì",
     "english": "can; know how to",
     "part_of_speech": "modal verb",
     "explanation": "Used for learned ability or future likelihood.",
@@ -525,6 +540,7 @@
   },
   {
     "word": "能",
+    "pinyin": "néng",
     "english": "can; be able to",
     "part_of_speech": "modal verb",
     "explanation": "Used for ability or permission in a situation.",
@@ -535,6 +551,7 @@
   },
   {
     "word": "应该",
+    "pinyin": "yīng gāi",
     "english": "should",
     "part_of_speech": "modal verb",
     "explanation": "Used to express what is proper or expected.",
@@ -545,6 +562,7 @@
   },
   {
     "word": "需要",
+    "pinyin": "xū yào",
     "english": "to need",
     "part_of_speech": "verb",
     "explanation": "Used when something is necessary.",
@@ -555,6 +573,7 @@
   },
   {
     "word": "找",
+    "pinyin": "zhǎo",
     "english": "to look for",
     "part_of_speech": "verb",
     "explanation": "Trying to find someone or something.",
@@ -565,6 +584,7 @@
   },
   {
     "word": "给",
+    "pinyin": "gěi",
     "english": "to give; for",
     "part_of_speech": "verb",
     "explanation": "Used for giving or doing something for someone.",
@@ -575,6 +595,7 @@
   },
   {
     "word": "带",
+    "pinyin": "dài",
     "english": "to bring; to carry",
     "part_of_speech": "verb",
     "explanation": "Taking something or someone along.",
@@ -585,6 +606,7 @@
   },
   {
     "word": "用",
+    "pinyin": "yòng",
     "english": "to use",
     "part_of_speech": "verb",
     "explanation": "Using a tool, method, or object.",
@@ -595,6 +617,7 @@
   },
   {
     "word": "做",
+    "pinyin": "zuò",
     "english": "to do; to make",
     "part_of_speech": "verb",
     "explanation": "Performing an action or making something.",
@@ -605,6 +628,7 @@
   },
   {
     "word": "去",
+    "pinyin": "qù",
     "english": "to go",
     "part_of_speech": "verb",
     "explanation": "Moving toward another place.",
@@ -615,6 +639,7 @@
   },
   {
     "word": "来",
+    "pinyin": "lái",
     "english": "to come",
     "part_of_speech": "verb",
     "explanation": "Moving toward the speaker or place.",
@@ -625,6 +650,7 @@
   },
   {
     "word": "到",
+    "pinyin": "dào",
     "english": "to arrive",
     "part_of_speech": "verb",
     "explanation": "Reaching a place or time.",
@@ -635,6 +661,7 @@
   },
   {
     "word": "走",
+    "pinyin": "zǒu",
     "english": "to walk; to leave",
     "part_of_speech": "verb",
     "explanation": "Walking or leaving a place.",
@@ -645,6 +672,7 @@
   },
   {
     "word": "坐",
+    "pinyin": "zuò",
     "english": "to sit; to take transport",
     "part_of_speech": "verb",
     "explanation": "Sitting down or taking a vehicle.",
@@ -655,6 +683,7 @@
   },
   {
     "word": "住",
+    "pinyin": "zhù",
     "english": "to live; to stay",
     "part_of_speech": "verb",
     "explanation": "Living or staying somewhere.",
@@ -665,6 +694,7 @@
   },
   {
     "word": "睡觉",
+    "pinyin": "shuì jiào",
     "english": "to sleep",
     "part_of_speech": "verb",
     "explanation": "Going to sleep or sleeping.",
@@ -675,6 +705,7 @@
   },
   {
     "word": "起床",
+    "pinyin": "qǐ chuáng",
     "english": "to get up",
     "part_of_speech": "verb",
     "explanation": "Getting out of bed after sleeping.",
@@ -685,6 +716,7 @@
   },
   {
     "word": "洗澡",
+    "pinyin": "xǐ zǎo",
     "english": "to shower",
     "part_of_speech": "verb",
     "explanation": "Washing the body.",
@@ -695,6 +727,7 @@
   },
   {
     "word": "洗手",
+    "pinyin": "xǐ shǒu",
     "english": "to wash hands",
     "part_of_speech": "verb",
     "explanation": "Cleaning the hands with water.",
@@ -705,6 +738,7 @@
   },
   {
     "word": "穿",
+    "pinyin": "chuān",
     "english": "to wear",
     "part_of_speech": "verb",
     "explanation": "Putting clothes or shoes on the body.",
@@ -715,6 +749,7 @@
   },
   {
     "word": "拿",
+    "pinyin": "ná",
     "english": "to take; to hold",
     "part_of_speech": "verb",
     "explanation": "Holding or taking something.",
@@ -725,6 +760,7 @@
   },
   {
     "word": "放",
+    "pinyin": "fàng",
     "english": "to put; to place",
     "part_of_speech": "verb",
     "explanation": "Putting something somewhere.",
@@ -735,6 +771,7 @@
   },
   {
     "word": "送",
+    "pinyin": "sòng",
     "english": "to send; to give as a gift",
     "part_of_speech": "verb",
     "explanation": "Delivering something or giving a gift.",
@@ -745,6 +782,7 @@
   },
   {
     "word": "帮忙",
+    "pinyin": "bāng máng",
     "english": "to help",
     "part_of_speech": "verb",
     "explanation": "Helping someone do something.",
@@ -755,6 +793,7 @@
   },
   {
     "word": "问",
+    "pinyin": "wèn",
     "english": "to ask",
     "part_of_speech": "verb",
     "explanation": "Asking a question.",
@@ -765,6 +804,7 @@
   },
   {
     "word": "回答",
+    "pinyin": "huí dá",
     "english": "to answer",
     "part_of_speech": "verb",
     "explanation": "Giving an answer to a question.",
@@ -775,6 +815,7 @@
   },
   {
     "word": "懂",
+    "pinyin": "dǒng",
     "english": "to understand",
     "part_of_speech": "verb",
     "explanation": "Understanding meaning or information.",
@@ -785,6 +826,7 @@
   },
   {
     "word": "明白",
+    "pinyin": "míng bái",
     "english": "to understand; clear",
     "part_of_speech": "verb",
     "explanation": "Understanding clearly.",
@@ -795,6 +837,7 @@
   },
   {
     "word": "认识",
+    "pinyin": "rèn shí",
     "english": "to know; to recognize",
     "part_of_speech": "verb",
     "explanation": "Knowing a person or recognizing something.",
@@ -805,6 +848,7 @@
   },
   {
     "word": "记得",
+    "pinyin": "jì de",
     "english": "to remember",
     "part_of_speech": "verb",
     "explanation": "Keeping something in memory.",
@@ -815,6 +859,7 @@
   },
   {
     "word": "忘记",
+    "pinyin": "wàng jì",
     "english": "to forget",
     "part_of_speech": "verb",
     "explanation": "Not remembering something.",
@@ -825,6 +870,7 @@
   },
   {
     "word": "时间",
+    "pinyin": "shí jiān",
     "english": "time",
     "part_of_speech": "noun",
     "explanation": "Minutes, hours, days, or available time.",
@@ -835,6 +881,7 @@
   },
   {
     "word": "今天",
+    "pinyin": "jīn tiān",
     "english": "today",
     "part_of_speech": "time word",
     "explanation": "The current day.",
@@ -845,6 +892,7 @@
   },
   {
     "word": "明天",
+    "pinyin": "míng tiān",
     "english": "tomorrow",
     "part_of_speech": "time word",
     "explanation": "The day after today.",
@@ -855,6 +903,7 @@
   },
   {
     "word": "昨天",
+    "pinyin": "zuó tiān",
     "english": "yesterday",
     "part_of_speech": "time word",
     "explanation": "The day before today.",
@@ -865,6 +914,7 @@
   },
   {
     "word": "早上",
+    "pinyin": "zǎo shàng",
     "english": "morning",
     "part_of_speech": "time word",
     "explanation": "The early part of the day.",
@@ -875,6 +925,7 @@
   },
   {
     "word": "中午",
+    "pinyin": "zhōng wǔ",
     "english": "noon",
     "part_of_speech": "time word",
     "explanation": "Around midday.",
@@ -885,6 +936,7 @@
   },
   {
     "word": "晚上",
+    "pinyin": "wǎn shàng",
     "english": "evening; night",
     "part_of_speech": "time word",
     "explanation": "The later part of the day.",
@@ -895,6 +947,7 @@
   },
   {
     "word": "周末",
+    "pinyin": "zhōu mò",
     "english": "weekend",
     "part_of_speech": "time word",
     "explanation": "Saturday and Sunday.",
@@ -905,6 +958,7 @@
   },
   {
     "word": "家",
+    "pinyin": "jiā",
     "english": "home; family",
     "part_of_speech": "noun",
     "explanation": "A home or family.",
@@ -915,6 +969,7 @@
   },
   {
     "word": "学校",
+    "pinyin": "xué xiào",
     "english": "school",
     "part_of_speech": "noun",
     "explanation": "A place for learning.",
@@ -925,6 +980,7 @@
   },
   {
     "word": "公司",
+    "pinyin": "gōng sī",
     "english": "company; office",
     "part_of_speech": "noun",
     "explanation": "A business or workplace.",
@@ -935,6 +991,7 @@
   },
   {
     "word": "医院",
+    "pinyin": "yī yuàn",
     "english": "hospital",
     "part_of_speech": "noun",
     "explanation": "A place for medical care.",
@@ -945,6 +1002,7 @@
   },
   {
     "word": "商店",
+    "pinyin": "shāng diàn",
     "english": "shop; store",
     "part_of_speech": "noun",
     "explanation": "A place where people buy things.",
@@ -955,6 +1013,7 @@
   },
   {
     "word": "超市",
+    "pinyin": "chāo shì",
     "english": "supermarket",
     "part_of_speech": "noun",
     "explanation": "A large store for food and daily items.",
@@ -965,6 +1024,7 @@
   },
   {
     "word": "饭店",
+    "pinyin": "fàn diàn",
     "english": "restaurant; hotel",
     "part_of_speech": "noun",
     "explanation": "A place to eat meals, and sometimes a hotel depending on context.",
@@ -975,6 +1035,7 @@
   },
   {
     "word": "车站",
+    "pinyin": "chē zhàn",
     "english": "station",
     "part_of_speech": "noun",
     "explanation": "A place to take buses, trains, or other transport.",
@@ -985,6 +1046,7 @@
   },
   {
     "word": "地铁",
+    "pinyin": "dì tiě",
     "english": "MRT; subway",
     "part_of_speech": "noun",
     "explanation": "An underground or urban train system.",
@@ -995,6 +1057,7 @@
   },
   {
     "word": "公交车",
+    "pinyin": "gōng jiāo chē",
     "english": "bus",
     "part_of_speech": "noun",
     "explanation": "Public road transport.",
@@ -1005,6 +1068,7 @@
   },
   {
     "word": "出租车",
+    "pinyin": "chū zū chē",
     "english": "taxi",
     "part_of_speech": "noun",
     "explanation": "A paid car service.",
@@ -1015,6 +1079,7 @@
   },
   {
     "word": "手机",
+    "pinyin": "shǒu jī",
     "english": "mobile phone",
     "part_of_speech": "noun",
     "explanation": "A phone used for calls, messages, and apps.",
@@ -1025,6 +1090,7 @@
   },
   {
     "word": "电脑",
+    "pinyin": "diàn nǎo",
     "english": "computer",
     "part_of_speech": "noun",
     "explanation": "An electronic device for work, study, and browsing.",
@@ -1035,6 +1101,7 @@
   },
   {
     "word": "钥匙",
+    "pinyin": "yào shi",
     "english": "key",
     "part_of_speech": "noun",
     "explanation": "A small object used to open a lock.",
@@ -1045,6 +1112,7 @@
   },
   {
     "word": "钱包",
+    "pinyin": "qián bāo",
     "english": "wallet",
     "part_of_speech": "noun",
     "explanation": "A small case for money and cards.",
@@ -1055,6 +1123,7 @@
   },
   {
     "word": "衣服",
+    "pinyin": "yī fú",
     "english": "clothes",
     "part_of_speech": "noun",
     "explanation": "Things people wear.",
@@ -1065,6 +1134,7 @@
   },
   {
     "word": "鞋子",
+    "pinyin": "xié zi",
     "english": "shoes",
     "part_of_speech": "noun",
     "explanation": "Things worn on the feet.",
@@ -1075,6 +1145,7 @@
   },
   {
     "word": "水",
+    "pinyin": "shuǐ",
     "english": "water",
     "part_of_speech": "noun",
     "explanation": "A common drink and liquid.",
@@ -1085,6 +1156,7 @@
   },
   {
     "word": "咖啡",
+    "pinyin": "kā fēi",
     "english": "coffee",
     "part_of_speech": "noun",
     "explanation": "A common drink made from coffee beans.",
@@ -1095,6 +1167,7 @@
   },
   {
     "word": "茶",
+    "pinyin": "chá",
     "english": "tea",
     "part_of_speech": "noun",
     "explanation": "A common drink made from tea leaves.",
@@ -1105,6 +1178,7 @@
   },
   {
     "word": "饭",
+    "pinyin": "fàn",
     "english": "rice; meal",
     "part_of_speech": "noun",
     "explanation": "Cooked rice or a meal.",
@@ -1115,6 +1189,7 @@
   },
   {
     "word": "面条",
+    "pinyin": "miàn tiáo",
     "english": "noodles",
     "part_of_speech": "noun",
     "explanation": "Long thin food made from flour or starch.",
@@ -1125,6 +1200,7 @@
   },
   {
     "word": "苹果",
+    "pinyin": "píng guǒ",
     "english": "apple",
     "part_of_speech": "noun",
     "explanation": "A common fruit.",
@@ -1135,6 +1211,7 @@
   },
   {
     "word": "香蕉",
+    "pinyin": "xiāng jiāo",
     "english": "banana",
     "part_of_speech": "noun",
     "explanation": "A long yellow fruit.",
@@ -1145,6 +1222,7 @@
   },
   {
     "word": "鸡蛋",
+    "pinyin": "jī dàn",
     "english": "egg",
     "part_of_speech": "noun",
     "explanation": "A common food used in many meals.",
@@ -1155,6 +1233,7 @@
   },
   {
     "word": "牛奶",
+    "pinyin": "niú nǎi",
     "english": "milk",
     "part_of_speech": "noun",
     "explanation": "A common drink from cows.",
@@ -1165,6 +1244,7 @@
   },
   {
     "word": "热",
+    "pinyin": "rè",
     "english": "hot",
     "part_of_speech": "adjective",
     "explanation": "High temperature or feeling warm.",
@@ -1175,6 +1255,7 @@
   },
   {
     "word": "冷",
+    "pinyin": "lěng",
     "english": "cold",
     "part_of_speech": "adjective",
     "explanation": "Low temperature or feeling chilly.",
@@ -1185,6 +1266,7 @@
   },
   {
     "word": "好吃",
+    "pinyin": "hǎo chī",
     "english": "delicious",
     "part_of_speech": "adjective",
     "explanation": "Food that tastes good.",
@@ -1195,6 +1277,7 @@
   },
   {
     "word": "好喝",
+    "pinyin": "hǎo hē",
     "english": "tasty to drink",
     "part_of_speech": "adjective",
     "explanation": "A drink that tastes good.",
@@ -1205,6 +1288,7 @@
   },
   {
     "word": "漂亮",
+    "pinyin": "piào liàng",
     "english": "beautiful",
     "part_of_speech": "adjective",
     "explanation": "Good-looking or attractive.",
@@ -1215,6 +1299,7 @@
   },
   {
     "word": "贵",
+    "pinyin": "guì",
     "english": "expensive",
     "part_of_speech": "adjective",
     "explanation": "Costing a lot of money.",
@@ -1225,6 +1310,7 @@
   },
   {
     "word": "便宜",
+    "pinyin": "pián yi",
     "english": "cheap; inexpensive",
     "part_of_speech": "adjective",
     "explanation": "Costing little money.",
@@ -1235,6 +1321,7 @@
   },
   {
     "word": "快",
+    "pinyin": "kuài",
     "english": "fast",
     "part_of_speech": "adjective",
     "explanation": "High speed or soon.",
@@ -1245,6 +1332,7 @@
   },
   {
     "word": "慢",
+    "pinyin": "màn",
     "english": "slow",
     "part_of_speech": "adjective",
     "explanation": "Low speed.",
@@ -1255,6 +1343,7 @@
   },
   {
     "word": "远",
+    "pinyin": "yuǎn",
     "english": "far",
     "part_of_speech": "adjective",
     "explanation": "A long distance away.",
@@ -1265,6 +1354,7 @@
   },
   {
     "word": "近",
+    "pinyin": "jìn",
     "english": "near",
     "part_of_speech": "adjective",
     "explanation": "A short distance away.",
@@ -1275,6 +1365,7 @@
   },
   {
     "word": "忙",
+    "pinyin": "máng",
     "english": "busy",
     "part_of_speech": "adjective",
     "explanation": "Having many things to do.",
@@ -1285,6 +1376,7 @@
   },
   {
     "word": "空",
+    "pinyin": "kōng",
     "english": "free; empty",
     "part_of_speech": "adjective",
     "explanation": "Available or empty.",
@@ -1295,6 +1387,7 @@
   },
   {
     "word": "新",
+    "pinyin": "xīn",
     "english": "new",
     "part_of_speech": "adjective",
     "explanation": "Recently made, bought, or known.",
@@ -1305,6 +1398,7 @@
   },
   {
     "word": "旧",
+    "pinyin": "jiù",
     "english": "old; used",
     "part_of_speech": "adjective",
     "explanation": "Not new or used before.",
@@ -1315,6 +1409,7 @@
   },
   {
     "word": "大",
+    "pinyin": "dà",
     "english": "big",
     "part_of_speech": "adjective",
     "explanation": "Large in size or amount.",
@@ -1325,6 +1420,7 @@
   },
   {
     "word": "小",
+    "pinyin": "xiǎo",
     "english": "small",
     "part_of_speech": "adjective",
     "explanation": "Small in size or amount.",
@@ -1335,6 +1431,7 @@
   },
   {
     "word": "多",
+    "pinyin": "duō",
     "english": "many; much",
     "part_of_speech": "adjective",
     "explanation": "A large amount or number.",
@@ -1345,6 +1442,7 @@
   },
   {
     "word": "少",
+    "pinyin": "shǎo",
     "english": "few; little",
     "part_of_speech": "adjective",
     "explanation": "A small amount or number.",
@@ -1355,6 +1453,7 @@
   },
   {
     "word": "怎么",
+    "pinyin": "zěn me",
     "english": "how",
     "part_of_speech": "question word",
     "explanation": "Used to ask method or manner.",
@@ -1365,6 +1464,7 @@
   },
   {
     "word": "哪里",
+    "pinyin": "nǎ lǐ",
     "english": "where",
     "part_of_speech": "question word",
     "explanation": "Used to ask about place.",
@@ -1375,6 +1475,7 @@
   },
   {
     "word": "什么时候",
+    "pinyin": "shén me shí hòu",
     "english": "when",
     "part_of_speech": "question word",
     "explanation": "Used to ask about time.",
@@ -1385,6 +1486,7 @@
   },
   {
     "word": "谁",
+    "pinyin": "shuí",
     "english": "who",
     "part_of_speech": "question word",
     "explanation": "Used to ask about a person.",
@@ -1395,6 +1497,7 @@
   },
   {
     "word": "哪个",
+    "pinyin": "nǎ ge",
     "english": "which one",
     "part_of_speech": "question word",
     "explanation": "Used to choose among options.",
@@ -1405,6 +1508,7 @@
   },
   {
     "word": "几",
+    "pinyin": "jǐ",
     "english": "how many; what number",
     "part_of_speech": "question word",
     "explanation": "Used to ask small numbers or time.",
@@ -1415,6 +1519,7 @@
   },
   {
     "word": "很",
+    "pinyin": "hěn",
     "english": "very",
     "part_of_speech": "adverb",
     "explanation": "A common degree word before adjectives.",
@@ -1425,6 +1530,7 @@
   },
   {
     "word": "也",
+    "pinyin": "yě",
     "english": "also",
     "part_of_speech": "adverb",
     "explanation": "Used to say something is the same for another person or thing.",
@@ -1435,6 +1541,7 @@
   },
   {
     "word": "都",
+    "pinyin": "dōu",
     "english": "all",
     "part_of_speech": "adverb",
     "explanation": "Used for all members of a group.",
@@ -1445,6 +1552,7 @@
   },
   {
     "word": "还",
+    "pinyin": "hái",
     "english": "still; also",
     "part_of_speech": "adverb",
     "explanation": "Used for continuation or adding something.",
@@ -1455,6 +1563,7 @@
   },
   {
     "word": "就",
+    "pinyin": "jiù",
     "english": "then; just",
     "part_of_speech": "adverb",
     "explanation": "A common word for sequence, emphasis, or sooner-than-expected action.",
@@ -1465,6 +1574,7 @@
   },
   {
     "word": "但是",
+    "pinyin": "dàn shì",
     "english": "but",
     "part_of_speech": "conjunction",
     "explanation": "Used to show contrast.",
@@ -1475,6 +1585,7 @@
   },
   {
     "word": "所以",
+    "pinyin": "suǒ yǐ",
     "english": "so; therefore",
     "part_of_speech": "conjunction",
     "explanation": "Introduces a result.",
@@ -1485,6 +1596,7 @@
   },
   {
     "word": "如果",
+    "pinyin": "rú guǒ",
     "english": "if",
     "part_of_speech": "conjunction",
     "explanation": "Introduces a condition.",
@@ -1495,6 +1607,7 @@
   },
   {
     "word": "和",
+    "pinyin": "hé",
     "english": "and; with",
     "part_of_speech": "conjunction",
     "explanation": "Connects nouns or people.",
@@ -1505,6 +1618,7 @@
   },
   {
     "word": "在",
+    "pinyin": "zài",
     "english": "at; in; located at",
     "part_of_speech": "word",
     "explanation": "Used for location or ongoing action.",
@@ -1515,6 +1629,7 @@
   },
   {
     "word": "里",
+    "pinyin": "lǐ",
     "english": "inside",
     "part_of_speech": "word",
     "explanation": "Indicates inside a place or thing.",
@@ -1525,6 +1640,7 @@
   },
   {
     "word": "上",
+    "pinyin": "shàng",
     "english": "on; above",
     "part_of_speech": "word",
     "explanation": "Indicates on top of something or above.",
@@ -1535,6 +1651,7 @@
   },
   {
     "word": "下",
+    "pinyin": "xià",
     "english": "under; below",
     "part_of_speech": "word",
     "explanation": "Indicates under or below something.",
@@ -1545,6 +1662,7 @@
   },
   {
     "word": "人",
+    "pinyin": "rén",
     "english": "person; people",
     "part_of_speech": "noun",
     "explanation": "Refers to a person or people.",
@@ -1555,6 +1673,7 @@
   },
   {
     "word": "男人",
+    "pinyin": "nán rén",
     "english": "man",
     "part_of_speech": "noun",
     "explanation": "An adult male person.",
@@ -1565,6 +1684,7 @@
   },
   {
     "word": "女人",
+    "pinyin": "nǚ rén",
     "english": "woman",
     "part_of_speech": "noun",
     "explanation": "An adult female person.",
@@ -1575,6 +1695,7 @@
   },
   {
     "word": "孩子",
+    "pinyin": "hái zi",
     "english": "child",
     "part_of_speech": "noun",
     "explanation": "A young person.",
@@ -1585,6 +1706,7 @@
   },
   {
     "word": "爸爸",
+    "pinyin": "bà bà",
     "english": "dad; father",
     "part_of_speech": "noun",
     "explanation": "A casual word for father.",
@@ -1595,6 +1717,7 @@
   },
   {
     "word": "妈妈",
+    "pinyin": "mā mā",
     "english": "mom; mother",
     "part_of_speech": "noun",
     "explanation": "A casual word for mother.",
@@ -1605,6 +1728,7 @@
   },
   {
     "word": "哥哥",
+    "pinyin": "gē gē",
     "english": "older brother",
     "part_of_speech": "noun",
     "explanation": "An older male sibling.",
@@ -1615,6 +1739,7 @@
   },
   {
     "word": "姐姐",
+    "pinyin": "jiě jiě",
     "english": "older sister",
     "part_of_speech": "noun",
     "explanation": "An older female sibling.",
@@ -1625,6 +1750,7 @@
   },
   {
     "word": "弟弟",
+    "pinyin": "dì di",
     "english": "younger brother",
     "part_of_speech": "noun",
     "explanation": "A younger male sibling.",
@@ -1635,6 +1761,7 @@
   },
   {
     "word": "妹妹",
+    "pinyin": "mèi mèi",
     "english": "younger sister",
     "part_of_speech": "noun",
     "explanation": "A younger female sibling.",
@@ -1645,6 +1772,7 @@
   },
   {
     "word": "老师",
+    "pinyin": "lǎo shī",
     "english": "teacher",
     "part_of_speech": "noun",
     "explanation": "A person who teaches.",
@@ -1655,6 +1783,7 @@
   },
   {
     "word": "学生",
+    "pinyin": "xué shēng",
     "english": "student",
     "part_of_speech": "noun",
     "explanation": "A person who studies at school or in a class.",
@@ -1665,6 +1794,7 @@
   },
   {
     "word": "同事",
+    "pinyin": "tóng shì",
     "english": "coworker",
     "part_of_speech": "noun",
     "explanation": "A person who works with you.",
@@ -1675,6 +1805,7 @@
   },
   {
     "word": "房间",
+    "pinyin": "fáng jiān",
     "english": "room",
     "part_of_speech": "noun",
     "explanation": "A room inside a building.",
@@ -1685,6 +1816,7 @@
   },
   {
     "word": "厨房",
+    "pinyin": "chú fáng",
     "english": "kitchen",
     "part_of_speech": "noun",
     "explanation": "A room where people cook.",
@@ -1695,6 +1827,7 @@
   },
   {
     "word": "洗手间",
+    "pinyin": "xǐ shǒu jiān",
     "english": "restroom; bathroom",
     "part_of_speech": "noun",
     "explanation": "A restroom or bathroom.",
@@ -1705,6 +1838,7 @@
   },
   {
     "word": "门",
+    "pinyin": "mén",
     "english": "door",
     "part_of_speech": "noun",
     "explanation": "The entrance to a room or building.",
@@ -1715,6 +1849,7 @@
   },
   {
     "word": "窗户",
+    "pinyin": "chuāng hù",
     "english": "window",
     "part_of_speech": "noun",
     "explanation": "An opening with glass in a wall.",
@@ -1725,6 +1860,7 @@
   },
   {
     "word": "桌子",
+    "pinyin": "zhuō zi",
     "english": "table; desk",
     "part_of_speech": "noun",
     "explanation": "Furniture with a flat top for putting things on.",
@@ -1735,6 +1871,7 @@
   },
   {
     "word": "椅子",
+    "pinyin": "yǐ zi",
     "english": "chair",
     "part_of_speech": "noun",
     "explanation": "Furniture used for sitting.",
@@ -1745,6 +1882,7 @@
   },
   {
     "word": "书",
+    "pinyin": "shū",
     "english": "book",
     "part_of_speech": "noun",
     "explanation": "A written or printed work for reading.",
@@ -1755,6 +1893,7 @@
   },
   {
     "word": "电视",
+    "pinyin": "diàn shì",
     "english": "television",
     "part_of_speech": "noun",
     "explanation": "A device or program for watching shows.",
@@ -1765,6 +1904,7 @@
   },
   {
     "word": "电影",
+    "pinyin": "diàn yǐng",
     "english": "movie",
     "part_of_speech": "noun",
     "explanation": "A film people watch for entertainment.",
@@ -1775,6 +1915,7 @@
   },
   {
     "word": "音乐",
+    "pinyin": "yīn yuè",
     "english": "music",
     "part_of_speech": "noun",
     "explanation": "Sounds arranged for listening and enjoyment.",
@@ -1785,6 +1926,7 @@
   },
   {
     "word": "电话",
+    "pinyin": "diàn huà",
     "english": "phone call; telephone",
     "part_of_speech": "noun",
     "explanation": "A phone or a phone call.",
@@ -1795,6 +1937,7 @@
   },
   {
     "word": "消息",
+    "pinyin": "xiāo xī",
     "english": "message; news",
     "part_of_speech": "noun",
     "explanation": "Information sent or received.",
@@ -1805,6 +1948,7 @@
   },
   {
     "word": "照片",
+    "pinyin": "zhào piān",
     "english": "photo",
     "part_of_speech": "noun",
     "explanation": "A picture taken with a camera or phone.",
@@ -1815,6 +1959,7 @@
   },
   {
     "word": "钱",
+    "pinyin": "qián",
     "english": "money",
     "part_of_speech": "noun",
     "explanation": "Money used to buy things.",
@@ -1825,6 +1970,7 @@
   },
   {
     "word": "卡",
+    "pinyin": "kǎ",
     "english": "card",
     "part_of_speech": "noun",
     "explanation": "A card used for payment, access, or identification.",
@@ -1835,6 +1981,7 @@
   },
   {
     "word": "现金",
+    "pinyin": "xiàn jīn",
     "english": "cash",
     "part_of_speech": "noun",
     "explanation": "Physical money such as notes and coins.",
@@ -1845,6 +1992,7 @@
   },
   {
     "word": "票",
+    "pinyin": "piào",
     "english": "ticket",
     "part_of_speech": "noun",
     "explanation": "A ticket for transport, movies, or events.",
@@ -1855,6 +2003,7 @@
   },
   {
     "word": "机场",
+    "pinyin": "jī chǎng",
     "english": "airport",
     "part_of_speech": "noun",
     "explanation": "A place where planes arrive and leave.",
@@ -1865,6 +2014,7 @@
   },
   {
     "word": "火车",
+    "pinyin": "huǒ chē",
     "english": "train",
     "part_of_speech": "noun",
     "explanation": "A rail vehicle for travel.",
@@ -1875,6 +2025,7 @@
   },
   {
     "word": "飞机",
+    "pinyin": "fēi jī",
     "english": "airplane",
     "part_of_speech": "noun",
     "explanation": "A vehicle that flies in the air.",
@@ -1885,6 +2036,7 @@
   },
   {
     "word": "路",
+    "pinyin": "lù",
     "english": "road; way",
     "part_of_speech": "noun",
     "explanation": "A road or a route to a place.",
@@ -1895,6 +2047,7 @@
   },
   {
     "word": "左边",
+    "pinyin": "zuǒ biān",
     "english": "left side",
     "part_of_speech": "noun",
     "explanation": "The side on the left.",
@@ -1905,6 +2058,7 @@
   },
   {
     "word": "右边",
+    "pinyin": "yòu biān",
     "english": "right side",
     "part_of_speech": "noun",
     "explanation": "The side on the right.",
@@ -1915,6 +2069,7 @@
   },
   {
     "word": "前面",
+    "pinyin": "qián miàn",
     "english": "front; ahead",
     "part_of_speech": "noun",
     "explanation": "The area in front or ahead.",
@@ -1925,6 +2080,7 @@
   },
   {
     "word": "后面",
+    "pinyin": "hòu miàn",
     "english": "behind; back",
     "part_of_speech": "noun",
     "explanation": "The area behind something.",
@@ -1935,6 +2091,7 @@
   },
   {
     "word": "旁边",
+    "pinyin": "páng biān",
     "english": "beside; next to",
     "part_of_speech": "noun",
     "explanation": "The area next to something.",
@@ -1945,6 +2102,7 @@
   },
   {
     "word": "问题",
+    "pinyin": "wèn tí",
     "english": "question; problem",
     "part_of_speech": "noun",
     "explanation": "Something asked or something that needs solving.",
@@ -1955,6 +2113,7 @@
   },
   {
     "word": "事情",
+    "pinyin": "shì qíng",
     "english": "matter; thing",
     "part_of_speech": "noun",
     "explanation": "An event, matter, or thing to deal with.",
@@ -1965,6 +2124,7 @@
   },
   {
     "word": "名字",
+    "pinyin": "míng zì",
     "english": "name",
     "part_of_speech": "noun",
     "explanation": "A word used to identify a person or thing.",
@@ -1975,6 +2135,7 @@
   },
   {
     "word": "天气",
+    "pinyin": "tiān qì",
     "english": "weather",
     "part_of_speech": "noun",
     "explanation": "The condition outside, such as hot, cold, rain, or sun.",
@@ -1985,6 +2146,7 @@
   },
   {
     "word": "雨",
+    "pinyin": "yǔ",
     "english": "rain",
     "part_of_speech": "noun",
     "explanation": "Water falling from the sky.",
@@ -1995,6 +2157,7 @@
   },
   {
     "word": "太阳",
+    "pinyin": "tài yáng",
     "english": "sun",
     "part_of_speech": "noun",
     "explanation": "The bright star that gives light during the day.",
@@ -2005,6 +2168,7 @@
   },
   {
     "word": "药",
+    "pinyin": "yào",
     "english": "medicine",
     "part_of_speech": "noun",
     "explanation": "Something taken to treat illness.",
@@ -2015,6 +2179,7 @@
   },
   {
     "word": "身体",
+    "pinyin": "shēn tǐ",
     "english": "body; health",
     "part_of_speech": "noun",
     "explanation": "The body or general health.",
@@ -2025,6 +2190,7 @@
   },
   {
     "word": "生病",
+    "pinyin": "shēng bìng",
     "english": "to get sick; sick",
     "part_of_speech": "verb",
     "explanation": "To become ill or be sick.",

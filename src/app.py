@@ -58,6 +58,10 @@ def split_example(example):
     return chinese_text, translation
 
 
+def to_speech_text(text):
+    return re.sub(r"[\"'‘’“”「」『』]", "", text).strip()
+
+
 def load_dictionary():
     with DICTIONARY_PATH.open(encoding="utf-8") as dictionary_file:
         raw_entries = json.load(dictionary_file)
@@ -74,6 +78,7 @@ def load_dictionary():
             structured_examples.append(
                 {
                     "text": chinese_text,
+                    "speech_text": to_speech_text(chinese_text),
                     "pinyin": to_sentence_pinyin(chinese_text),
                     "translation": translation,
                 }
@@ -295,6 +300,7 @@ def fetch_ai_explanation(query):
         examples.append(
             {
                 "text": text,
+                "speech_text": to_speech_text(text),
                 "pinyin": to_sentence_pinyin(text),
                 "translation": translation,
             }

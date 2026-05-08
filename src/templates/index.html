@@ -18,7 +18,7 @@
                     class="hero-logo"
                 >
                 <div class="hero-copy">
-                    <p class="eyebrow">v3.1</p>
+                    <p class="eyebrow">v3.1.1</p>
                     <h1>Mandarin Learning Assistant</h1>
                     <p class="hero-credit">© 2026 Yuchi</p>
                 </div>
@@ -109,7 +109,7 @@
                                     <button
                                         type="button"
                                         class="audio-button sentence-audio"
-                                        data-speak="{{ sentence.text }}"
+                                        data-speak="{{ sentence.speech_text }}"
                                         aria-label="Play sentence audio"
                                         title="Play sentence audio"
                                     >
@@ -252,7 +252,7 @@
                     <button
                         type="button"
                         class="audio-button sentence-audio"
-                        data-speak="${escapeHtml(sentence.text)}"
+                        data-speak="${escapeHtml(sentence.speech_text || sentence.text)}"
                         aria-label="Play sentence audio"
                         title="Play sentence audio"
                     >

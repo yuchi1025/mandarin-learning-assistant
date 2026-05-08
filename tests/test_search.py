@@ -23,3 +23,11 @@ def test_partial_search_still_works():
 
 def test_punctuation_only_query_returns_no_results():
     assert words_for("!!!") == []
+
+
+def test_example_audio_text_omits_quote_marks():
+    result = mandarin_app.search_entries("nǐ hǎo")[0]
+    speech_texts = [example["speech_text"] for example in result["examples"]]
+
+    assert "老师说：你好，同学们。" in speech_texts
+    assert all("'" not in text and '"' not in text for text in speech_texts)
