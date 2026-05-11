@@ -89,9 +89,11 @@ If the result comes from AI:
   - in-memory cache
 - `src/templates/index.html`
   - UI for search and quiz modes
+- `src/static/app.js`
   - browser audio controls
   - client-side quiz interaction
   - async AI loading
+  - recent searches
 - `src/static/style.css`
   - layout and styling
 - `data/dictionary.json`
@@ -99,7 +101,7 @@ If the result comes from AI:
 - `scripts/validate_dictionary.py`
   - validates required dictionary fields, examples, duplicates, and optional expected count
 - `tests/`
-  - pytest coverage for dictionary quality, search behavior, and Flask routes
+  - pytest coverage for dictionary quality, search behavior, Flask routes, and static asset loading
 - `assets/screenshots/`
   - Search Mode, Search Result, and Quiz Mode screenshots for documentation/demo use
 - `assets/demo/`

@@ -65,7 +65,7 @@ The demo video shows a visible cursor performing Chinese search, English search,
 
 - `HTML` for page structure
 - `CSS` for layout, responsive styling, cards, buttons, loading state, and quiz feedback
-- `Vanilla JavaScript` for audio controls, recent searches, async AI loading, and client-side quiz interaction
+- Vanilla `JavaScript` for audio controls, recent searches, async AI loading, and client-side quiz interaction
 - `Browser Speech Synthesis API` for Mandarin word and sentence pronunciation
 
 ### Backend components:
@@ -147,7 +147,7 @@ The demo video shows a visible cursor performing Chinese search, English search,
   - Versioning And Git:
     - “What is the progress compared to v3?”
     - “Since we are in v3.1.1, update all files to be consistent.”
-    - “Git push.”
+    - “Git push to https://github.com/yuchi1025/mandarin-learning-assistant.”
 - Key review points and corresponding decisions made:
 
   | Review Point | Decision Made |
@@ -244,7 +244,7 @@ Run the automated tests:
 python3 -m pytest
 ```
 
-The current `13`-test suite covers dictionary quality, consistent dictionary field order, tone-marked dictionary pinyin, exact search behavior, partial search behavior, punctuation-only input, basic Flask routes, invalid AI endpoint input, and cleaned sentence-audio text.
+The current `14`-test suite covers dictionary quality, consistent dictionary field order, tone-marked dictionary pinyin, exact search behavior, partial search behavior, punctuation-only input, basic Flask routes, static JavaScript loading, invalid AI endpoint input, and cleaned sentence-audio text.
 
 ---
 
@@ -298,6 +298,7 @@ mandarin-learning-assistant/
 │   ├── templates/
 │   │   └── index.html
 │   └── static/
+│       ├── app.js
 │       └── style.css
 ├── tests/
 │   ├── conftest.py
@@ -327,9 +328,10 @@ Key folders and files:
 
 - `src/` contains the main Flask app and frontend source files.
 - `src/app.py` contains Flask routes, dictionary loading, search logic, quiz logic, Ollama fallback, the async AI endpoint, and in-memory AI caching.
-- `src/templates/index.html` contains the Search Mode and Quiz Mode page, including Vanilla JavaScript for audio, recent searches, AI loading, and quiz interaction.
+- `src/templates/index.html` contains the Search Mode and Quiz Mode page structure.
 - `src/static/style.css` contains layout, card, quiz, loading, and branding styles.
-- `tests/` contains pytest coverage for dictionary quality, consistent field order, tone-marked pinyin, search behavior, Flask routes, and cleaned sentence-audio text.
+- `src/static/app.js` contains Vanilla JavaScript for audio, recent searches, async AI loading, and quiz interaction.
+- `tests/` contains pytest coverage for dictionary quality, consistent field order, tone-marked pinyin, search behavior, Flask routes, static JavaScript loading, and cleaned sentence-audio text.
 - `docs/VERSION_NOTES.md` records the project progress from v0 to v3.1.1.
 - `scripts/validate_dictionary.py` validates the 200-entry dictionary, required fields, consistent field order, duplicate words, examples, and tone-marked pinyin.
 - `assets/logo/` contains the product banner, app icon, and favicon source.

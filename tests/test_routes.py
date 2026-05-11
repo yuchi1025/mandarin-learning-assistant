@@ -10,6 +10,15 @@ def test_home_page_loads():
     assert b"Mandarin Learning Assistant" in response.data
 
 
+def test_static_app_js_loads():
+    client = mandarin_app.app.test_client()
+
+    response = client.get("/static/app.js")
+
+    assert response.status_code == 200
+    assert b"function speakMandarin" in response.data
+
+
 def test_search_post_renders_result():
     client = mandarin_app.app.test_client()
 
