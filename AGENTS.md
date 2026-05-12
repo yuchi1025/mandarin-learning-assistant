@@ -74,7 +74,9 @@ If the result comes from AI:
   - the same question stays on screen so the user can try again
 - If the user later clicks the correct answer, it turns green and advances to the next quiz.
 - Recent quiz words are avoided for a few rounds to reduce repetition.
-- AI-learned words can be added into the quiz pool after successful lookup.
+- Successful AI fallback search results can be added into the quiz pool for the current server session.
+- Switching between Search Mode and Quiz Mode should preserve AI-learned quiz words.
+- Browser refresh, close, or external navigation should clear AI-learned quiz words through `/api/clear-ai-cache` and clear recent searches from `localStorage`.
 
 ## Main Files
 

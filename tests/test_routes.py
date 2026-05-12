@@ -35,3 +35,46 @@ def test_ai_endpoint_rejects_punctuation_only_query():
 
     assert response.status_code == 400
     assert response.get_json()["ok"] is False
+
+
+def test_quiz_entries_include_ai_cache_results():
+    mandarin_app.AI_EXPLANATION_CACHE["lion"] = (
+        {
+            "word": "狮子",
+            "pinyin": "shī zi",
+            "english": "lion",
+            "part_of_speech": "noun",
+            "explanation": "A large wild animal.",
+            "examples": [],
+        },
+        None,
+    )
+
+    try:
+        quiz_words = [entry["word"] for entry in mandarin_app.get_quiz_entries()]
+    finally:
+        mandarin_app.AI_EXPLANATION_CACHE.clear()
+
+    assert "狮子" in quiz_words
+
+
+def test_clear_ai_cache_endpoint_removes_ai_quiz_words():
+    client = mandarin_app.app.test_client()
+    mandarin_app.AI_EXPLANATION_CACHE["lion"] = (
+        {
+            "word": "狮子",
+            "pinyin": "shī zi",
+            "english": "lion",
+            "part_of_speech": "noun",
+            "explanation": "A large wild animal.",
+            "examples": [],
+        },
+        None,
+    )
+
+    response = client.post("/api/clear-ai-cache")
+
+    assert response.status_code == 200
+    assert response.get_json()["ok"] is True
+    assert mandarin_app.AI_EXPLANATION_CACHE == {}
+    assert "狮子" not in [entry["word"] for entry in mandarin_app.get_quiz_entries()]

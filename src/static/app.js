@@ -1,3 +1,49 @@
+const INTERNAL_NAVIGATION_KEY = "mandarin_internal_navigation";
+const RECENT_SEARCHES_KEY = "mandarin_recent_searches";
+
+function markInternalNavigation() {
+    window.sessionStorage.setItem(INTERNAL_NAVIGATION_KEY, "true");
+}
+
+function shouldClearAiCacheOnExit() {
+    const isInternalNavigation = window.sessionStorage.getItem(INTERNAL_NAVIGATION_KEY) === "true";
+    if (isInternalNavigation) {
+        window.sessionStorage.removeItem(INTERNAL_NAVIGATION_KEY);
+        return false;
+    }
+    return true;
+}
+
+function clearSessionDataOnExit() {
+    if (!shouldClearAiCacheOnExit()) {
+        return;
+    }
+
+    window.localStorage.removeItem(RECENT_SEARCHES_KEY);
+    clearAiCache();
+}
+
+function clearAiCache() {
+    if (navigator.sendBeacon) {
+        navigator.sendBeacon("/api/clear-ai-cache", new Blob([], { type: "application/json" }));
+        return;
+    }
+
+    fetch("/api/clear-ai-cache", {
+        method: "POST",
+        keepalive: true,
+    }).catch(function () {});
+}
+
+function isRefreshNavigation() {
+    const navigationEntries = performance.getEntriesByType("navigation");
+    if (navigationEntries.length) {
+        return navigationEntries[0].type === "reload";
+    }
+
+    return performance.navigation && performance.navigation.type === performance.navigation.TYPE_RELOAD;
+}
+
 function speakMandarin(text) {
     if (!window.speechSynthesis) {
         window.alert("Your browser does not support built-in audio playback.");
@@ -158,14 +204,14 @@ function loadAiResult() {
 
 function getRecentSearches() {
     try {
-        return JSON.parse(window.localStorage.getItem("mandarin_recent_searches") || "[]");
+        return JSON.parse(window.localStorage.getItem(RECENT_SEARCHES_KEY) || "[]");
     } catch {
         return [];
     }
 }
 
 function setRecentSearches(items) {
-    window.localStorage.setItem("mandarin_recent_searches", JSON.stringify(items));
+    window.localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(items));
 }
 
 function saveRecentSearch(query) {
@@ -187,6 +233,7 @@ function runSearch(query) {
         return;
     }
     input.value = query;
+    markInternalNavigation();
     form.submit();
 }
 
@@ -263,9 +310,11 @@ function bindQuizOptions() {
                     recentWords.concat([currentWord]).slice(-5).forEach(function (word) {
                         params.append("recent_word", word);
                     });
+                    markInternalNavigation();
                     window.location.href = nextUrl + "&" + params.toString().replace(/^mode=quiz&?/, "");
                 }, 220);
             } else {
+                markInternalNavigation();
                 quizForm.submit();
             }
         });
@@ -281,10 +330,24 @@ function focusSearchInput() {
 }
 
 window.addEventListener("load", function () {
+    const isRefresh = isRefreshNavigation();
+    if (isRefresh) {
+        window.localStorage.removeItem(RECENT_SEARCHES_KEY);
+        clearAiCache();
+    }
+
     const input = document.getElementById("search-input");
-    if (input && input.value.trim()) {
+    if (input && input.value.trim() && !isRefresh) {
         saveRecentSearch(input.value);
     }
+
+    document.querySelectorAll("form").forEach(function (form) {
+        form.addEventListener("submit", markInternalNavigation);
+    });
+
+    document.querySelectorAll("a[href]").forEach(function (link) {
+        link.addEventListener("click", markInternalNavigation);
+    });
 
     focusSearchInput();
     bindAudioButtons();
@@ -292,3 +355,5 @@ window.addEventListener("load", function () {
     renderRecentSearches();
     loadAiResult();
 });
+
+window.addEventListener("pagehide", clearSessionDataOnExit);

@@ -484,6 +484,12 @@ def ai_explanation():
     return jsonify({"ok": True, "result": result})
 
 
+@app.post("/api/clear-ai-cache")
+def clear_ai_cache():
+    AI_EXPLANATION_CACHE.clear()
+    return jsonify({"ok": True})
+
+
 @app.get("/assets/<path:filename>")
 def asset_file(filename):
     return send_from_directory(ASSETS_DIR, filename)

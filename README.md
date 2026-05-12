@@ -244,7 +244,7 @@ Run the automated tests:
 python3 -m pytest
 ```
 
-The current `14`-test suite covers dictionary quality, consistent dictionary field order, tone-marked dictionary pinyin, exact search behavior, partial search behavior, punctuation-only input, basic Flask routes, static JavaScript loading, invalid AI endpoint input, and cleaned sentence-audio text.
+The current `16`-test suite covers dictionary quality, consistent dictionary field order, tone-marked dictionary pinyin, exact search behavior, partial search behavior, punctuation-only input, basic Flask routes, static JavaScript loading, invalid AI endpoint input, AI-learned quiz entries, AI cache cleanup, and cleaned sentence-audio text.
 
 ---
 
@@ -276,11 +276,15 @@ How to use the project.
   - Recent Searches:
     - Recent searches appear after successful searches
     - Clicking a recent search chip runs that search again
+    - Refreshing or closing the browser page clears recent searches
   - Quiz Mode:
     - A wrong quiz answer shows feedback while keeping the same question available
     - A correct quiz answer advances to the next quiz after a short delay
   - Session behaviour:
-    - AI-learned quiz words are session-only because they come from in-memory cache, not persistent storage
+    - Successful AI fallback searches can be practised in Quiz Mode during the same server session
+    - Switching between Search Mode and Quiz Mode keeps AI-learned quiz words available
+    - Refreshing or closing the browser page clears AI-learned quiz words from the server cache and clears recent searches
+    - AI-learned quiz words are temporary because they come from in-memory cache, not persistent storage
 
 ---
 
@@ -373,6 +377,6 @@ Key folders and files:
   | Added logo and copyright branding. | The app should feel like a personal learning product rather than an unfinished code exercise. |
 - Remaining limitations:
   - The app is a local prototype and has not been publicly deployed.
-  - AI-learned words are stored only in memory, so they disappear when the server restarts.
+  - AI fallback explanations are cached only in memory, so they disappear when the server restarts.
   - Audio quality depends on the browser or operating system speech synthesis voice.
   - The dictionary is useful for a prototype but would need more review before production use.
