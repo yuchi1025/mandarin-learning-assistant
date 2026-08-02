@@ -204,13 +204,13 @@ Optional Ollama setup:
 
 https://ollama.com/download
 
-2. Start Ollama.
-
-3. Pull the default model:
+2. Pull the default model:
 
 ```bash
 ollama pull gemma3
 ```
+
+The Flask app starts `ollama serve` automatically when the web app opens and Ollama is not already running.
 
 Optional environment variables:
 
@@ -218,7 +218,10 @@ Optional environment variables:
 export OLLAMA_URL=http://localhost:11434/api/chat
 export OLLAMA_MODEL=gemma3
 export OLLAMA_KEEP_ALIVE=15m
+export OLLAMA_AUTO_START=1
 ```
+
+Set `OLLAMA_AUTO_START=0` if you prefer to manage Ollama yourself.
 
 The app still runs without Ollama. In that case, built-in dictionary lookup and quiz mode work normally, while unknown-word AI fallback returns an unavailable message.
 

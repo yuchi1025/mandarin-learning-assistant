@@ -32,44 +32,81 @@
             <a href="{{ url_for('home', mode='search') }}" class="{% if mode == 'search' %}active{% endif %}">
                 Search Mode
             </a>
+            <a href="{{ url_for('home', mode='batch') }}" class="{% if mode == 'batch' %}active{% endif %}">
+                Batch Mode
+            </a>
             <a href="{{ url_for('home', mode='quiz') }}" class="{% if mode == 'quiz' %}active{% endif %}">
                 Quiz Mode
             </a>
         </nav>
 
-        {% if mode == 'search' %}
+        {% if mode == 'search' or mode == 'batch' %}
             <section class="search-panel">
-                <form method="post" class="search-form" id="search-form">
-                    <input type="hidden" name="form_type" value="search">
-                    <input
-                        id="search-input"
-                        type="text"
-                        name="query"
-                        placeholder="Try: 你好, xue xi, or friend"
-                        value="{{ query }}"
-                        required
-                    >
-                    <button type="submit">Search</button>
-                </form>
+                {% if mode == 'batch' %}
+                    <form method="post" class="batch-search-form" id="batch-search-form">
+                        <input type="hidden" name="form_type" value="batch">
+                        <textarea
+                            id="batch-search-input"
+                            name="query"
+                            placeholder="Try one per line:&#10;你好&#10;airport&#10;xue xi"
+                            required
+                        >{{ query }}</textarea>
+                        <button type="submit">Search All</button>
+                    </form>
+                {% else %}
+                    <form method="post" class="search-form" id="search-form">
+                        <input type="hidden" name="form_type" value="search">
+                        <input
+                            id="search-input"
+                            type="text"
+                            name="query"
+                            placeholder="Try: 你好, xue xi, or friend"
+                            value="{{ query }}"
+                            required
+                        >
+                        <button type="submit">Search</button>
+                    </form>
+                {% endif %}
             </section>
 
-            <section class="recent-searches" id="recent-searches" hidden>
-                <div class="recent-header">
-                    <h2>Recent Searches</h2>
-                    <button type="button" class="clear-recent-button" id="clear-recent-searches">Clear</button>
-                </div>
-                <div class="recent-search-list" id="recent-search-list"></div>
-            </section>
+            {% if mode == 'search' %}
+                <section class="recent-searches" id="recent-searches" hidden>
+                    <div class="recent-header">
+                        <h2>Recent Searches</h2>
+                        <button type="button" class="clear-recent-button" id="clear-recent-searches">Clear</button>
+                    </div>
+                    <div class="recent-search-list" id="recent-search-list"></div>
+                </section>
+            {% endif %}
 
             <p class="audio-status" id="audio-status" hidden></p>
 
-            {% if query and not results and not ai_pending %}
+            {% if mode == 'batch' and batch_missing %}
+                <section class="batch-missing">
+                    <div class="recent-header">
+                        <h2>No Match</h2>
+                    </div>
+                    <div class="recent-search-list">
+                        {% for missing_query in batch_missing %}
+                            <span class="missing-chip">{{ missing_query }}</span>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
+            {% if mode == 'search' and query and not results and not ai_pending %}
                 <section class="empty-state">
                     <p>No results found for "<strong>{{ query }}</strong>". Try another word.</p>
                 </section>
             {% endif %}
 
-            {% if ai_pending %}
+            {% if mode == 'batch' and query and not results %}
+                <section class="empty-state">
+                    <p>No matching dictionary cards found.</p>
+                </section>
+            {% endif %}
+
+            {% if mode == 'search' and ai_pending %}
                 <section class="result-card ai-result-card ai-loading-card" id="ai-result-card" data-ai-query="{{ query }}">
                     <div class="ai-loading-shell">
                         <div class="ai-spinner" aria-hidden="true"></div>

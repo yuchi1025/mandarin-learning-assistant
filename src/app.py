@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 import unicodedata
 import urllib.error
+import urllib.parse
 import urllib.request
 
 from flask import after_this_request, Flask, jsonify, render_template, request, send_file, send_from_directory
@@ -18,9 +19,12 @@ RECENT_QUIZ_LIMIT = 5
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/chat")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma3")
 OLLAMA_KEEP_ALIVE = os.getenv("OLLAMA_KEEP_ALIVE", "15m")
+OLLAMA_COMMAND = os.getenv("OLLAMA_COMMAND", "ollama")
+OLLAMA_AUTO_START = os.getenv("OLLAMA_AUTO_START", "1").lower() not in {"0", "false", "no"}
 TTS_VOICE = os.getenv("TTS_VOICE", "Tingting")
 TTS_COMMAND = os.getenv("TTS_COMMAND", "/usr/bin/say")
 AI_EXPLANATION_CACHE = {}
+OLLAMA_START_ATTEMPTED = False
 VALID_PARTS_OF_SPEECH = {
     "noun",
     "verb",
@@ -39,10 +43,32 @@ VALID_PARTS_OF_SPEECH = {
 
 
 DICTIONARY_PATH = Path(__file__).resolve().parent.parent / "data" / "dictionary.json"
+PINYIN_PHRASE_OVERRIDES = {
+    "不记得": "bú jì dé",
+    "不記得": "bú jì dé",
+    "记得": "jì dé",
+    "記得": "jì dé",
+}
+PINYIN_OVERRIDE_PHRASES = sorted(PINYIN_PHRASE_OVERRIDES, key=len, reverse=True)
 
 
 def to_sentence_pinyin(text):
-    pinyin_text = " ".join(lazy_pinyin(text, style=Style.TONE))
+    pinyin_parts = []
+    index = 0
+    while index < len(text):
+        matched_phrase = next(
+            (phrase for phrase in PINYIN_OVERRIDE_PHRASES if text.startswith(phrase, index)),
+            None,
+        )
+        if matched_phrase:
+            pinyin_parts.append(PINYIN_PHRASE_OVERRIDES[matched_phrase])
+            index += len(matched_phrase)
+            continue
+
+        pinyin_parts.extend(lazy_pinyin(text[index], style=Style.TONE))
+        index += 1
+
+    pinyin_text = " ".join(pinyin_parts)
     return re.sub(r"\s+([,.!?;:，。！？；：])", r"\1", pinyin_text)
 
 
@@ -107,6 +133,122 @@ def load_dictionary():
 
 
 DICTIONARY_ENTRIES = load_dictionary()
+
+COMMON_TRADITIONAL_TO_SIMPLIFIED_CHARS = {
+    "樣": "样",
+}
+COMMON_SIMPLIFIED_TO_TRADITIONAL_CHARS = {
+    "业": "業",
+    "样": "樣",
+}
+
+
+def build_script_maps(entries):
+    traditional_to_simplified = {}
+    simplified_to_traditional = {}
+    traditional_char_to_simplified = dict(COMMON_TRADITIONAL_TO_SIMPLIFIED_CHARS)
+    simplified_char_to_traditional = dict(COMMON_SIMPLIFIED_TO_TRADITIONAL_CHARS)
+
+    for entry in entries:
+        word = entry["word"]
+        traditional = entry["traditional"]
+        traditional_to_simplified[traditional] = word
+        simplified_to_traditional[word] = traditional
+        if len(word) == len(traditional):
+            for simplified_char, traditional_char in zip(word, traditional):
+                if simplified_char != traditional_char:
+                    traditional_char_to_simplified.setdefault(traditional_char, simplified_char)
+                    simplified_char_to_traditional.setdefault(simplified_char, traditional_char)
+
+    return (
+        traditional_to_simplified,
+        simplified_to_traditional,
+        traditional_char_to_simplified,
+        simplified_char_to_traditional,
+    )
+
+
+(
+    TRADITIONAL_TO_SIMPLIFIED,
+    SIMPLIFIED_TO_TRADITIONAL,
+    TRADITIONAL_CHAR_TO_SIMPLIFIED,
+    SIMPLIFIED_CHAR_TO_TRADITIONAL,
+) = build_script_maps(DICTIONARY_ENTRIES)
+
+
+def simplify_known_traditional_text(text):
+    if text in TRADITIONAL_TO_SIMPLIFIED:
+        return TRADITIONAL_TO_SIMPLIFIED[text]
+    return "".join(TRADITIONAL_CHAR_TO_SIMPLIFIED.get(char, char) for char in text)
+
+
+def traditionalize_known_simplified_text(text):
+    if text in SIMPLIFIED_TO_TRADITIONAL:
+        return SIMPLIFIED_TO_TRADITIONAL[text]
+    return "".join(SIMPLIFIED_CHAR_TO_TRADITIONAL.get(char, char) for char in text)
+
+
+def normalize_ai_word_forms(query, word, traditional):
+    word = word.strip()
+    traditional = traditional.strip() or word
+
+    if word in TRADITIONAL_TO_SIMPLIFIED:
+        traditional = word
+        word = TRADITIONAL_TO_SIMPLIFIED[word]
+    elif word in SIMPLIFIED_TO_TRADITIONAL:
+        traditional = SIMPLIFIED_TO_TRADITIONAL[word]
+    elif word == traditional and contains_chinese(word):
+        simplified_word = simplify_known_traditional_text(word)
+        if simplified_word != word:
+            traditional = word
+            word = simplified_word
+        else:
+            traditional_word = traditionalize_known_simplified_text(word)
+            if traditional_word != word:
+                traditional = traditional_word
+
+    if query.strip() in TRADITIONAL_TO_SIMPLIFIED and word == query.strip():
+        traditional = query.strip()
+        word = TRADITIONAL_TO_SIMPLIFIED[query.strip()]
+
+    return word, traditional
+
+
+def get_ollama_health_url():
+    parsed_url = urllib.parse.urlparse(OLLAMA_URL)
+    if not parsed_url.scheme or not parsed_url.netloc:
+        return "http://localhost:11434/api/tags"
+    return urllib.parse.urlunparse((parsed_url.scheme, parsed_url.netloc, "/api/tags", "", "", ""))
+
+
+def is_ollama_running():
+    try:
+        with urllib.request.urlopen(get_ollama_health_url(), timeout=0.5):
+            return True
+    except (OSError, TimeoutError, urllib.error.URLError):
+        return False
+
+
+def ensure_ollama_started():
+    global OLLAMA_START_ATTEMPTED
+
+    if not OLLAMA_AUTO_START or OLLAMA_START_ATTEMPTED or is_ollama_running():
+        return
+
+    OLLAMA_START_ATTEMPTED = True
+    try:
+        subprocess.Popen(
+            [OLLAMA_COMMAND, "serve"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except FileNotFoundError:
+        return
+
+
+@app.before_request
+def auto_start_ollama():
+    ensure_ollama_started()
 
 
 def search_entries(query):
@@ -192,6 +334,44 @@ def search_entries(query):
 
     scored_matches.sort(key=lambda item: item[0])
     return [entry for _, entry in scored_matches]
+
+
+def split_batch_queries(text):
+    queries = []
+    seen = set()
+    for raw_query in re.split(r"[\n,;，；]+", text):
+        query = raw_query.strip()
+        query_key = normalize_query_key(query)
+        if not query or query_key in seen:
+            continue
+        queries.append(query)
+        seen.add(query_key)
+    return queries
+
+
+def batch_search_entries(text):
+    results = []
+    missing_queries = []
+    seen_words = set()
+
+    for query in split_batch_queries(text):
+        matches = search_entries(query)
+        if not matches:
+            missing_queries.append(query)
+            continue
+
+        added_match = False
+        for entry in matches:
+            if entry["word"] in seen_words:
+                continue
+            results.append(entry)
+            seen_words.add(entry["word"])
+            added_match = True
+
+        if not added_match:
+            missing_queries.append(query)
+
+    return results, missing_queries
 
 
 def is_meaningful_query(query):
@@ -318,10 +498,15 @@ def fetch_ai_explanation(query):
             }
         )
 
+    word = parsed.get("word", query).strip() or query
+    traditional = parsed.get("traditional", word).strip() or word
+    word, traditional = normalize_ai_word_forms(query, word, traditional)
+    pinyin = to_sentence_pinyin(word) if contains_chinese(word) else parsed.get("pinyin", "").strip()
+
     ai_result = {
-        "word": parsed.get("word", query).strip() or query,
-        "traditional": parsed.get("traditional", parsed.get("word", query)).strip() or parsed.get("word", query).strip() or query,
-        "pinyin": parsed.get("pinyin", "").strip(),
+        "word": word,
+        "traditional": traditional,
+        "pinyin": pinyin,
         "english": parsed.get("english", "").strip(),
         "part_of_speech": normalize_part_of_speech(parsed.get("part_of_speech", "word")),
         "explanation": parsed.get("explanation", "").strip() or "No explanation available.",
@@ -340,7 +525,8 @@ def get_ai_explanation(query):
         return AI_EXPLANATION_CACHE[cache_key]
 
     result = fetch_ai_explanation(query)
-    AI_EXPLANATION_CACHE[cache_key] = result
+    if result[0] and not result[1]:
+        AI_EXPLANATION_CACHE[cache_key] = result
     return result
 
 
@@ -438,6 +624,7 @@ def home():
     recent_words = request.args.getlist("recent_word")
     query = ""
     results = []
+    batch_missing = []
     ai_pending = False
     quiz = build_quiz(recent_words=recent_words)
     quiz_feedback = None
@@ -451,6 +638,10 @@ def home():
             results = search_entries(query)
             if not results and is_meaningful_query(query):
                 ai_pending = True
+        elif form_type == "batch":
+            mode = "batch"
+            query = request.form.get("query", "")
+            results, batch_missing = batch_search_entries(query)
         elif form_type == "quiz":
             mode = "quiz"
             query = request.form.get("query", "")
@@ -478,6 +669,7 @@ def home():
         mode=mode,
         query=query,
         results=results,
+        batch_missing=batch_missing,
         ai_pending=ai_pending,
         quiz=quiz,
         quiz_feedback=quiz_feedback,

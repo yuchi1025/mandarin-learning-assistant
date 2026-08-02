@@ -53,6 +53,36 @@ def test_search_post_renders_result():
     assert "机场".encode("utf-8") in response.data
 
 
+def test_batch_search_post_renders_multiple_cards():
+    client = mandarin_app.app.test_client()
+
+    response = client.post("/", data={"form_type": "batch", "query": "airport\nfriend\nxue xi"})
+
+    assert response.status_code == 200
+    assert "机场".encode("utf-8") in response.data
+    assert "朋友".encode("utf-8") in response.data
+    assert "学习".encode("utf-8") in response.data
+    assert b"Batch Mode" in response.data
+
+
+def test_batch_search_deduplicates_queries_and_shows_missing_terms():
+    client = mandarin_app.app.test_client()
+
+    response = client.post("/", data={"form_type": "batch", "query": "airport, airport\nnotarealword"})
+
+    assert response.status_code == 200
+    assert "机场".encode("utf-8") in response.data
+    assert b"No Match" in response.data
+    assert b"notarealword" in response.data
+
+
+def test_batch_search_entries_deduplicates_result_cards():
+    results, missing_queries = mandarin_app.batch_search_entries("airport, airport")
+
+    assert [entry["word"] for entry in results] == ["机场"]
+    assert missing_queries == []
+
+
 def test_ai_endpoint_rejects_punctuation_only_query():
     client = mandarin_app.app.test_client()
 
@@ -76,11 +106,16 @@ def test_ai_result_accepts_traditional_query_match():
     assert mandarin_app.validate_ai_result("學習", result) is True
 
 
+def test_sentence_pinyin_uses_phrase_override_for_jide():
+    assert mandarin_app.to_sentence_pinyin("我不记得他的名字。") == "wǒ bú jì dé tā de míng zì。"
+    assert mandarin_app.to_sentence_pinyin("我不記得他的名字。") == "wǒ bú jì dé tā de míng zì。"
+
+
 def test_ai_explanation_includes_traditional_form(monkeypatch):
     response_payload = {
         "message": {
             "content": (
-                '{"word":"学习","traditional":"學習","pinyin":"xué xí",'
+                '{"word":"学习","traditional":"學習","pinyin":"wrong pinyin",'
                 '"english":"to study","part_of_speech":"verb",'
                 '"explanation":"To learn or study something.",'
                 '"examples":[{"text":"我学习中文。","translation":"I study Chinese."}]}'
@@ -98,6 +133,100 @@ def test_ai_explanation_includes_traditional_form(monkeypatch):
     assert error is None
     assert result["word"] == "学习"
     assert result["traditional"] == "學習"
+    assert result["pinyin"] == "xué xí"
+
+
+def test_ai_explanation_simplifies_duplicate_traditional_word(monkeypatch):
+    response_payload = {
+        "message": {
+            "content": (
+                '{"word":"學習","traditional":"學習","pinyin":"wrong pinyin",'
+                '"english":"to study","part_of_speech":"verb",'
+                '"explanation":"To learn or study something.",'
+                '"examples":[{"text":"我学习中文。","translation":"I study Chinese."}]}'
+            )
+        }
+    }
+
+    def fake_urlopen(request, timeout):
+        return FakeUrlopenResponse(mandarin_app.json.dumps(response_payload).encode("utf-8"))
+
+    monkeypatch.setattr(mandarin_app.urllib.request, "urlopen", fake_urlopen)
+
+    result, error = mandarin_app.fetch_ai_explanation("學習")
+
+    assert error is None
+    assert result["word"] == "学习"
+    assert result["traditional"] == "學習"
+    assert result["pinyin"] == "xué xí"
+
+
+def test_normalize_ai_word_forms_simplifies_known_traditional_characters():
+    word, traditional = mandarin_app.normalize_ai_word_forms("不一樣", "不一樣", "不一樣")
+
+    assert word == "不一样"
+    assert traditional == "不一樣"
+
+
+def test_normalize_ai_word_forms_traditionalizes_known_simplified_characters():
+    word, traditional = mandarin_app.normalize_ai_word_forms("homework", "作业", "作业")
+
+    assert word == "作业"
+    assert traditional == "作業"
+
+
+def test_ai_explanation_does_not_cache_errors(monkeypatch):
+    monkeypatch.setattr(mandarin_app, "fetch_ai_explanation", lambda query: (None, "temporary error"))
+    mandarin_app.AI_EXPLANATION_CACHE.clear()
+
+    result, error = mandarin_app.get_ai_explanation("homework")
+
+    assert result is None
+    assert error == "temporary error"
+    assert mandarin_app.AI_EXPLANATION_CACHE == {}
+
+
+def test_ollama_health_url_uses_configured_host(monkeypatch):
+    monkeypatch.setattr(mandarin_app, "OLLAMA_URL", "http://127.0.0.1:11434/api/chat")
+
+    assert mandarin_app.get_ollama_health_url() == "http://127.0.0.1:11434/api/tags"
+
+
+def test_ensure_ollama_started_skips_when_disabled(monkeypatch):
+    started_commands = []
+
+    def fake_popen(command, stdout, stderr):
+        started_commands.append(command)
+        return FakePopen(command, stdout, stderr)
+
+    monkeypatch.setattr(mandarin_app, "OLLAMA_AUTO_START", False)
+    monkeypatch.setattr(mandarin_app, "OLLAMA_START_ATTEMPTED", False)
+    monkeypatch.setattr(mandarin_app, "is_ollama_running", lambda: False)
+    monkeypatch.setattr(mandarin_app.subprocess, "Popen", fake_popen)
+
+    mandarin_app.ensure_ollama_started()
+
+    assert started_commands == []
+    assert mandarin_app.OLLAMA_START_ATTEMPTED is False
+
+
+def test_ensure_ollama_started_launches_server(monkeypatch):
+    started_commands = []
+
+    def fake_popen(command, stdout, stderr):
+        started_commands.append(command)
+        return FakePopen(command, stdout, stderr)
+
+    monkeypatch.setattr(mandarin_app, "OLLAMA_AUTO_START", True)
+    monkeypatch.setattr(mandarin_app, "OLLAMA_START_ATTEMPTED", False)
+    monkeypatch.setattr(mandarin_app, "OLLAMA_COMMAND", "ollama")
+    monkeypatch.setattr(mandarin_app, "is_ollama_running", lambda: False)
+    monkeypatch.setattr(mandarin_app.subprocess, "Popen", fake_popen)
+
+    mandarin_app.ensure_ollama_started()
+
+    assert started_commands == [["ollama", "serve"]]
+    assert mandarin_app.OLLAMA_START_ATTEMPTED is True
 
 
 def test_quiz_entries_include_ai_cache_results():

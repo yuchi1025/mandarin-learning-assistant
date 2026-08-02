@@ -8,6 +8,9 @@ from validate_dictionary import validate_entries
 
 DICTIONARY_PATH = Path(__file__).resolve().parent.parent / "data" / "dictionary.json"
 EXPECTED_FIELDS = ["word", "traditional", "pinyin", "english", "part_of_speech", "explanation", "examples"]
+PINYIN_WORD_OVERRIDES = {
+    "记得": "jì dé",
+}
 
 
 def load_entries():
@@ -40,7 +43,10 @@ def test_dictionary_pinyin_uses_tone_marks():
     entries = load_entries()
 
     for entry in entries:
-        expected_pinyin = " ".join(lazy_pinyin(entry["word"], style=Style.TONE))
+        expected_pinyin = PINYIN_WORD_OVERRIDES.get(
+            entry["word"],
+            " ".join(lazy_pinyin(entry["word"], style=Style.TONE)),
+        )
         assert entry["pinyin"] == expected_pinyin
 
 

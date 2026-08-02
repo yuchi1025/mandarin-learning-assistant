@@ -394,7 +394,7 @@ function bindQuizOptions() {
 }
 
 function focusSearchInput() {
-    const searchInput = document.getElementById("search-input");
+    const searchInput = document.getElementById("search-input") || document.getElementById("batch-search-input");
     if (searchInput) {
         searchInput.focus();
         searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);

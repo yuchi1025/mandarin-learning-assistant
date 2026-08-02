@@ -17,6 +17,9 @@ REQUIRED_FIELDS = [
     "explanation",
     "examples",
 ]
+PINYIN_WORD_OVERRIDES = {
+    "记得": "jì dé",
+}
 
 
 def validate_entries(entries, expected_count=None):
@@ -54,7 +57,7 @@ def validate_entries(entries, expected_count=None):
                 errors.append(f"{label}: `{field}` must be a non-empty string.")
 
         pinyin = str(entry.get("pinyin", "")).strip()
-        expected_pinyin = " ".join(lazy_pinyin(word, style=Style.TONE)) if word else ""
+        expected_pinyin = PINYIN_WORD_OVERRIDES.get(word, " ".join(lazy_pinyin(word, style=Style.TONE))) if word else ""
         if word and pinyin and pinyin != expected_pinyin:
             errors.append(f"{label}: `pinyin` should be `{expected_pinyin}`.")
 
