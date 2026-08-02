@@ -7,7 +7,7 @@ from validate_dictionary import validate_entries
 
 
 DICTIONARY_PATH = Path(__file__).resolve().parent.parent / "data" / "dictionary.json"
-EXPECTED_FIELDS = ["word", "pinyin", "english", "part_of_speech", "explanation", "examples"]
+EXPECTED_FIELDS = ["word", "traditional", "pinyin", "english", "part_of_speech", "explanation", "examples"]
 
 
 def load_entries():
@@ -23,8 +23,10 @@ def test_dictionary_is_valid():
 def test_dictionary_words_are_unique():
     entries = load_entries()
     words = [entry["word"] for entry in entries]
+    traditional_words = [entry["traditional"] for entry in entries]
 
     assert len(words) == len(set(words))
+    assert len(traditional_words) == len(set(traditional_words))
 
 
 def test_dictionary_entries_use_consistent_field_order():
@@ -40,3 +42,10 @@ def test_dictionary_pinyin_uses_tone_marks():
     for entry in entries:
         expected_pinyin = " ".join(lazy_pinyin(entry["word"], style=Style.TONE))
         assert entry["pinyin"] == expected_pinyin
+
+
+def test_dictionary_has_traditional_words():
+    entries = load_entries()
+
+    assert all(entry["traditional"].strip() for entry in entries)
+    assert any(entry["traditional"] != entry["word"] for entry in entries)

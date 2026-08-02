@@ -50,22 +50,90 @@ function speakMandarin(text) {
         return;
     }
 
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "zh-CN";
-    utterance.rate = 0.9;
-
-    const voices = window.speechSynthesis.getVoices();
-    const chineseVoice = voices.find(function (voice) {
-        return voice.lang && voice.lang.toLowerCase().startsWith("zh");
-    });
-
-    if (chineseVoice) {
-        utterance.voice = chineseVoice;
+    const speechText = (text || "").trim();
+    if (!speechText) {
+        return;
     }
 
-    window.speechSynthesis.speak(utterance);
+    window.speechSynthesis.cancel();
+
+    getSpeechVoices().then(function (voices) {
+        const utterance = new SpeechSynthesisUtterance(speechText);
+        utterance.lang = "zh-CN";
+        utterance.rate = 0.9;
+        utterance.volume = 1;
+
+        const chineseVoice = voices.find(function (voice) {
+            return voice.lang && voice.lang.toLowerCase().startsWith("zh");
+        });
+
+        if (chineseVoice) {
+            utterance.voice = chineseVoice;
+            utterance.lang = chineseVoice.lang;
+        }
+
+        utterance.onerror = function () {
+            showAudioStatus("Browser audio could not play. Check the browser tab and macOS output device.");
+        };
+
+        window.speechSynthesis.speak(utterance);
+    });
+}
+
+function showAudioStatus(message) {
+    const status = document.getElementById("audio-status");
+    if (!status) {
+        return;
+    }
+
+    status.textContent = message;
+    status.hidden = false;
+}
+
+function playMandarinAudio(text) {
+    const speechText = (text || "").trim();
+    if (!speechText) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("text", speechText);
+
+    fetch("/api/speak", {
+        method: "POST",
+        body: formData,
+    })
+        .then(function (response) {
+            if (!response.ok) {
+                throw new Error("Local speech failed.");
+            }
+        })
+        .catch(function () {
+            showAudioStatus("Local audio failed. Trying browser audio.");
+            speakMandarin(speechText);
+        });
+}
+
+function getSpeechVoices() {
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length) {
+        return Promise.resolve(voices);
+    }
+
+    return new Promise(function (resolve) {
+        const timeout = window.setTimeout(function () {
+            window.speechSynthesis.removeEventListener("voiceschanged", handleVoicesChanged);
+            resolve(window.speechSynthesis.getVoices());
+        }, 1000);
+
+        function handleVoicesChanged() {
+            window.clearTimeout(timeout);
+            window.speechSynthesis.removeEventListener("voiceschanged", handleVoicesChanged);
+            resolve(window.speechSynthesis.getVoices());
+        }
+
+        window.speechSynthesis.addEventListener("voiceschanged", handleVoicesChanged);
+    });
 }
 
 function attachAudioHandler(button) {
@@ -74,7 +142,7 @@ function attachAudioHandler(button) {
     }
 
     button.addEventListener("click", function () {
-        speakMandarin(button.dataset.speak);
+        playMandarinAudio(button.dataset.speak);
     });
     button.dataset.audioBound = "true";
 }
@@ -127,6 +195,9 @@ function renderExample(sentence) {
 
 function renderAiResult(card, item) {
     const pinyinLine = item.pinyin ? `<span>${escapeHtml(item.pinyin)}</span>` : "";
+    const traditionalLine = item.traditional && item.traditional !== item.word
+        ? `<span class="traditional-word">${escapeHtml(item.traditional)}</span>`
+        : "";
     const meaningLine = item.english ? `<p><strong>Meaning:</strong> ${escapeHtml(item.english)}</p>` : "";
     const examplesBlock = item.examples && item.examples.length
         ? `
@@ -144,6 +215,7 @@ function renderAiResult(card, item) {
             <div class="word-block">
                 <div class="word-line">
                     <h2>${escapeHtml(item.word)}</h2>
+                    ${traditionalLine}
                     <button
                         type="button"
                         class="audio-button inline-audio-button"

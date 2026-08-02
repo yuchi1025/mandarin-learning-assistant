@@ -10,6 +10,7 @@ from pypinyin import Style, lazy_pinyin
 
 REQUIRED_FIELDS = [
     "word",
+    "traditional",
     "pinyin",
     "english",
     "part_of_speech",
@@ -25,6 +26,7 @@ def validate_entries(entries, expected_count=None):
         return ["Dictionary root must be a JSON array."]
 
     words = []
+    traditional_words = []
     for index, entry in enumerate(entries, start=1):
         label = f"entry {index}"
         if not isinstance(entry, dict):
@@ -32,8 +34,10 @@ def validate_entries(entries, expected_count=None):
             continue
 
         word = str(entry.get("word", "")).strip()
+        traditional = str(entry.get("traditional", "")).strip()
         label = f"entry {index} ({word or 'missing word'})"
         words.append(word)
+        traditional_words.append(traditional)
 
         field_names = list(entry)
         missing_fields = [field for field in REQUIRED_FIELDS if field not in entry]
@@ -54,6 +58,9 @@ def validate_entries(entries, expected_count=None):
         if word and pinyin and pinyin != expected_pinyin:
             errors.append(f"{label}: `pinyin` should be `{expected_pinyin}`.")
 
+        if word and traditional and len(traditional) != len(word):
+            errors.append(f"{label}: `traditional` should match the word length.")
+
         examples = entry.get("examples")
         if not isinstance(examples, list) or not examples:
             errors.append(f"{label}: `examples` must be a non-empty list.")
@@ -70,6 +77,12 @@ def validate_entries(entries, expected_count=None):
     duplicates = sorted(word for word, count in Counter(words).items() if word and count > 1)
     for word in duplicates:
         errors.append(f"duplicate word: {word}.")
+
+    duplicate_traditional = sorted(
+        word for word, count in Counter(traditional_words).items() if word and count > 1
+    )
+    for word in duplicate_traditional:
+        errors.append(f"duplicate traditional word: {word}.")
 
     if expected_count is not None and len(entries) != expected_count:
         errors.append(f"expected {expected_count} entries, found {len(entries)}.")

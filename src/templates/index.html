@@ -61,6 +61,8 @@
                 <div class="recent-search-list" id="recent-search-list"></div>
             </section>
 
+            <p class="audio-status" id="audio-status" hidden></p>
+
             {% if query and not results and not ai_pending %}
                 <section class="empty-state">
                     <p>No results found for "<strong>{{ query }}</strong>". Try another word.</p>
@@ -81,6 +83,9 @@
                         <div class="word-block">
                             <div class="word-line">
                                 <h2>{{ item.word }}</h2>
+                                {% if item.traditional and item.traditional != item.word %}
+                                    <span class="traditional-word">{{ item.traditional }}</span>
+                                {% endif %}
                                 <button
                                     type="button"
                                     class="audio-button inline-audio-button"
@@ -140,7 +145,13 @@
                     <p class="eyebrow">Easy Quiz</p>
                     <h2>What does this Mandarin word mean?</h2>
                 </div>
-                <p class="quiz-word">{{ quiz.word }} <span>({{ quiz.pinyin }})</span></p>
+                <p class="quiz-word">
+                    {{ quiz.word }}
+                    {% if quiz.traditional and quiz.traditional != quiz.word %}
+                        <span class="quiz-traditional">{{ quiz.traditional }}</span>
+                    {% endif %}
+                    <span>({{ quiz.pinyin }})</span>
+                </p>
                 <form method="post" class="quiz-form" data-correct-answer="{{ quiz.correct_answer }}" data-next-url="{{ url_for('home', mode='quiz') }}">
                     <input type="hidden" name="form_type" value="quiz">
                     <input type="hidden" name="question_word" value="{{ quiz.word }}">
@@ -177,6 +188,6 @@
         {% endif %}
     </main>
 
-    <script src="{{ url_for('static', filename='app.js') }}?v=3.1.1-session-cleanup"></script>
+    <script src="{{ url_for('static', filename='app.js') }}?v=3.1.1-audio-single-source"></script>
 </body>
 </html>

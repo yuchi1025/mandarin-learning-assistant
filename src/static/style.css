@@ -139,6 +139,12 @@ h1 {
     gap: 10px;
 }
 
+.audio-status {
+    margin: 0 0 18px;
+    color: #8a4f00;
+    font-size: 0.95rem;
+}
+
 .recent-search-chip,
 .clear-recent-button {
     border: 1px solid var(--border);
@@ -317,6 +323,20 @@ h1 {
 .card-header span {
     color: var(--accent);
     font-style: italic;
+}
+
+.traditional-word,
+.quiz-traditional {
+    color: #6a5b4d;
+    font-size: 1.2rem;
+    font-style: normal;
+}
+
+.traditional-word::before,
+.quiz-traditional::before {
+    content: "/";
+    margin-right: 8px;
+    color: #9c8d7c;
 }
 
 .audio-button {

@@ -3,11 +3,13 @@ import os
 from pathlib import Path
 import random
 import re
+import subprocess
+import tempfile
 import unicodedata
 import urllib.error
 import urllib.request
 
-from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask import after_this_request, Flask, jsonify, render_template, request, send_file, send_from_directory
 from pypinyin import Style, lazy_pinyin
 
 app = Flask(__name__)
@@ -16,6 +18,8 @@ RECENT_QUIZ_LIMIT = 5
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/chat")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma3")
 OLLAMA_KEEP_ALIVE = os.getenv("OLLAMA_KEEP_ALIVE", "15m")
+TTS_VOICE = os.getenv("TTS_VOICE", "Tingting")
+TTS_COMMAND = os.getenv("TTS_COMMAND", "/usr/bin/say")
 AI_EXPLANATION_CACHE = {}
 VALID_PARTS_OF_SPEECH = {
     "noun",
@@ -71,6 +75,7 @@ def load_dictionary():
         word = str(raw_entry.get("word", "")).strip()
         if not word:
             continue
+        traditional = str(raw_entry.get("traditional", word)).strip() or word
 
         structured_examples = []
         for example in raw_entry.get("examples", []):
@@ -88,6 +93,7 @@ def load_dictionary():
         entries.append(
             {
                 "word": word,
+                "traditional": traditional,
                 "pinyin": pinyin,
                 "english": str(raw_entry.get("english", "")).strip(),
                 "part_of_speech": str(raw_entry.get("part_of_speech", "word")).strip() or "word",
@@ -115,11 +121,13 @@ def search_entries(query):
     exact_matches = []
     for entry in DICTIONARY_ENTRIES:
         word = entry["word"]
+        traditional = entry["traditional"]
         search_pinyin = entry["search_pinyin"]
         english = entry["english"].lower()
 
         if (
             normalized_query == word
+            or normalized_query == traditional
             or normalized_query_no_tones == search_pinyin
             or normalized_query == english
         ):
@@ -133,6 +141,7 @@ def search_entries(query):
     scored_matches = []
     for entry in DICTIONARY_ENTRIES:
         word = entry["word"]
+        traditional = entry["traditional"]
         pinyin = entry["pinyin"].lower()
         search_pinyin = entry["search_pinyin"]
         english = entry["english"].lower()
@@ -148,25 +157,25 @@ def search_entries(query):
 
         score = None
 
-        if normalized_query == word:
+        if normalized_query == word or normalized_query == traditional:
             score = (0, len(word))
         elif normalized_query_no_tones == search_pinyin:
             score = (1, len(search_pinyin))
         elif normalized_query == english:
             score = (2, len(english))
         elif query_is_single_char:
-            if word.startswith(normalized_query):
-                score = (3, len(word))
+            if word.startswith(normalized_query) or traditional.startswith(normalized_query):
+                score = (3, min(len(word), len(traditional)))
             elif search_pinyin.startswith(normalized_query_no_tones):
                 score = (4, len(search_pinyin))
-        elif word.startswith(normalized_query):
-            score = (3, len(word))
+        elif word.startswith(normalized_query) or traditional.startswith(normalized_query):
+            score = (3, min(len(word), len(traditional)))
         elif search_pinyin.startswith(normalized_query_no_tones):
             score = (4, len(search_pinyin))
         elif english.startswith(normalized_query):
             score = (5, len(english))
-        elif normalized_query in word:
-            score = (6, len(word))
+        elif normalized_query in word or normalized_query in traditional:
+            score = (6, min(len(word), len(traditional)))
         elif normalized_query_no_tones in search_pinyin and not query_is_short_ascii:
             score = (7, len(search_pinyin))
         elif english_word_contains:
@@ -218,6 +227,7 @@ def normalize_part_of_speech(value):
 
 def validate_ai_result(query, result):
     word = result.get("word", "").strip()
+    traditional = result.get("traditional", word).strip() or word
     english = result.get("english", "").strip()
     explanation = result.get("explanation", "").strip()
 
@@ -225,7 +235,7 @@ def validate_ai_result(query, result):
         return False
 
     query_is_chinese = contains_chinese(query)
-    word_is_chinese = contains_chinese(word)
+    word_is_chinese = contains_chinese(word) or contains_chinese(traditional)
 
     if query_is_chinese and not word_is_chinese:
         return False
@@ -236,7 +246,7 @@ def validate_ai_result(query, result):
     if not explanation:
         return False
 
-    if query_is_chinese and word != query.strip():
+    if query_is_chinese and query.strip() not in {word, traditional}:
         return False
 
     if query_is_chinese and not english:
@@ -248,11 +258,13 @@ def validate_ai_result(query, result):
 def fetch_ai_explanation(query):
     system_prompt = (
         "You are a Mandarin tutor for English-speaking beginners. "
-        "Return JSON only with these keys: word, pinyin, english, part_of_speech, explanation, examples. "
+        "Return JSON only with these keys: word, traditional, pinyin, english, part_of_speech, explanation, examples. "
         "Do not add extra keys. "
         "Use concise beginner-friendly English. "
-        "The word field must be the exact Mandarin word or phrase being explained, not a sentence. "
-        "If the input itself is Chinese, keep the word field exactly the same as the input. "
+        "The word field must be the simplified Chinese form of the exact Mandarin word or phrase being explained, not a sentence. "
+        "The traditional field must be the traditional Chinese form of the same word or phrase. "
+        "If simplified and traditional are the same, use the same value for both fields. "
+        "If the input itself is Chinese, the input must match either the simplified word field or the traditional field. "
         "Set part_of_speech to exactly one of: noun, verb, adjective, adverb, phrase, expression, question word, conjunction, modal verb, time word, pronoun, measure word, word. "
         "Set examples to exactly 2 short Chinese sentence objects with keys text and translation. "
         "If the input is not a real Mandarin word or phrase, explain that clearly and return examples as an empty list."
@@ -308,6 +320,7 @@ def fetch_ai_explanation(query):
 
     ai_result = {
         "word": parsed.get("word", query).strip() or query,
+        "traditional": parsed.get("traditional", parsed.get("word", query)).strip() or parsed.get("word", query).strip() or query,
         "pinyin": parsed.get("pinyin", "").strip(),
         "english": parsed.get("english", "").strip(),
         "part_of_speech": normalize_part_of_speech(parsed.get("part_of_speech", "word")),
@@ -412,6 +425,7 @@ def build_quiz(question_word=None, exclude_word=None, choices=None, recent_words
 
     return {
         "word": correct_entry["word"],
+        "traditional": correct_entry.get("traditional", correct_entry["word"]),
         "pinyin": correct_entry["pinyin"],
         "correct_answer": correct_entry["english"],
         "choices": choices,
@@ -490,10 +504,65 @@ def clear_ai_cache():
     return jsonify({"ok": True})
 
 
+@app.get("/api/tts")
+def text_to_speech():
+    text = to_speech_text(request.args.get("text", ""))[:200]
+    if not text:
+        return jsonify({"ok": False, "error": "Missing text to speak."}), 400
+
+    with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as audio_file:
+        audio_path = Path(audio_file.name)
+
+    try:
+        subprocess.run(
+            [TTS_COMMAND, "-v", TTS_VOICE, "-o", str(audio_path), text],
+            check=True,
+            timeout=30,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+    except FileNotFoundError:
+        audio_path.unlink(missing_ok=True)
+        return jsonify({"ok": False, "error": "Local text-to-speech command was not found."}), 503
+    except subprocess.TimeoutExpired:
+        audio_path.unlink(missing_ok=True)
+        return jsonify({"ok": False, "error": "Local text-to-speech timed out."}), 503
+    except subprocess.CalledProcessError as error:
+        audio_path.unlink(missing_ok=True)
+        detail = (error.stderr or error.stdout or "").strip()
+        return jsonify({"ok": False, "error": detail or "Local text-to-speech is unavailable."}), 503
+
+    @after_this_request
+    def remove_audio_file(response):
+        audio_path.unlink(missing_ok=True)
+        return response
+
+    return send_file(audio_path, mimetype="audio/aiff", download_name="mandarin.aiff")
+
+
+@app.post("/api/speak")
+def speak_text():
+    text = to_speech_text(request.form.get("text", ""))[:200]
+    if not text:
+        return jsonify({"ok": False, "error": "Missing text to speak."}), 400
+
+    try:
+        subprocess.Popen(
+            [TTS_COMMAND, "-v", TTS_VOICE, text],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except FileNotFoundError:
+        return jsonify({"ok": False, "error": "Local text-to-speech command was not found."}), 503
+
+    return jsonify({"ok": True})
+
+
 @app.get("/assets/<path:filename>")
 def asset_file(filename):
     return send_from_directory(ASSETS_DIR, filename)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)

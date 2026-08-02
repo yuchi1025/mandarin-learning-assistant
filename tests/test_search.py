@@ -13,6 +13,10 @@ def test_exact_chinese_match_returns_only_exact_word():
     assert words_for("洗手间") == ["洗手间"]
 
 
+def test_exact_traditional_chinese_match_returns_simplified_entry():
+    assert words_for("洗手間") == ["洗手间"]
+
+
 def test_exact_pinyin_match_returns_only_exact_word():
     assert words_for("zuo bian") == ["左边"]
 

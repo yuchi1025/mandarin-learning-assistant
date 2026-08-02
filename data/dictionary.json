@@ -1,6 +1,7 @@
 [
   {
     "word": "你好",
+    "traditional": "你好",
     "pinyin": "nǐ hǎo",
     "english": "hello",
     "part_of_speech": "greeting",
@@ -12,6 +13,7 @@
   },
   {
     "word": "谢谢",
+    "traditional": "謝謝",
     "pinyin": "xiè xiè",
     "english": "thank you",
     "part_of_speech": "expression",
@@ -23,6 +25,7 @@
   },
   {
     "word": "学习",
+    "traditional": "學習",
     "pinyin": "xué xí",
     "english": "to study; learning",
     "part_of_speech": "verb",
@@ -34,6 +37,7 @@
   },
   {
     "word": "朋友",
+    "traditional": "朋友",
     "pinyin": "péng yǒu",
     "english": "friend",
     "part_of_speech": "noun",
@@ -45,6 +49,7 @@
   },
   {
     "word": "吃饭",
+    "traditional": "吃飯",
     "pinyin": "chī fàn",
     "english": "to eat a meal",
     "part_of_speech": "verb",
@@ -56,6 +61,7 @@
   },
   {
     "word": "喝水",
+    "traditional": "喝水",
     "pinyin": "hē shuǐ",
     "english": "to drink water",
     "part_of_speech": "verb",
@@ -67,6 +73,7 @@
   },
   {
     "word": "多少钱",
+    "traditional": "多少錢",
     "pinyin": "duō shǎo qián",
     "english": "how much money",
     "part_of_speech": "question phrase",
@@ -78,6 +85,7 @@
   },
   {
     "word": "可以",
+    "traditional": "可以",
     "pinyin": "kě yǐ",
     "english": "can; may",
     "part_of_speech": "modal verb",
@@ -89,6 +97,7 @@
   },
   {
     "word": "不要",
+    "traditional": "不要",
     "pinyin": "bú yào",
     "english": "don’t want; don’t",
     "part_of_speech": "verb phrase",
@@ -100,6 +109,7 @@
   },
   {
     "word": "现在",
+    "traditional": "現在",
     "pinyin": "xiàn zài",
     "english": "now",
     "part_of_speech": "time word",
@@ -111,6 +121,7 @@
   },
   {
     "word": "等一下",
+    "traditional": "等一下",
     "pinyin": "děng yí xià",
     "english": "wait a moment",
     "part_of_speech": "phrase",
@@ -122,6 +133,7 @@
   },
   {
     "word": "为什么",
+    "traditional": "為什麼",
     "pinyin": "wèi shén me",
     "english": "why",
     "part_of_speech": "question word",
@@ -133,6 +145,7 @@
   },
   {
     "word": "因为",
+    "traditional": "因為",
     "pinyin": "yīn wèi",
     "english": "because",
     "part_of_speech": "conjunction",
@@ -144,6 +157,7 @@
   },
   {
     "word": "知道",
+    "traditional": "知道",
     "pinyin": "zhī dào",
     "english": "to know",
     "part_of_speech": "verb",
@@ -155,6 +169,7 @@
   },
   {
     "word": "觉得",
+    "traditional": "覺得",
     "pinyin": "jué de",
     "english": "to feel; to think",
     "part_of_speech": "verb",
@@ -166,6 +181,7 @@
   },
   {
     "word": "喜欢",
+    "traditional": "喜歡",
     "pinyin": "xǐ huān",
     "english": "to like",
     "part_of_speech": "verb",
@@ -177,6 +193,7 @@
   },
   {
     "word": "不喜欢",
+    "traditional": "不喜歡",
     "pinyin": "bù xǐ huān",
     "english": "to dislike",
     "part_of_speech": "verb",
@@ -188,6 +205,7 @@
   },
   {
     "word": "工作",
+    "traditional": "工作",
     "pinyin": "gōng zuò",
     "english": "work; job",
     "part_of_speech": "noun / verb",
@@ -199,6 +217,7 @@
   },
   {
     "word": "下班",
+    "traditional": "下班",
     "pinyin": "xià bān",
     "english": "to get off work",
     "part_of_speech": "verb",
@@ -210,6 +229,7 @@
   },
   {
     "word": "上班",
+    "traditional": "上班",
     "pinyin": "shàng bān",
     "english": "to go to work",
     "part_of_speech": "verb",
@@ -221,6 +241,7 @@
   },
   {
     "word": "回家",
+    "traditional": "回家",
     "pinyin": "huí jiā",
     "english": "to go home",
     "part_of_speech": "verb",
@@ -232,6 +253,7 @@
   },
   {
     "word": "出去",
+    "traditional": "出去",
     "pinyin": "chū qù",
     "english": "to go out",
     "part_of_speech": "verb",
@@ -243,6 +265,7 @@
   },
   {
     "word": "进来",
+    "traditional": "進來",
     "pinyin": "jìn lái",
     "english": "to come in",
     "part_of_speech": "verb",
@@ -254,6 +277,7 @@
   },
   {
     "word": "看",
+    "traditional": "看",
     "pinyin": "kàn",
     "english": "to look; to watch",
     "part_of_speech": "verb",
@@ -265,6 +289,7 @@
   },
   {
     "word": "听",
+    "traditional": "聽",
     "pinyin": "tīng",
     "english": "to listen",
     "part_of_speech": "verb",
@@ -276,6 +301,7 @@
   },
   {
     "word": "说",
+    "traditional": "說",
     "pinyin": "shuō",
     "english": "to speak; to say",
     "part_of_speech": "verb",
@@ -287,6 +313,7 @@
   },
   {
     "word": "买",
+    "traditional": "買",
     "pinyin": "mǎi",
     "english": "to buy",
     "part_of_speech": "verb",
@@ -298,6 +325,7 @@
   },
   {
     "word": "卖",
+    "traditional": "賣",
     "pinyin": "mài",
     "english": "to sell",
     "part_of_speech": "verb",
@@ -309,6 +337,7 @@
   },
   {
     "word": "打开",
+    "traditional": "打開",
     "pinyin": "dǎ kāi",
     "english": "to open",
     "part_of_speech": "verb",
@@ -320,6 +349,7 @@
   },
   {
     "word": "关上",
+    "traditional": "關上",
     "pinyin": "guān shàng",
     "english": "to close",
     "part_of_speech": "verb",
@@ -331,6 +361,7 @@
   },
   {
     "word": "开始",
+    "traditional": "開始",
     "pinyin": "kāi shǐ",
     "english": "to start",
     "part_of_speech": "verb",
@@ -342,6 +373,7 @@
   },
   {
     "word": "结束",
+    "traditional": "結束",
     "pinyin": "jié shù",
     "english": "to end",
     "part_of_speech": "verb",
@@ -353,6 +385,7 @@
   },
   {
     "word": "累",
+    "traditional": "累",
     "pinyin": "lèi",
     "english": "tired",
     "part_of_speech": "adjective",
@@ -364,6 +397,7 @@
   },
   {
     "word": "开心",
+    "traditional": "開心",
     "pinyin": "kāi xīn",
     "english": "happy",
     "part_of_speech": "adjective",
@@ -375,6 +409,7 @@
   },
   {
     "word": "早上好",
+    "traditional": "早上好",
     "pinyin": "zǎo shàng hǎo",
     "english": "good morning",
     "part_of_speech": "greeting",
@@ -386,6 +421,7 @@
   },
   {
     "word": "晚上好",
+    "traditional": "晚上好",
     "pinyin": "wǎn shàng hǎo",
     "english": "good evening",
     "part_of_speech": "greeting",
@@ -397,6 +433,7 @@
   },
   {
     "word": "再见",
+    "traditional": "再見",
     "pinyin": "zài jiàn",
     "english": "goodbye",
     "part_of_speech": "expression",
@@ -408,6 +445,7 @@
   },
   {
     "word": "对不起",
+    "traditional": "對不起",
     "pinyin": "duì bù qǐ",
     "english": "sorry",
     "part_of_speech": "expression",
@@ -419,6 +457,7 @@
   },
   {
     "word": "没关系",
+    "traditional": "沒關係",
     "pinyin": "méi guān xì",
     "english": "it is okay",
     "part_of_speech": "expression",
@@ -430,6 +469,7 @@
   },
   {
     "word": "请",
+    "traditional": "請",
     "pinyin": "qǐng",
     "english": "please",
     "part_of_speech": "word",
@@ -441,6 +481,7 @@
   },
   {
     "word": "请问",
+    "traditional": "請問",
     "pinyin": "qǐng wèn",
     "english": "excuse me; may I ask",
     "part_of_speech": "phrase",
@@ -452,6 +493,7 @@
   },
   {
     "word": "没事",
+    "traditional": "沒事",
     "pinyin": "méi shì",
     "english": "no problem; nothing wrong",
     "part_of_speech": "expression",
@@ -463,6 +505,7 @@
   },
   {
     "word": "是",
+    "traditional": "是",
     "pinyin": "shì",
     "english": "to be; yes",
     "part_of_speech": "verb",
@@ -474,6 +517,7 @@
   },
   {
     "word": "不是",
+    "traditional": "不是",
     "pinyin": "bú shì",
     "english": "is not; no",
     "part_of_speech": "verb",
@@ -485,6 +529,7 @@
   },
   {
     "word": "有",
+    "traditional": "有",
     "pinyin": "yǒu",
     "english": "to have; there is",
     "part_of_speech": "verb",
@@ -496,6 +541,7 @@
   },
   {
     "word": "没有",
+    "traditional": "沒有",
     "pinyin": "méi yǒu",
     "english": "do not have; there is not",
     "part_of_speech": "verb",
@@ -507,6 +553,7 @@
   },
   {
     "word": "要",
+    "traditional": "要",
     "pinyin": "yào",
     "english": "to want; will",
     "part_of_speech": "modal verb",
@@ -518,6 +565,7 @@
   },
   {
     "word": "想",
+    "traditional": "想",
     "pinyin": "xiǎng",
     "english": "to want; to think",
     "part_of_speech": "verb",
@@ -529,6 +577,7 @@
   },
   {
     "word": "会",
+    "traditional": "會",
     "pinyin": "huì",
     "english": "can; know how to",
     "part_of_speech": "modal verb",
@@ -540,6 +589,7 @@
   },
   {
     "word": "能",
+    "traditional": "能",
     "pinyin": "néng",
     "english": "can; be able to",
     "part_of_speech": "modal verb",
@@ -551,6 +601,7 @@
   },
   {
     "word": "应该",
+    "traditional": "應該",
     "pinyin": "yīng gāi",
     "english": "should",
     "part_of_speech": "modal verb",
@@ -562,6 +613,7 @@
   },
   {
     "word": "需要",
+    "traditional": "需要",
     "pinyin": "xū yào",
     "english": "to need",
     "part_of_speech": "verb",
@@ -573,6 +625,7 @@
   },
   {
     "word": "找",
+    "traditional": "找",
     "pinyin": "zhǎo",
     "english": "to look for",
     "part_of_speech": "verb",
@@ -584,6 +637,7 @@
   },
   {
     "word": "给",
+    "traditional": "給",
     "pinyin": "gěi",
     "english": "to give; for",
     "part_of_speech": "verb",
@@ -595,6 +649,7 @@
   },
   {
     "word": "带",
+    "traditional": "帶",
     "pinyin": "dài",
     "english": "to bring; to carry",
     "part_of_speech": "verb",
@@ -606,6 +661,7 @@
   },
   {
     "word": "用",
+    "traditional": "用",
     "pinyin": "yòng",
     "english": "to use",
     "part_of_speech": "verb",
@@ -617,6 +673,7 @@
   },
   {
     "word": "做",
+    "traditional": "做",
     "pinyin": "zuò",
     "english": "to do; to make",
     "part_of_speech": "verb",
@@ -628,6 +685,7 @@
   },
   {
     "word": "去",
+    "traditional": "去",
     "pinyin": "qù",
     "english": "to go",
     "part_of_speech": "verb",
@@ -639,6 +697,7 @@
   },
   {
     "word": "来",
+    "traditional": "來",
     "pinyin": "lái",
     "english": "to come",
     "part_of_speech": "verb",
@@ -650,6 +709,7 @@
   },
   {
     "word": "到",
+    "traditional": "到",
     "pinyin": "dào",
     "english": "to arrive",
     "part_of_speech": "verb",
@@ -661,6 +721,7 @@
   },
   {
     "word": "走",
+    "traditional": "走",
     "pinyin": "zǒu",
     "english": "to walk; to leave",
     "part_of_speech": "verb",
@@ -672,6 +733,7 @@
   },
   {
     "word": "坐",
+    "traditional": "坐",
     "pinyin": "zuò",
     "english": "to sit; to take transport",
     "part_of_speech": "verb",
@@ -683,6 +745,7 @@
   },
   {
     "word": "住",
+    "traditional": "住",
     "pinyin": "zhù",
     "english": "to live; to stay",
     "part_of_speech": "verb",
@@ -694,6 +757,7 @@
   },
   {
     "word": "睡觉",
+    "traditional": "睡覺",
     "pinyin": "shuì jiào",
     "english": "to sleep",
     "part_of_speech": "verb",
@@ -705,6 +769,7 @@
   },
   {
     "word": "起床",
+    "traditional": "起床",
     "pinyin": "qǐ chuáng",
     "english": "to get up",
     "part_of_speech": "verb",
@@ -716,6 +781,7 @@
   },
   {
     "word": "洗澡",
+    "traditional": "洗澡",
     "pinyin": "xǐ zǎo",
     "english": "to shower",
     "part_of_speech": "verb",
@@ -727,6 +793,7 @@
   },
   {
     "word": "洗手",
+    "traditional": "洗手",
     "pinyin": "xǐ shǒu",
     "english": "to wash hands",
     "part_of_speech": "verb",
@@ -738,6 +805,7 @@
   },
   {
     "word": "穿",
+    "traditional": "穿",
     "pinyin": "chuān",
     "english": "to wear",
     "part_of_speech": "verb",
@@ -749,6 +817,7 @@
   },
   {
     "word": "拿",
+    "traditional": "拿",
     "pinyin": "ná",
     "english": "to take; to hold",
     "part_of_speech": "verb",
@@ -760,6 +829,7 @@
   },
   {
     "word": "放",
+    "traditional": "放",
     "pinyin": "fàng",
     "english": "to put; to place",
     "part_of_speech": "verb",
@@ -771,6 +841,7 @@
   },
   {
     "word": "送",
+    "traditional": "送",
     "pinyin": "sòng",
     "english": "to send; to give as a gift",
     "part_of_speech": "verb",
@@ -782,6 +853,7 @@
   },
   {
     "word": "帮忙",
+    "traditional": "幫忙",
     "pinyin": "bāng máng",
     "english": "to help",
     "part_of_speech": "verb",
@@ -793,6 +865,7 @@
   },
   {
     "word": "问",
+    "traditional": "問",
     "pinyin": "wèn",
     "english": "to ask",
     "part_of_speech": "verb",
@@ -804,6 +877,7 @@
   },
   {
     "word": "回答",
+    "traditional": "回答",
     "pinyin": "huí dá",
     "english": "to answer",
     "part_of_speech": "verb",
@@ -815,6 +889,7 @@
   },
   {
     "word": "懂",
+    "traditional": "懂",
     "pinyin": "dǒng",
     "english": "to understand",
     "part_of_speech": "verb",
@@ -826,6 +901,7 @@
   },
   {
     "word": "明白",
+    "traditional": "明白",
     "pinyin": "míng bái",
     "english": "to understand; clear",
     "part_of_speech": "verb",
@@ -837,6 +913,7 @@
   },
   {
     "word": "认识",
+    "traditional": "認識",
     "pinyin": "rèn shí",
     "english": "to know; to recognize",
     "part_of_speech": "verb",
@@ -848,6 +925,7 @@
   },
   {
     "word": "记得",
+    "traditional": "記得",
     "pinyin": "jì de",
     "english": "to remember",
     "part_of_speech": "verb",
@@ -859,6 +937,7 @@
   },
   {
     "word": "忘记",
+    "traditional": "忘記",
     "pinyin": "wàng jì",
     "english": "to forget",
     "part_of_speech": "verb",
@@ -870,6 +949,7 @@
   },
   {
     "word": "时间",
+    "traditional": "時間",
     "pinyin": "shí jiān",
     "english": "time",
     "part_of_speech": "noun",
@@ -881,6 +961,7 @@
   },
   {
     "word": "今天",
+    "traditional": "今天",
     "pinyin": "jīn tiān",
     "english": "today",
     "part_of_speech": "time word",
@@ -892,6 +973,7 @@
   },
   {
     "word": "明天",
+    "traditional": "明天",
     "pinyin": "míng tiān",
     "english": "tomorrow",
     "part_of_speech": "time word",
@@ -903,6 +985,7 @@
   },
   {
     "word": "昨天",
+    "traditional": "昨天",
     "pinyin": "zuó tiān",
     "english": "yesterday",
     "part_of_speech": "time word",
@@ -914,6 +997,7 @@
   },
   {
     "word": "早上",
+    "traditional": "早上",
     "pinyin": "zǎo shàng",
     "english": "morning",
     "part_of_speech": "time word",
@@ -925,6 +1009,7 @@
   },
   {
     "word": "中午",
+    "traditional": "中午",
     "pinyin": "zhōng wǔ",
     "english": "noon",
     "part_of_speech": "time word",
@@ -936,6 +1021,7 @@
   },
   {
     "word": "晚上",
+    "traditional": "晚上",
     "pinyin": "wǎn shàng",
     "english": "evening; night",
     "part_of_speech": "time word",
@@ -947,6 +1033,7 @@
   },
   {
     "word": "周末",
+    "traditional": "週末",
     "pinyin": "zhōu mò",
     "english": "weekend",
     "part_of_speech": "time word",
@@ -958,6 +1045,7 @@
   },
   {
     "word": "家",
+    "traditional": "家",
     "pinyin": "jiā",
     "english": "home; family",
     "part_of_speech": "noun",
@@ -969,6 +1057,7 @@
   },
   {
     "word": "学校",
+    "traditional": "學校",
     "pinyin": "xué xiào",
     "english": "school",
     "part_of_speech": "noun",
@@ -980,6 +1069,7 @@
   },
   {
     "word": "公司",
+    "traditional": "公司",
     "pinyin": "gōng sī",
     "english": "company; office",
     "part_of_speech": "noun",
@@ -991,6 +1081,7 @@
   },
   {
     "word": "医院",
+    "traditional": "醫院",
     "pinyin": "yī yuàn",
     "english": "hospital",
     "part_of_speech": "noun",
@@ -1002,6 +1093,7 @@
   },
   {
     "word": "商店",
+    "traditional": "商店",
     "pinyin": "shāng diàn",
     "english": "shop; store",
     "part_of_speech": "noun",
@@ -1013,6 +1105,7 @@
   },
   {
     "word": "超市",
+    "traditional": "超市",
     "pinyin": "chāo shì",
     "english": "supermarket",
     "part_of_speech": "noun",
@@ -1024,6 +1117,7 @@
   },
   {
     "word": "饭店",
+    "traditional": "飯店",
     "pinyin": "fàn diàn",
     "english": "restaurant; hotel",
     "part_of_speech": "noun",
@@ -1035,6 +1129,7 @@
   },
   {
     "word": "车站",
+    "traditional": "車站",
     "pinyin": "chē zhàn",
     "english": "station",
     "part_of_speech": "noun",
@@ -1046,6 +1141,7 @@
   },
   {
     "word": "地铁",
+    "traditional": "地鐵",
     "pinyin": "dì tiě",
     "english": "MRT; subway",
     "part_of_speech": "noun",
@@ -1057,6 +1153,7 @@
   },
   {
     "word": "公交车",
+    "traditional": "公交車",
     "pinyin": "gōng jiāo chē",
     "english": "bus",
     "part_of_speech": "noun",
@@ -1068,6 +1165,7 @@
   },
   {
     "word": "出租车",
+    "traditional": "出租車",
     "pinyin": "chū zū chē",
     "english": "taxi",
     "part_of_speech": "noun",
@@ -1079,6 +1177,7 @@
   },
   {
     "word": "手机",
+    "traditional": "手機",
     "pinyin": "shǒu jī",
     "english": "mobile phone",
     "part_of_speech": "noun",
@@ -1090,6 +1189,7 @@
   },
   {
     "word": "电脑",
+    "traditional": "電腦",
     "pinyin": "diàn nǎo",
     "english": "computer",
     "part_of_speech": "noun",
@@ -1101,6 +1201,7 @@
   },
   {
     "word": "钥匙",
+    "traditional": "鑰匙",
     "pinyin": "yào shi",
     "english": "key",
     "part_of_speech": "noun",
@@ -1112,6 +1213,7 @@
   },
   {
     "word": "钱包",
+    "traditional": "錢包",
     "pinyin": "qián bāo",
     "english": "wallet",
     "part_of_speech": "noun",
@@ -1123,6 +1225,7 @@
   },
   {
     "word": "衣服",
+    "traditional": "衣服",
     "pinyin": "yī fú",
     "english": "clothes",
     "part_of_speech": "noun",
@@ -1134,6 +1237,7 @@
   },
   {
     "word": "鞋子",
+    "traditional": "鞋子",
     "pinyin": "xié zi",
     "english": "shoes",
     "part_of_speech": "noun",
@@ -1145,6 +1249,7 @@
   },
   {
     "word": "水",
+    "traditional": "水",
     "pinyin": "shuǐ",
     "english": "water",
     "part_of_speech": "noun",
@@ -1156,6 +1261,7 @@
   },
   {
     "word": "咖啡",
+    "traditional": "咖啡",
     "pinyin": "kā fēi",
     "english": "coffee",
     "part_of_speech": "noun",
@@ -1167,6 +1273,7 @@
   },
   {
     "word": "茶",
+    "traditional": "茶",
     "pinyin": "chá",
     "english": "tea",
     "part_of_speech": "noun",
@@ -1178,6 +1285,7 @@
   },
   {
     "word": "饭",
+    "traditional": "飯",
     "pinyin": "fàn",
     "english": "rice; meal",
     "part_of_speech": "noun",
@@ -1189,6 +1297,7 @@
   },
   {
     "word": "面条",
+    "traditional": "麵條",
     "pinyin": "miàn tiáo",
     "english": "noodles",
     "part_of_speech": "noun",
@@ -1200,6 +1309,7 @@
   },
   {
     "word": "苹果",
+    "traditional": "蘋果",
     "pinyin": "píng guǒ",
     "english": "apple",
     "part_of_speech": "noun",
@@ -1211,6 +1321,7 @@
   },
   {
     "word": "香蕉",
+    "traditional": "香蕉",
     "pinyin": "xiāng jiāo",
     "english": "banana",
     "part_of_speech": "noun",
@@ -1222,6 +1333,7 @@
   },
   {
     "word": "鸡蛋",
+    "traditional": "雞蛋",
     "pinyin": "jī dàn",
     "english": "egg",
     "part_of_speech": "noun",
@@ -1233,6 +1345,7 @@
   },
   {
     "word": "牛奶",
+    "traditional": "牛奶",
     "pinyin": "niú nǎi",
     "english": "milk",
     "part_of_speech": "noun",
@@ -1244,6 +1357,7 @@
   },
   {
     "word": "热",
+    "traditional": "熱",
     "pinyin": "rè",
     "english": "hot",
     "part_of_speech": "adjective",
@@ -1255,6 +1369,7 @@
   },
   {
     "word": "冷",
+    "traditional": "冷",
     "pinyin": "lěng",
     "english": "cold",
     "part_of_speech": "adjective",
@@ -1266,6 +1381,7 @@
   },
   {
     "word": "好吃",
+    "traditional": "好吃",
     "pinyin": "hǎo chī",
     "english": "delicious",
     "part_of_speech": "adjective",
@@ -1277,6 +1393,7 @@
   },
   {
     "word": "好喝",
+    "traditional": "好喝",
     "pinyin": "hǎo hē",
     "english": "tasty to drink",
     "part_of_speech": "adjective",
@@ -1288,6 +1405,7 @@
   },
   {
     "word": "漂亮",
+    "traditional": "漂亮",
     "pinyin": "piào liàng",
     "english": "beautiful",
     "part_of_speech": "adjective",
@@ -1299,6 +1417,7 @@
   },
   {
     "word": "贵",
+    "traditional": "貴",
     "pinyin": "guì",
     "english": "expensive",
     "part_of_speech": "adjective",
@@ -1310,6 +1429,7 @@
   },
   {
     "word": "便宜",
+    "traditional": "便宜",
     "pinyin": "pián yi",
     "english": "cheap; inexpensive",
     "part_of_speech": "adjective",
@@ -1321,6 +1441,7 @@
   },
   {
     "word": "快",
+    "traditional": "快",
     "pinyin": "kuài",
     "english": "fast",
     "part_of_speech": "adjective",
@@ -1332,6 +1453,7 @@
   },
   {
     "word": "慢",
+    "traditional": "慢",
     "pinyin": "màn",
     "english": "slow",
     "part_of_speech": "adjective",
@@ -1343,6 +1465,7 @@
   },
   {
     "word": "远",
+    "traditional": "遠",
     "pinyin": "yuǎn",
     "english": "far",
     "part_of_speech": "adjective",
@@ -1354,6 +1477,7 @@
   },
   {
     "word": "近",
+    "traditional": "近",
     "pinyin": "jìn",
     "english": "near",
     "part_of_speech": "adjective",
@@ -1365,6 +1489,7 @@
   },
   {
     "word": "忙",
+    "traditional": "忙",
     "pinyin": "máng",
     "english": "busy",
     "part_of_speech": "adjective",
@@ -1376,6 +1501,7 @@
   },
   {
     "word": "空",
+    "traditional": "空",
     "pinyin": "kōng",
     "english": "free; empty",
     "part_of_speech": "adjective",
@@ -1387,6 +1513,7 @@
   },
   {
     "word": "新",
+    "traditional": "新",
     "pinyin": "xīn",
     "english": "new",
     "part_of_speech": "adjective",
@@ -1398,6 +1525,7 @@
   },
   {
     "word": "旧",
+    "traditional": "舊",
     "pinyin": "jiù",
     "english": "old; used",
     "part_of_speech": "adjective",
@@ -1409,6 +1537,7 @@
   },
   {
     "word": "大",
+    "traditional": "大",
     "pinyin": "dà",
     "english": "big",
     "part_of_speech": "adjective",
@@ -1420,6 +1549,7 @@
   },
   {
     "word": "小",
+    "traditional": "小",
     "pinyin": "xiǎo",
     "english": "small",
     "part_of_speech": "adjective",
@@ -1431,6 +1561,7 @@
   },
   {
     "word": "多",
+    "traditional": "多",
     "pinyin": "duō",
     "english": "many; much",
     "part_of_speech": "adjective",
@@ -1442,6 +1573,7 @@
   },
   {
     "word": "少",
+    "traditional": "少",
     "pinyin": "shǎo",
     "english": "few; little",
     "part_of_speech": "adjective",
@@ -1453,6 +1585,7 @@
   },
   {
     "word": "怎么",
+    "traditional": "怎麼",
     "pinyin": "zěn me",
     "english": "how",
     "part_of_speech": "question word",
@@ -1464,6 +1597,7 @@
   },
   {
     "word": "哪里",
+    "traditional": "哪裡",
     "pinyin": "nǎ lǐ",
     "english": "where",
     "part_of_speech": "question word",
@@ -1475,6 +1609,7 @@
   },
   {
     "word": "什么时候",
+    "traditional": "什麼時候",
     "pinyin": "shén me shí hòu",
     "english": "when",
     "part_of_speech": "question word",
@@ -1486,6 +1621,7 @@
   },
   {
     "word": "谁",
+    "traditional": "誰",
     "pinyin": "shuí",
     "english": "who",
     "part_of_speech": "question word",
@@ -1497,6 +1633,7 @@
   },
   {
     "word": "哪个",
+    "traditional": "哪個",
     "pinyin": "nǎ ge",
     "english": "which one",
     "part_of_speech": "question word",
@@ -1508,6 +1645,7 @@
   },
   {
     "word": "几",
+    "traditional": "幾",
     "pinyin": "jǐ",
     "english": "how many; what number",
     "part_of_speech": "question word",
@@ -1519,6 +1657,7 @@
   },
   {
     "word": "很",
+    "traditional": "很",
     "pinyin": "hěn",
     "english": "very",
     "part_of_speech": "adverb",
@@ -1530,6 +1669,7 @@
   },
   {
     "word": "也",
+    "traditional": "也",
     "pinyin": "yě",
     "english": "also",
     "part_of_speech": "adverb",
@@ -1541,6 +1681,7 @@
   },
   {
     "word": "都",
+    "traditional": "都",
     "pinyin": "dōu",
     "english": "all",
     "part_of_speech": "adverb",
@@ -1552,6 +1693,7 @@
   },
   {
     "word": "还",
+    "traditional": "還",
     "pinyin": "hái",
     "english": "still; also",
     "part_of_speech": "adverb",
@@ -1563,6 +1705,7 @@
   },
   {
     "word": "就",
+    "traditional": "就",
     "pinyin": "jiù",
     "english": "then; just",
     "part_of_speech": "adverb",
@@ -1574,6 +1717,7 @@
   },
   {
     "word": "但是",
+    "traditional": "但是",
     "pinyin": "dàn shì",
     "english": "but",
     "part_of_speech": "conjunction",
@@ -1585,6 +1729,7 @@
   },
   {
     "word": "所以",
+    "traditional": "所以",
     "pinyin": "suǒ yǐ",
     "english": "so; therefore",
     "part_of_speech": "conjunction",
@@ -1596,6 +1741,7 @@
   },
   {
     "word": "如果",
+    "traditional": "如果",
     "pinyin": "rú guǒ",
     "english": "if",
     "part_of_speech": "conjunction",
@@ -1607,6 +1753,7 @@
   },
   {
     "word": "和",
+    "traditional": "和",
     "pinyin": "hé",
     "english": "and; with",
     "part_of_speech": "conjunction",
@@ -1618,6 +1765,7 @@
   },
   {
     "word": "在",
+    "traditional": "在",
     "pinyin": "zài",
     "english": "at; in; located at",
     "part_of_speech": "word",
@@ -1629,6 +1777,7 @@
   },
   {
     "word": "里",
+    "traditional": "裡",
     "pinyin": "lǐ",
     "english": "inside",
     "part_of_speech": "word",
@@ -1640,6 +1789,7 @@
   },
   {
     "word": "上",
+    "traditional": "上",
     "pinyin": "shàng",
     "english": "on; above",
     "part_of_speech": "word",
@@ -1651,6 +1801,7 @@
   },
   {
     "word": "下",
+    "traditional": "下",
     "pinyin": "xià",
     "english": "under; below",
     "part_of_speech": "word",
@@ -1662,6 +1813,7 @@
   },
   {
     "word": "人",
+    "traditional": "人",
     "pinyin": "rén",
     "english": "person; people",
     "part_of_speech": "noun",
@@ -1673,6 +1825,7 @@
   },
   {
     "word": "男人",
+    "traditional": "男人",
     "pinyin": "nán rén",
     "english": "man",
     "part_of_speech": "noun",
@@ -1684,6 +1837,7 @@
   },
   {
     "word": "女人",
+    "traditional": "女人",
     "pinyin": "nǚ rén",
     "english": "woman",
     "part_of_speech": "noun",
@@ -1695,6 +1849,7 @@
   },
   {
     "word": "孩子",
+    "traditional": "孩子",
     "pinyin": "hái zi",
     "english": "child",
     "part_of_speech": "noun",
@@ -1706,6 +1861,7 @@
   },
   {
     "word": "爸爸",
+    "traditional": "爸爸",
     "pinyin": "bà bà",
     "english": "dad; father",
     "part_of_speech": "noun",
@@ -1717,6 +1873,7 @@
   },
   {
     "word": "妈妈",
+    "traditional": "媽媽",
     "pinyin": "mā mā",
     "english": "mom; mother",
     "part_of_speech": "noun",
@@ -1728,6 +1885,7 @@
   },
   {
     "word": "哥哥",
+    "traditional": "哥哥",
     "pinyin": "gē gē",
     "english": "older brother",
     "part_of_speech": "noun",
@@ -1739,6 +1897,7 @@
   },
   {
     "word": "姐姐",
+    "traditional": "姐姐",
     "pinyin": "jiě jiě",
     "english": "older sister",
     "part_of_speech": "noun",
@@ -1750,6 +1909,7 @@
   },
   {
     "word": "弟弟",
+    "traditional": "弟弟",
     "pinyin": "dì di",
     "english": "younger brother",
     "part_of_speech": "noun",
@@ -1761,6 +1921,7 @@
   },
   {
     "word": "妹妹",
+    "traditional": "妹妹",
     "pinyin": "mèi mèi",
     "english": "younger sister",
     "part_of_speech": "noun",
@@ -1772,6 +1933,7 @@
   },
   {
     "word": "老师",
+    "traditional": "老師",
     "pinyin": "lǎo shī",
     "english": "teacher",
     "part_of_speech": "noun",
@@ -1783,6 +1945,7 @@
   },
   {
     "word": "学生",
+    "traditional": "學生",
     "pinyin": "xué shēng",
     "english": "student",
     "part_of_speech": "noun",
@@ -1794,6 +1957,7 @@
   },
   {
     "word": "同事",
+    "traditional": "同事",
     "pinyin": "tóng shì",
     "english": "coworker",
     "part_of_speech": "noun",
@@ -1805,6 +1969,7 @@
   },
   {
     "word": "房间",
+    "traditional": "房間",
     "pinyin": "fáng jiān",
     "english": "room",
     "part_of_speech": "noun",
@@ -1816,6 +1981,7 @@
   },
   {
     "word": "厨房",
+    "traditional": "廚房",
     "pinyin": "chú fáng",
     "english": "kitchen",
     "part_of_speech": "noun",
@@ -1827,6 +1993,7 @@
   },
   {
     "word": "洗手间",
+    "traditional": "洗手間",
     "pinyin": "xǐ shǒu jiān",
     "english": "restroom; bathroom",
     "part_of_speech": "noun",
@@ -1838,6 +2005,7 @@
   },
   {
     "word": "门",
+    "traditional": "門",
     "pinyin": "mén",
     "english": "door",
     "part_of_speech": "noun",
@@ -1849,6 +2017,7 @@
   },
   {
     "word": "窗户",
+    "traditional": "窗戶",
     "pinyin": "chuāng hù",
     "english": "window",
     "part_of_speech": "noun",
@@ -1860,6 +2029,7 @@
   },
   {
     "word": "桌子",
+    "traditional": "桌子",
     "pinyin": "zhuō zi",
     "english": "table; desk",
     "part_of_speech": "noun",
@@ -1871,6 +2041,7 @@
   },
   {
     "word": "椅子",
+    "traditional": "椅子",
     "pinyin": "yǐ zi",
     "english": "chair",
     "part_of_speech": "noun",
@@ -1882,6 +2053,7 @@
   },
   {
     "word": "书",
+    "traditional": "書",
     "pinyin": "shū",
     "english": "book",
     "part_of_speech": "noun",
@@ -1893,6 +2065,7 @@
   },
   {
     "word": "电视",
+    "traditional": "電視",
     "pinyin": "diàn shì",
     "english": "television",
     "part_of_speech": "noun",
@@ -1904,6 +2077,7 @@
   },
   {
     "word": "电影",
+    "traditional": "電影",
     "pinyin": "diàn yǐng",
     "english": "movie",
     "part_of_speech": "noun",
@@ -1915,6 +2089,7 @@
   },
   {
     "word": "音乐",
+    "traditional": "音樂",
     "pinyin": "yīn yuè",
     "english": "music",
     "part_of_speech": "noun",
@@ -1926,6 +2101,7 @@
   },
   {
     "word": "电话",
+    "traditional": "電話",
     "pinyin": "diàn huà",
     "english": "phone call; telephone",
     "part_of_speech": "noun",
@@ -1937,6 +2113,7 @@
   },
   {
     "word": "消息",
+    "traditional": "消息",
     "pinyin": "xiāo xī",
     "english": "message; news",
     "part_of_speech": "noun",
@@ -1948,6 +2125,7 @@
   },
   {
     "word": "照片",
+    "traditional": "照片",
     "pinyin": "zhào piān",
     "english": "photo",
     "part_of_speech": "noun",
@@ -1959,6 +2137,7 @@
   },
   {
     "word": "钱",
+    "traditional": "錢",
     "pinyin": "qián",
     "english": "money",
     "part_of_speech": "noun",
@@ -1970,6 +2149,7 @@
   },
   {
     "word": "卡",
+    "traditional": "卡",
     "pinyin": "kǎ",
     "english": "card",
     "part_of_speech": "noun",
@@ -1981,6 +2161,7 @@
   },
   {
     "word": "现金",
+    "traditional": "現金",
     "pinyin": "xiàn jīn",
     "english": "cash",
     "part_of_speech": "noun",
@@ -1992,6 +2173,7 @@
   },
   {
     "word": "票",
+    "traditional": "票",
     "pinyin": "piào",
     "english": "ticket",
     "part_of_speech": "noun",
@@ -2003,6 +2185,7 @@
   },
   {
     "word": "机场",
+    "traditional": "機場",
     "pinyin": "jī chǎng",
     "english": "airport",
     "part_of_speech": "noun",
@@ -2014,6 +2197,7 @@
   },
   {
     "word": "火车",
+    "traditional": "火車",
     "pinyin": "huǒ chē",
     "english": "train",
     "part_of_speech": "noun",
@@ -2025,6 +2209,7 @@
   },
   {
     "word": "飞机",
+    "traditional": "飛機",
     "pinyin": "fēi jī",
     "english": "airplane",
     "part_of_speech": "noun",
@@ -2036,6 +2221,7 @@
   },
   {
     "word": "路",
+    "traditional": "路",
     "pinyin": "lù",
     "english": "road; way",
     "part_of_speech": "noun",
@@ -2047,6 +2233,7 @@
   },
   {
     "word": "左边",
+    "traditional": "左邊",
     "pinyin": "zuǒ biān",
     "english": "left side",
     "part_of_speech": "noun",
@@ -2058,6 +2245,7 @@
   },
   {
     "word": "右边",
+    "traditional": "右邊",
     "pinyin": "yòu biān",
     "english": "right side",
     "part_of_speech": "noun",
@@ -2069,6 +2257,7 @@
   },
   {
     "word": "前面",
+    "traditional": "前面",
     "pinyin": "qián miàn",
     "english": "front; ahead",
     "part_of_speech": "noun",
@@ -2080,6 +2269,7 @@
   },
   {
     "word": "后面",
+    "traditional": "後面",
     "pinyin": "hòu miàn",
     "english": "behind; back",
     "part_of_speech": "noun",
@@ -2091,6 +2281,7 @@
   },
   {
     "word": "旁边",
+    "traditional": "旁邊",
     "pinyin": "páng biān",
     "english": "beside; next to",
     "part_of_speech": "noun",
@@ -2102,6 +2293,7 @@
   },
   {
     "word": "问题",
+    "traditional": "問題",
     "pinyin": "wèn tí",
     "english": "question; problem",
     "part_of_speech": "noun",
@@ -2113,6 +2305,7 @@
   },
   {
     "word": "事情",
+    "traditional": "事情",
     "pinyin": "shì qíng",
     "english": "matter; thing",
     "part_of_speech": "noun",
@@ -2124,6 +2317,7 @@
   },
   {
     "word": "名字",
+    "traditional": "名字",
     "pinyin": "míng zì",
     "english": "name",
     "part_of_speech": "noun",
@@ -2135,6 +2329,7 @@
   },
   {
     "word": "天气",
+    "traditional": "天氣",
     "pinyin": "tiān qì",
     "english": "weather",
     "part_of_speech": "noun",
@@ -2146,6 +2341,7 @@
   },
   {
     "word": "雨",
+    "traditional": "雨",
     "pinyin": "yǔ",
     "english": "rain",
     "part_of_speech": "noun",
@@ -2157,6 +2353,7 @@
   },
   {
     "word": "太阳",
+    "traditional": "太陽",
     "pinyin": "tài yáng",
     "english": "sun",
     "part_of_speech": "noun",
@@ -2168,6 +2365,7 @@
   },
   {
     "word": "药",
+    "traditional": "藥",
     "pinyin": "yào",
     "english": "medicine",
     "part_of_speech": "noun",
@@ -2179,6 +2377,7 @@
   },
   {
     "word": "身体",
+    "traditional": "身體",
     "pinyin": "shēn tǐ",
     "english": "body; health",
     "part_of_speech": "noun",
@@ -2190,6 +2389,7 @@
   },
   {
     "word": "生病",
+    "traditional": "生病",
     "pinyin": "shēng bìng",
     "english": "to get sick; sick",
     "part_of_speech": "verb",
