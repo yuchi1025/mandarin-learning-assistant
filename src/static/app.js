@@ -248,12 +248,7 @@ function renderAiError(card, message) {
     `;
 }
 
-function loadAiResult() {
-    const card = document.getElementById("ai-result-card");
-    if (!card) {
-        return;
-    }
-
+function loadAiResult(card) {
     const query = card.dataset.aiQuery;
     fetch(`/api/ai-explanation?query=${encodeURIComponent(query)}`)
         .then(function (response) {
@@ -272,6 +267,12 @@ function loadAiResult() {
         .catch(function () {
             renderAiError(card, "Could not reach the local AI service.");
         });
+}
+
+function loadAiResults() {
+    document.querySelectorAll(".ai-result-card[data-ai-query]").forEach(function (card) {
+        loadAiResult(card);
+    });
 }
 
 function getRecentSearches() {
@@ -425,7 +426,7 @@ window.addEventListener("load", function () {
     bindAudioButtons();
     bindQuizOptions();
     renderRecentSearches();
-    loadAiResult();
+    loadAiResults();
 });
 
 window.addEventListener("pagehide", clearSessionDataOnExit);

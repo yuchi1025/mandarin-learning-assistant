@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import random
 import re
+import socket
 import subprocess
 import tempfile
 import unicodedata
@@ -46,6 +47,8 @@ DICTIONARY_PATH = Path(__file__).resolve().parent.parent / "data" / "dictionary.
 PINYIN_PHRASE_OVERRIDES = {
     "不记得": "bú jì dé",
     "不記得": "bú jì dé",
+    "行为": "xíng wéi",
+    "行為": "xíng wéi",
     "记得": "jì dé",
     "記得": "jì dé",
 }
@@ -352,12 +355,16 @@ def split_batch_queries(text):
 def batch_search_entries(text):
     results = []
     missing_queries = []
+    ai_queries = []
     seen_words = set()
 
     for query in split_batch_queries(text):
         matches = search_entries(query)
         if not matches:
-            missing_queries.append(query)
+            if is_meaningful_query(query):
+                ai_queries.append(query)
+            else:
+                missing_queries.append(query)
             continue
 
         added_match = False
@@ -369,9 +376,9 @@ def batch_search_entries(text):
             added_match = True
 
         if not added_match:
-            missing_queries.append(query)
+            ai_queries.append(query)
 
-    return results, missing_queries
+    return results, missing_queries, ai_queries
 
 
 def is_meaningful_query(query):
@@ -403,6 +410,34 @@ def looks_like_mandarin_quiz_word(text):
 def normalize_part_of_speech(value):
     cleaned = " ".join(value.strip().lower().split())
     return cleaned if cleaned in VALID_PARTS_OF_SPEECH else "word"
+
+
+def make_structured_example(text, translation):
+    return {
+        "text": text,
+        "speech_text": to_speech_text(text),
+        "pinyin": to_sentence_pinyin(text),
+        "translation": translation,
+    }
+
+
+def get_curated_ai_result(query):
+    query_key = normalize_query_key(query)
+    if query_key != normalize_query_key("前年"):
+        return None
+
+    return {
+        "word": "前年",
+        "traditional": "前年",
+        "pinyin": "qián nián",
+        "english": "the year before last",
+        "part_of_speech": "time word",
+        "explanation": "前年 means the year before last, two years before the current year.",
+        "examples": [
+            make_structured_example("前年我去了北京。", "The year before last, I went to Beijing."),
+            make_structured_example("前年我们一起旅行。", "The year before last, we traveled together."),
+        ],
+    }
 
 
 def validate_ai_result(query, result):
@@ -474,7 +509,7 @@ def fetch_ai_explanation(query):
     try:
         with urllib.request.urlopen(http_request, timeout=20) as response:
             response_data = json.loads(response.read().decode("utf-8"))
-    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+    except (OSError, TimeoutError, socket.timeout, urllib.error.URLError, json.JSONDecodeError) as exc:
         return None, f"AI explanation is unavailable right now. Start Ollama and load `{OLLAMA_MODEL}`. ({exc})"
 
     try:
@@ -489,14 +524,7 @@ def fetch_ai_explanation(query):
         translation = example.get("translation", "").strip()
         if not text:
             continue
-        examples.append(
-            {
-                "text": text,
-                "speech_text": to_speech_text(text),
-                "pinyin": to_sentence_pinyin(text),
-                "translation": translation,
-            }
-        )
+        examples.append(make_structured_example(text, translation))
 
     word = parsed.get("word", query).strip() or query
     traditional = parsed.get("traditional", word).strip() or word
@@ -523,6 +551,12 @@ def get_ai_explanation(query):
     cache_key = normalize_query_key(query)
     if cache_key in AI_EXPLANATION_CACHE:
         return AI_EXPLANATION_CACHE[cache_key]
+
+    curated_result = get_curated_ai_result(query)
+    if curated_result:
+        result = (curated_result, None)
+        AI_EXPLANATION_CACHE[cache_key] = result
+        return result
 
     result = fetch_ai_explanation(query)
     if result[0] and not result[1]:
@@ -625,6 +659,7 @@ def home():
     query = ""
     results = []
     batch_missing = []
+    batch_ai_queries = []
     ai_pending = False
     quiz = build_quiz(recent_words=recent_words)
     quiz_feedback = None
@@ -641,7 +676,7 @@ def home():
         elif form_type == "batch":
             mode = "batch"
             query = request.form.get("query", "")
-            results, batch_missing = batch_search_entries(query)
+            results, batch_missing, batch_ai_queries = batch_search_entries(query)
         elif form_type == "quiz":
             mode = "quiz"
             query = request.form.get("query", "")
@@ -670,6 +705,7 @@ def home():
         query=query,
         results=results,
         batch_missing=batch_missing,
+        batch_ai_queries=batch_ai_queries,
         ai_pending=ai_pending,
         quiz=quiz,
         quiz_feedback=quiz_feedback,

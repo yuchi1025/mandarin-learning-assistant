@@ -100,7 +100,7 @@
                 </section>
             {% endif %}
 
-            {% if mode == 'batch' and query and not results %}
+            {% if mode == 'batch' and query and not results and not batch_ai_queries %}
                 <section class="empty-state">
                     <p>No matching dictionary cards found.</p>
                 </section>
@@ -112,6 +112,16 @@
                         <div class="ai-spinner" aria-hidden="true"></div>
                     </div>
                 </section>
+            {% endif %}
+
+            {% if mode == 'batch' and batch_ai_queries %}
+                {% for ai_query in batch_ai_queries %}
+                    <section class="result-card ai-result-card ai-loading-card batch-ai-result-card" data-ai-query="{{ ai_query }}">
+                        <div class="ai-loading-shell">
+                            <div class="ai-spinner" aria-hidden="true"></div>
+                        </div>
+                    </section>
+                {% endfor %}
             {% endif %}
 
             {% for item in results %}

@@ -68,19 +68,39 @@ def test_batch_search_post_renders_multiple_cards():
 def test_batch_search_deduplicates_queries_and_shows_missing_terms():
     client = mandarin_app.app.test_client()
 
-    response = client.post("/", data={"form_type": "batch", "query": "airport, airport\nnotarealword"})
+    response = client.post("/", data={"form_type": "batch", "query": "airport, airport\n!!!"})
 
     assert response.status_code == 200
     assert "机场".encode("utf-8") in response.data
     assert b"No Match" in response.data
-    assert b"notarealword" in response.data
+    assert b"!!!" in response.data
+
+
+def test_batch_search_renders_ai_placeholders_for_unknown_words():
+    client = mandarin_app.app.test_client()
+
+    response = client.post("/", data={"form_type": "batch", "query": "airport\nnotarealword"})
+
+    assert response.status_code == 200
+    assert "机场".encode("utf-8") in response.data
+    assert b'data-ai-query="notarealword"' in response.data
+    assert b"No Match" not in response.data
 
 
 def test_batch_search_entries_deduplicates_result_cards():
-    results, missing_queries = mandarin_app.batch_search_entries("airport, airport")
+    results, missing_queries, ai_queries = mandarin_app.batch_search_entries("airport, airport")
 
     assert [entry["word"] for entry in results] == ["机场"]
     assert missing_queries == []
+    assert ai_queries == []
+
+
+def test_batch_search_entries_routes_unknown_words_to_ai():
+    results, missing_queries, ai_queries = mandarin_app.batch_search_entries("airport, notarealword, !!!")
+
+    assert [entry["word"] for entry in results] == ["机场"]
+    assert missing_queries == ["!!!"]
+    assert ai_queries == ["notarealword"]
 
 
 def test_ai_endpoint_rejects_punctuation_only_query():
@@ -109,6 +129,20 @@ def test_ai_result_accepts_traditional_query_match():
 def test_sentence_pinyin_uses_phrase_override_for_jide():
     assert mandarin_app.to_sentence_pinyin("我不记得他的名字。") == "wǒ bú jì dé tā de míng zì。"
     assert mandarin_app.to_sentence_pinyin("我不記得他的名字。") == "wǒ bú jì dé tā de míng zì。"
+
+
+def test_sentence_pinyin_uses_phrase_override_for_behavior():
+    assert mandarin_app.to_sentence_pinyin("行为") == "xíng wéi"
+    assert mandarin_app.to_sentence_pinyin("行為") == "xíng wéi"
+    assert mandarin_app.to_sentence_pinyin("他的行为很奇怪。") == "tā de xíng wéi hěn qí guài。"
+
+
+def test_curated_ai_result_corrects_qiannian_meaning():
+    result = mandarin_app.get_curated_ai_result("前年")
+
+    assert result["word"] == "前年"
+    assert result["english"] == "the year before last"
+    assert "two years before" in result["explanation"]
 
 
 def test_ai_explanation_includes_traditional_form(monkeypatch):
@@ -184,6 +218,18 @@ def test_ai_explanation_does_not_cache_errors(monkeypatch):
     assert result is None
     assert error == "temporary error"
     assert mandarin_app.AI_EXPLANATION_CACHE == {}
+
+
+def test_fetch_ai_explanation_handles_socket_timeout(monkeypatch):
+    def fake_urlopen(request, timeout):
+        raise mandarin_app.socket.timeout("timed out")
+
+    monkeypatch.setattr(mandarin_app.urllib.request, "urlopen", fake_urlopen)
+
+    result, error = mandarin_app.fetch_ai_explanation("最後")
+
+    assert result is None
+    assert "AI explanation is unavailable" in error
 
 
 def test_ollama_health_url_uses_configured_host(monkeypatch):
