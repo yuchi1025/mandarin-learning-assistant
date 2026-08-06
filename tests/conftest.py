@@ -13,3 +13,6 @@ for path in (SRC_PATH, SCRIPTS_PATH):
         sys.path.insert(0, path_text)
 
 os.environ.setdefault("OLLAMA_AUTO_START", "0")
+TEST_PROGRESS_DB_PATH = Path(os.getenv("PROGRESS_DB_PATH", "/tmp/mandarin-learning-assistant-test-progress.db"))
+TEST_PROGRESS_DB_PATH.unlink(missing_ok=True)
+os.environ.setdefault("PROGRESS_DB_PATH", str(TEST_PROGRESS_DB_PATH))

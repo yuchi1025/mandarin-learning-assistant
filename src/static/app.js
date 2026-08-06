@@ -250,7 +250,8 @@ function renderAiError(card, message) {
 
 function loadAiResult(card) {
     const query = card.dataset.aiQuery;
-    fetch(`/api/ai-explanation?query=${encodeURIComponent(query)}`)
+    const mode = card.dataset.aiMode || "search";
+    return fetch(`/api/ai-explanation?query=${encodeURIComponent(query)}&mode=${encodeURIComponent(mode)}`)
         .then(function (response) {
             return response.json().then(function (data) {
                 return { status: response.status, data: data };
@@ -270,9 +271,12 @@ function loadAiResult(card) {
 }
 
 function loadAiResults() {
-    document.querySelectorAll(".ai-result-card[data-ai-query]").forEach(function (card) {
-        loadAiResult(card);
-    });
+    const cards = Array.from(document.querySelectorAll(".ai-result-card[data-ai-query]"));
+    cards.reduce(function (chain, card) {
+        return chain.then(function () {
+            return loadAiResult(card);
+        });
+    }, Promise.resolve());
 }
 
 function getRecentSearches() {

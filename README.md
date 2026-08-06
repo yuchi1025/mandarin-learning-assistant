@@ -21,10 +21,11 @@ Current version: `v3.1.1`
 
 - What was achieved:
   - Built a working local prototype of a Mandarin Learning Assistant for individual self-study.
-  - Combined dictionary lookup, pinyin support, pronunciation audio, example sentences, recent searches, AI fallback, and quiz practice in one web app.
+  - Combined dictionary lookup, pinyin support, pronunciation audio, example sentences, recent searches, AI fallback, batch lookup, progress tracking, and quiz practice in one web app.
   - Enabled learners to search by Chinese, English, pinyin with tone marks, or pinyin without tone marks.
   - Added local AI fallback so unknown valid words can show a structured explanation instead of only returning “not found.”
   - Added Quiz Mode so lookup can turn into active recall practice with immediate feedback.
+  - Added Progress Mode so searched words are stored locally and can be reviewed by day.
 
 ---
 
@@ -41,8 +42,10 @@ From the learner's perspective:
 7. Search by pinyin without tone marks, such as `zuo bian`.
 8. Click a Recent Searches chip to return to an older lookup.
 9. Search a word not in the built-in dictionary and watch the local AI loading state.
-10. Switch to Quiz Mode, choose a wrong answer, then choose the correct answer.
-11. Continue to the next quiz and choose a correct answer directly.
+10. Use Batch Mode to search several words at once.
+11. Open Progress Mode to review today’s searched words and overall activity.
+12. Switch to Quiz Mode, choose a wrong answer, then choose the correct answer.
+13. Continue to the next quiz and choose a correct answer directly.
 
 Screenshots:
 
@@ -72,6 +75,7 @@ The demo video shows a visible cursor performing Chinese search, English search,
 
 - `Python` for application logic and utility scripts
 - `Flask` for web routes, form handling, static/data asset serving, and the AI explanation API endpoint
+- `SQLite` for local progress history in `data/progress.db`
 - `pypinyin` for tone-marked pinyin generation
 - `Ollama local API` for optional unknown-word AI explanations
 - `gemma3` as the default local explanation model
@@ -225,6 +229,8 @@ Set `OLLAMA_AUTO_START=0` if you prefer to manage Ollama yourself.
 
 The app still runs without Ollama. In that case, built-in dictionary lookup and quiz mode work normally, while unknown-word AI fallback returns an unavailable message.
 
+Progress history is stored locally in `data/progress.db`. This runtime database is ignored by git.
+
 ---
 
 ## Data Validation
@@ -247,7 +253,7 @@ Run the automated tests:
 python3 -m pytest
 ```
 
-The current `16`-test suite covers dictionary quality, consistent dictionary field order, tone-marked dictionary pinyin, exact search behavior, partial search behavior, punctuation-only input, basic Flask routes, static JavaScript loading, invalid AI endpoint input, AI-learned quiz entries, AI cache cleanup, and cleaned sentence-audio text.
+The pytest suite covers dictionary quality, consistent dictionary field order, tone-marked dictionary pinyin, exact search behavior, partial search behavior, punctuation-only input, basic Flask routes, static JavaScript loading, invalid AI endpoint input, batch search, progress logging, AI-learned quiz entries, AI cache cleanup, and cleaned sentence-audio text.
 
 ---
 

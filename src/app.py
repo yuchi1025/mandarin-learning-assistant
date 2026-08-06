@@ -4,14 +4,17 @@ from pathlib import Path
 import random
 import re
 import socket
+import sqlite3
 import subprocess
 import tempfile
 import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime
 
 from flask import after_this_request, Flask, jsonify, render_template, request, send_file, send_from_directory
+from opencc import OpenCC
 from pypinyin import Style, lazy_pinyin
 
 app = Flask(__name__)
@@ -20,12 +23,15 @@ RECENT_QUIZ_LIMIT = 5
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/chat")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma3")
 OLLAMA_KEEP_ALIVE = os.getenv("OLLAMA_KEEP_ALIVE", "15m")
+OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "45"))
 OLLAMA_COMMAND = os.getenv("OLLAMA_COMMAND", "ollama")
 OLLAMA_AUTO_START = os.getenv("OLLAMA_AUTO_START", "1").lower() not in {"0", "false", "no"}
 TTS_VOICE = os.getenv("TTS_VOICE", "Tingting")
 TTS_COMMAND = os.getenv("TTS_COMMAND", "/usr/bin/say")
 AI_EXPLANATION_CACHE = {}
 OLLAMA_START_ATTEMPTED = False
+TO_SIMPLIFIED = OpenCC("t2s")
+TO_TRADITIONAL = OpenCC("s2t")
 VALID_PARTS_OF_SPEECH = {
     "noun",
     "verb",
@@ -44,11 +50,13 @@ VALID_PARTS_OF_SPEECH = {
 
 
 DICTIONARY_PATH = Path(__file__).resolve().parent.parent / "data" / "dictionary.json"
+PROGRESS_DB_PATH = Path(os.getenv("PROGRESS_DB_PATH", Path(__file__).resolve().parent.parent / "data" / "progress.db"))
 PINYIN_PHRASE_OVERRIDES = {
     "不记得": "bú jì dé",
     "不記得": "bú jì dé",
     "行为": "xíng wéi",
     "行為": "xíng wéi",
+    "日期": "rì qí",
     "记得": "jì dé",
     "記得": "jì dé",
 }
@@ -137,82 +145,168 @@ def load_dictionary():
 
 DICTIONARY_ENTRIES = load_dictionary()
 
-COMMON_TRADITIONAL_TO_SIMPLIFIED_CHARS = {
-    "樣": "样",
-}
-COMMON_SIMPLIFIED_TO_TRADITIONAL_CHARS = {
-    "业": "業",
-    "样": "樣",
-}
+
+def get_progress_connection():
+    PROGRESS_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    connection = sqlite3.connect(PROGRESS_DB_PATH)
+    connection.row_factory = sqlite3.Row
+    return connection
 
 
-def build_script_maps(entries):
-    traditional_to_simplified = {}
-    simplified_to_traditional = {}
-    traditional_char_to_simplified = dict(COMMON_TRADITIONAL_TO_SIMPLIFIED_CHARS)
-    simplified_char_to_traditional = dict(COMMON_SIMPLIFIED_TO_TRADITIONAL_CHARS)
+def init_progress_db():
+    with get_progress_connection() as connection:
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS search_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                searched_at TEXT NOT NULL,
+                query TEXT NOT NULL,
+                word TEXT,
+                traditional TEXT,
+                pinyin TEXT,
+                english TEXT,
+                source TEXT NOT NULL,
+                mode TEXT NOT NULL
+            )
+            """
+        )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_search_events_searched_at ON search_events (searched_at)"
+        )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_search_events_word ON search_events (word)"
+        )
 
-    for entry in entries:
-        word = entry["word"]
-        traditional = entry["traditional"]
-        traditional_to_simplified[traditional] = word
-        simplified_to_traditional[word] = traditional
-        if len(word) == len(traditional):
-            for simplified_char, traditional_char in zip(word, traditional):
-                if simplified_char != traditional_char:
-                    traditional_char_to_simplified.setdefault(traditional_char, simplified_char)
-                    simplified_char_to_traditional.setdefault(simplified_char, traditional_char)
 
-    return (
-        traditional_to_simplified,
-        simplified_to_traditional,
-        traditional_char_to_simplified,
-        simplified_char_to_traditional,
-    )
+def row_to_dict(row):
+    return dict(row) if row else None
 
 
-(
-    TRADITIONAL_TO_SIMPLIFIED,
-    SIMPLIFIED_TO_TRADITIONAL,
-    TRADITIONAL_CHAR_TO_SIMPLIFIED,
-    SIMPLIFIED_CHAR_TO_TRADITIONAL,
-) = build_script_maps(DICTIONARY_ENTRIES)
+def log_progress_event(query, entry, source, mode):
+    word = str(entry.get("word", "")).strip()
+    if not word:
+        return
 
+    init_progress_db()
+    with get_progress_connection() as connection:
+        connection.execute(
+            """
+            INSERT INTO search_events (
+                searched_at, query, word, traditional, pinyin, english, source, mode
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                datetime.now().isoformat(timespec="seconds"),
+                query.strip(),
+                word,
+                str(entry.get("traditional", word)).strip() or word,
+                str(entry.get("pinyin", "")).strip(),
+                str(entry.get("english", "")).strip(),
+                source,
+                mode,
+            ),
+        )
+
+
+def get_progress_summary():
+    init_progress_db()
+    today = datetime.now().date().isoformat()
+
+    with get_progress_connection() as connection:
+        total_searches = connection.execute("SELECT COUNT(*) AS count FROM search_events").fetchone()["count"]
+        unique_words = connection.execute(
+            "SELECT COUNT(DISTINCT word) AS count FROM search_events WHERE word IS NOT NULL AND word != ''"
+        ).fetchone()["count"]
+        today_count = connection.execute(
+            "SELECT COUNT(*) AS count FROM search_events WHERE substr(searched_at, 1, 10) = ?",
+            (today,),
+        ).fetchone()["count"]
+        today_events = [
+            row_to_dict(row)
+            for row in connection.execute(
+                """
+                SELECT searched_at, query, word, traditional, pinyin, english, source, mode
+                FROM search_events
+                WHERE substr(searched_at, 1, 10) = ?
+                ORDER BY searched_at DESC, id DESC
+                LIMIT 20
+                """,
+                (today,),
+            )
+        ]
+        recent_events = [
+            row_to_dict(row)
+            for row in connection.execute(
+                """
+                SELECT searched_at, query, word, traditional, pinyin, english, source, mode
+                FROM search_events
+                ORDER BY searched_at DESC, id DESC
+                LIMIT 20
+                """
+            )
+        ]
+        daily_counts = [
+            row_to_dict(row)
+            for row in connection.execute(
+                """
+                SELECT substr(searched_at, 1, 10) AS day, COUNT(*) AS count
+                FROM search_events
+                GROUP BY day
+                ORDER BY day DESC
+                LIMIT 14
+                """
+            )
+        ]
+        top_words = [
+            row_to_dict(row)
+            for row in connection.execute(
+                """
+                SELECT word, traditional, pinyin, english, COUNT(*) AS count
+                FROM search_events
+                WHERE word IS NOT NULL AND word != ''
+                GROUP BY word, traditional, pinyin, english
+                ORDER BY count DESC, MAX(searched_at) DESC
+                LIMIT 10
+                """
+            )
+        ]
+
+    return {
+        "total_searches": total_searches,
+        "unique_words": unique_words,
+        "today_count": today_count,
+        "today_events": today_events,
+        "recent_events": recent_events,
+        "daily_counts": daily_counts,
+        "top_words": top_words,
+    }
 
 def simplify_known_traditional_text(text):
-    if text in TRADITIONAL_TO_SIMPLIFIED:
-        return TRADITIONAL_TO_SIMPLIFIED[text]
-    return "".join(TRADITIONAL_CHAR_TO_SIMPLIFIED.get(char, char) for char in text)
+    return TO_SIMPLIFIED.convert(text)
 
 
 def traditionalize_known_simplified_text(text):
-    if text in SIMPLIFIED_TO_TRADITIONAL:
-        return SIMPLIFIED_TO_TRADITIONAL[text]
-    return "".join(SIMPLIFIED_CHAR_TO_TRADITIONAL.get(char, char) for char in text)
+    return TO_TRADITIONAL.convert(text)
+
+
+def clean_ai_word_form(text):
+    cleaned = re.sub(r"\([^)]*\)", "", text).strip()
+    if not contains_chinese(cleaned):
+        return cleaned
+    return "".join(char for char in cleaned if "\u4e00" <= char <= "\u9fff")
 
 
 def normalize_ai_word_forms(query, word, traditional):
-    word = word.strip()
-    traditional = traditional.strip() or word
+    word = clean_ai_word_form(word)
+    traditional = clean_ai_word_form(traditional) or word
 
-    if word in TRADITIONAL_TO_SIMPLIFIED:
-        traditional = word
-        word = TRADITIONAL_TO_SIMPLIFIED[word]
-    elif word in SIMPLIFIED_TO_TRADITIONAL:
-        traditional = SIMPLIFIED_TO_TRADITIONAL[word]
-    elif word == traditional and contains_chinese(word):
-        simplified_word = simplify_known_traditional_text(word)
-        if simplified_word != word:
-            traditional = word
-            word = simplified_word
-        else:
-            traditional_word = traditionalize_known_simplified_text(word)
-            if traditional_word != word:
-                traditional = traditional_word
-
-    if query.strip() in TRADITIONAL_TO_SIMPLIFIED and word == query.strip():
-        traditional = query.strip()
-        word = TRADITIONAL_TO_SIMPLIFIED[query.strip()]
+    if contains_chinese(word):
+        word = simplify_known_traditional_text(word)
+        traditional = traditionalize_known_simplified_text(word)
+    elif contains_chinese(traditional):
+        word = simplify_known_traditional_text(traditional)
+        traditional = traditionalize_known_simplified_text(word)
 
     return word, traditional
 
@@ -507,7 +601,7 @@ def fetch_ai_explanation(query):
     )
 
     try:
-        with urllib.request.urlopen(http_request, timeout=20) as response:
+        with urllib.request.urlopen(http_request, timeout=OLLAMA_TIMEOUT) as response:
             response_data = json.loads(response.read().decode("utf-8"))
     except (OSError, TimeoutError, socket.timeout, urllib.error.URLError, json.JSONDecodeError) as exc:
         return None, f"AI explanation is unavailable right now. Start Ollama and load `{OLLAMA_MODEL}`. ({exc})"
@@ -663,6 +757,7 @@ def home():
     ai_pending = False
     quiz = build_quiz(recent_words=recent_words)
     quiz_feedback = None
+    progress_summary = get_progress_summary() if mode == "progress" else None
 
     if request.method == "POST":
         form_type = request.form.get("form_type")
@@ -671,12 +766,16 @@ def home():
             mode = "search"
             query = request.form.get("query", "")
             results = search_entries(query)
+            for entry in results:
+                log_progress_event(query, entry, "dictionary", "search")
             if not results and is_meaningful_query(query):
                 ai_pending = True
         elif form_type == "batch":
             mode = "batch"
             query = request.form.get("query", "")
             results, batch_missing, batch_ai_queries = batch_search_entries(query)
+            for entry in results:
+                log_progress_event(query, entry, "dictionary", "batch")
         elif form_type == "quiz":
             mode = "quiz"
             query = request.form.get("query", "")
@@ -699,6 +798,9 @@ def home():
                     "wrong_pinyin": wrong_entry["pinyin"] if wrong_entry else "",
                 }
 
+    if mode == "progress":
+        progress_summary = get_progress_summary()
+
     return render_template(
         "index.html",
         mode=mode,
@@ -710,12 +812,14 @@ def home():
         quiz=quiz,
         quiz_feedback=quiz_feedback,
         recent_words=recent_words,
+        progress_summary=progress_summary,
     )
 
 
 @app.get("/api/ai-explanation")
 def ai_explanation():
     query = request.args.get("query", "")
+    mode = request.args.get("mode", "search")
     if not is_meaningful_query(query):
         return jsonify({"ok": False, "error": "Please enter a real Chinese word, pinyin, or English meaning."}), 400
 
@@ -723,6 +827,7 @@ def ai_explanation():
     if error:
         return jsonify({"ok": False, "error": error}), 503
 
+    log_progress_event(query, result, "ai", mode if mode in {"search", "batch"} else "search")
     return jsonify({"ok": True, "result": result})
 
 

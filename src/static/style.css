@@ -100,7 +100,9 @@ h1 {
 .quiz-card,
 .result-card,
 .empty-state,
-.batch-missing {
+.batch-missing,
+.progress-dashboard,
+.progress-panel {
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 18px;
@@ -260,9 +262,71 @@ h1 {
 
 .result-card,
 .empty-state,
-.batch-missing {
+.batch-missing,
+.progress-dashboard,
+.progress-panel {
     padding: 22px;
     margin-bottom: 18px;
+}
+
+.progress-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.progress-stat {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #fff;
+    padding: 14px;
+}
+
+.progress-stat span,
+.progress-source,
+.progress-empty {
+    color: #6a5b4d;
+}
+
+.progress-stat span {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.progress-stat strong {
+    font-size: 1.7rem;
+}
+
+.progress-panel h2 {
+    margin: 0 0 14px;
+    font-size: 1.15rem;
+}
+
+.progress-list {
+    display: grid;
+    gap: 10px;
+}
+
+.progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #fff;
+    padding: 12px 14px;
+}
+
+.progress-pinyin {
+    color: var(--accent);
+    font-style: italic;
+    margin-left: 8px;
+}
+
+.progress-traditional {
+    margin-left: 4px;
 }
 
 .missing-chip {
@@ -449,9 +513,14 @@ ul {
     .search-form,
     .batch-search-form,
     .card-header,
-    .example-item {
+    .example-item,
+    .progress-row {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .progress-stats {
+        grid-template-columns: 1fr;
     }
 
     .search-form button,

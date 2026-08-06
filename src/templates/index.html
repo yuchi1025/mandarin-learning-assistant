@@ -38,6 +38,9 @@
             <a href="{{ url_for('home', mode='quiz') }}" class="{% if mode == 'quiz' %}active{% endif %}">
                 Quiz Mode
             </a>
+            <a href="{{ url_for('home', mode='progress') }}" class="{% if mode == 'progress' %}active{% endif %}">
+                Progress Mode
+            </a>
         </nav>
 
         {% if mode == 'search' or mode == 'batch' %}
@@ -107,7 +110,7 @@
             {% endif %}
 
             {% if mode == 'search' and ai_pending %}
-                <section class="result-card ai-result-card ai-loading-card" id="ai-result-card" data-ai-query="{{ query }}">
+                <section class="result-card ai-result-card ai-loading-card" id="ai-result-card" data-ai-query="{{ query }}" data-ai-mode="search">
                     <div class="ai-loading-shell">
                         <div class="ai-spinner" aria-hidden="true"></div>
                     </div>
@@ -116,7 +119,7 @@
 
             {% if mode == 'batch' and batch_ai_queries %}
                 {% for ai_query in batch_ai_queries %}
-                    <section class="result-card ai-result-card ai-loading-card batch-ai-result-card" data-ai-query="{{ ai_query }}">
+                    <section class="result-card ai-result-card ai-loading-card batch-ai-result-card" data-ai-query="{{ ai_query }}" data-ai-mode="batch">
                         <div class="ai-loading-shell">
                             <div class="ai-spinner" aria-hidden="true"></div>
                         </div>
@@ -233,8 +236,87 @@
                 {% endif %}
             </section>
         {% endif %}
+
+        {% if mode == 'progress' %}
+            <section class="progress-dashboard">
+                <div class="progress-stats">
+                    <div class="progress-stat">
+                        <span>Total Searches</span>
+                        <strong>{{ progress_summary.total_searches }}</strong>
+                    </div>
+                    <div class="progress-stat">
+                        <span>Unique Words</span>
+                        <strong>{{ progress_summary.unique_words }}</strong>
+                    </div>
+                    <div class="progress-stat">
+                        <span>Today</span>
+                        <strong>{{ progress_summary.today_count }}</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="progress-panel">
+                <h2>Today</h2>
+                {% if progress_summary.today_events %}
+                    <div class="progress-list">
+                        {% for event in progress_summary.today_events %}
+                            <div class="progress-row">
+                                <div>
+                                    <strong>{{ event.word }}</strong>
+                                    {% if event.traditional and event.traditional != event.word %}
+                                        <span class="progress-traditional">/ {{ event.traditional }}</span>
+                                    {% endif %}
+                                    <span class="progress-pinyin">{{ event.pinyin }}</span>
+                                </div>
+                                <span class="progress-source">{{ event.source }} · {{ event.mode }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="progress-empty">No searches recorded today.</p>
+                {% endif %}
+            </section>
+
+            <section class="progress-panel">
+                <h2>Daily Activity</h2>
+                {% if progress_summary.daily_counts %}
+                    <div class="progress-list compact-progress-list">
+                        {% for day in progress_summary.daily_counts %}
+                            <div class="progress-row">
+                                <strong>{{ day.day }}</strong>
+                                <span>{{ day.count }} searches</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="progress-empty">No search history yet.</p>
+                {% endif %}
+            </section>
+
+            <section class="progress-panel">
+                <h2>Most Searched</h2>
+                {% if progress_summary.top_words %}
+                    <div class="progress-list">
+                        {% for item in progress_summary.top_words %}
+                            <div class="progress-row">
+                                <div>
+                                    <strong>{{ item.word }}</strong>
+                                    {% if item.traditional and item.traditional != item.word %}
+                                        <span class="progress-traditional">/ {{ item.traditional }}</span>
+                                    {% endif %}
+                                    <span class="progress-pinyin">{{ item.pinyin }}</span>
+                                </div>
+                                <span>{{ item.count }} times</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="progress-empty">No repeated searches yet.</p>
+                {% endif %}
+            </section>
+        {% endif %}
     </main>
 
-    <script src="{{ url_for('static', filename='app.js') }}?v=3.1.1-audio-single-source"></script>
+    <script src="{{ url_for('static', filename='app.js') }}?v=3.1.1-progress-batch-ai"></script>
 </body>
 </html>

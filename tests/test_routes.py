@@ -26,6 +26,12 @@ class FakeUrlopenResponse:
         return self.payload
 
 
+def use_temp_progress_db(monkeypatch, tmp_path):
+    db_path = tmp_path / "progress.db"
+    monkeypatch.setattr(mandarin_app, "PROGRESS_DB_PATH", db_path)
+    return db_path
+
+
 def test_home_page_loads():
     client = mandarin_app.app.test_client()
 
@@ -51,6 +57,21 @@ def test_search_post_renders_result():
 
     assert response.status_code == 200
     assert "机场".encode("utf-8") in response.data
+
+
+def test_search_post_logs_dictionary_progress(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    client = mandarin_app.app.test_client()
+
+    response = client.post("/", data={"form_type": "search", "query": "airport"})
+    summary = mandarin_app.get_progress_summary()
+
+    assert response.status_code == 200
+    assert summary["total_searches"] == 1
+    assert summary["today_events"][0]["query"] == "airport"
+    assert summary["today_events"][0]["word"] == "机场"
+    assert summary["today_events"][0]["source"] == "dictionary"
+    assert summary["today_events"][0]["mode"] == "search"
 
 
 def test_batch_search_post_renders_multiple_cards():
@@ -87,6 +108,18 @@ def test_batch_search_renders_ai_placeholders_for_unknown_words():
     assert b"No Match" not in response.data
 
 
+def test_batch_search_logs_dictionary_progress(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    client = mandarin_app.app.test_client()
+
+    response = client.post("/", data={"form_type": "batch", "query": "airport\nfriend"})
+    summary = mandarin_app.get_progress_summary()
+
+    assert response.status_code == 200
+    assert summary["total_searches"] == 2
+    assert [event["mode"] for event in summary["today_events"]] == ["batch", "batch"]
+
+
 def test_batch_search_entries_deduplicates_result_cards():
     results, missing_queries, ai_queries = mandarin_app.batch_search_entries("airport, airport")
 
@@ -112,6 +145,44 @@ def test_ai_endpoint_rejects_punctuation_only_query():
     assert response.get_json()["ok"] is False
 
 
+def test_ai_endpoint_logs_progress(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    client = mandarin_app.app.test_client()
+    result = {
+        "word": "狮子",
+        "traditional": "獅子",
+        "pinyin": "shī zi",
+        "english": "lion",
+        "part_of_speech": "noun",
+        "explanation": "A large wild animal.",
+        "examples": [],
+    }
+
+    monkeypatch.setattr(mandarin_app, "get_ai_explanation", lambda query: (result, None))
+
+    response = client.get("/api/ai-explanation", query_string={"query": "lion", "mode": "batch"})
+    summary = mandarin_app.get_progress_summary()
+
+    assert response.status_code == 200
+    assert summary["total_searches"] == 1
+    assert summary["today_events"][0]["word"] == "狮子"
+    assert summary["today_events"][0]["source"] == "ai"
+    assert summary["today_events"][0]["mode"] == "batch"
+
+
+def test_progress_mode_renders_summary(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    client = mandarin_app.app.test_client()
+
+    client.post("/", data={"form_type": "search", "query": "airport"})
+    response = client.get("/", query_string={"mode": "progress"})
+
+    assert response.status_code == 200
+    assert b"Progress Mode" in response.data
+    assert b"Total Searches" in response.data
+    assert "机场".encode("utf-8") in response.data
+
+
 def test_ai_result_accepts_traditional_query_match():
     result = {
         "word": "学习",
@@ -135,6 +206,11 @@ def test_sentence_pinyin_uses_phrase_override_for_behavior():
     assert mandarin_app.to_sentence_pinyin("行为") == "xíng wéi"
     assert mandarin_app.to_sentence_pinyin("行為") == "xíng wéi"
     assert mandarin_app.to_sentence_pinyin("他的行为很奇怪。") == "tā de xíng wéi hěn qí guài。"
+
+
+def test_sentence_pinyin_uses_phrase_override_for_date():
+    assert mandarin_app.to_sentence_pinyin("日期") == "rì qí"
+    assert mandarin_app.to_sentence_pinyin("这个日期很重要。") == "zhè gè rì qí hěn zhòng yào。"
 
 
 def test_curated_ai_result_corrects_qiannian_meaning():
@@ -207,6 +283,34 @@ def test_normalize_ai_word_forms_traditionalizes_known_simplified_characters():
 
     assert word == "作业"
     assert traditional == "作業"
+
+
+def test_normalize_ai_word_forms_cleans_pinyin_from_word():
+    word, traditional = mandarin_app.normalize_ai_word_forms("nervous", "紧张 (jǐnzhāng)", "緊張")
+
+    assert word == "紧张"
+    assert traditional == "緊張"
+
+
+def test_normalize_ai_word_forms_traditionalizes_survey():
+    word, traditional = mandarin_app.normalize_ai_word_forms("survey", "调查", "调查")
+
+    assert word == "调查"
+    assert traditional == "調查"
+
+
+def test_normalize_ai_word_forms_traditionalizes_order_food():
+    word, traditional = mandarin_app.normalize_ai_word_forms("order food", "点餐", "点餐")
+
+    assert word == "点餐"
+    assert traditional == "點餐"
+
+
+def test_normalize_ai_word_forms_handles_traditional_order_food():
+    word, traditional = mandarin_app.normalize_ai_word_forms("order food", "點餐", "點餐")
+
+    assert word == "点餐"
+    assert traditional == "點餐"
 
 
 def test_ai_explanation_does_not_cache_errors(monkeypatch):
