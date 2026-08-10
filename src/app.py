@@ -209,9 +209,14 @@ def log_progress_event(query, entry, source, mode):
         )
 
 
-def get_progress_summary():
+def get_progress_summary(selected_day=None):
     init_progress_db()
     today = datetime.now().date().isoformat()
+    if selected_day:
+        try:
+            selected_day = datetime.strptime(selected_day, "%Y-%m-%d").date().isoformat()
+        except ValueError:
+            selected_day = None
 
     with get_progress_connection() as connection:
         total_searches = connection.execute("SELECT COUNT(*) AS count FROM search_events").fetchone()["count"]
@@ -228,13 +233,35 @@ def get_progress_summary():
                 """
                 SELECT searched_at, query, word, traditional, pinyin, english, source, mode
                 FROM search_events
-                WHERE substr(searched_at, 1, 10) = ?
+                WHERE id IN (
+                    SELECT MAX(id)
+                    FROM search_events
+                    WHERE substr(searched_at, 1, 10) = ?
+                    GROUP BY word
+                )
                 ORDER BY searched_at DESC, id DESC
                 LIMIT 20
                 """,
                 (today,),
             )
         ]
+        selected_day_events = [
+            row_to_dict(row)
+            for row in connection.execute(
+                """
+                SELECT searched_at, query, word, traditional, pinyin, english, source, mode
+                FROM search_events
+                WHERE id IN (
+                    SELECT MAX(id)
+                    FROM search_events
+                    WHERE substr(searched_at, 1, 10) = ?
+                    GROUP BY word
+                )
+                ORDER BY searched_at DESC, id DESC
+                """,
+                (selected_day,),
+            )
+        ] if selected_day else []
         recent_events = [
             row_to_dict(row)
             for row in connection.execute(
@@ -277,6 +304,8 @@ def get_progress_summary():
         "unique_words": unique_words,
         "today_count": today_count,
         "today_events": today_events,
+        "selected_day": selected_day,
+        "selected_day_events": selected_day_events,
         "recent_events": recent_events,
         "daily_counts": daily_counts,
         "top_words": top_words,
@@ -749,6 +778,7 @@ def build_quiz(question_word=None, exclude_word=None, choices=None, recent_words
 @app.route("/", methods=["GET", "POST"])
 def home():
     mode = request.args.get("mode", "search")
+    progress_day = request.args.get("day")
     recent_words = request.args.getlist("recent_word")
     query = ""
     results = []
@@ -757,7 +787,7 @@ def home():
     ai_pending = False
     quiz = build_quiz(recent_words=recent_words)
     quiz_feedback = None
-    progress_summary = get_progress_summary() if mode == "progress" else None
+    progress_summary = get_progress_summary(progress_day) if mode == "progress" else None
 
     if request.method == "POST":
         form_type = request.form.get("form_type")
@@ -799,7 +829,7 @@ def home():
                 }
 
     if mode == "progress":
-        progress_summary = get_progress_summary()
+        progress_summary = get_progress_summary(progress_day)
 
     return render_template(
         "index.html",

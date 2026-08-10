@@ -74,6 +74,19 @@ def test_search_post_logs_dictionary_progress(monkeypatch, tmp_path):
     assert summary["today_events"][0]["mode"] == "search"
 
 
+def test_progress_summary_shows_each_word_once_per_day(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    client = mandarin_app.app.test_client()
+
+    client.post("/", data={"form_type": "search", "query": "airport"})
+    client.post("/", data={"form_type": "search", "query": "airport"})
+    summary = mandarin_app.get_progress_summary()
+
+    assert summary["total_searches"] == 2
+    assert len(summary["today_events"]) == 1
+    assert summary["today_events"][0]["word"] == "机场"
+
+
 def test_batch_search_post_renders_multiple_cards():
     client = mandarin_app.app.test_client()
 
@@ -181,6 +194,20 @@ def test_progress_mode_renders_summary(monkeypatch, tmp_path):
     assert b"Progress Mode" in response.data
     assert b"Total Searches" in response.data
     assert "机场".encode("utf-8") in response.data
+
+
+def test_progress_mode_shows_searches_for_selected_day(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    client = mandarin_app.app.test_client()
+
+    client.post("/", data={"form_type": "search", "query": "airport"})
+    day = mandarin_app.datetime.now().date().isoformat()
+    response = client.get("/", query_string={"mode": "progress", "day": day})
+
+    assert response.status_code == 200
+    assert f"Searches on {day}".encode("utf-8") in response.data
+    assert "机场".encode("utf-8") in response.data
+    assert b"progress-day-link selected" in response.data
 
 
 def test_ai_result_accepts_traditional_query_match():

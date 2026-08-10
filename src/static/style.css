@@ -319,6 +319,24 @@ h1 {
     padding: 12px 14px;
 }
 
+.progress-day-link {
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.progress-day-link:hover,
+.progress-day-link:focus-visible,
+.progress-day-link.selected {
+    border-color: var(--accent);
+    background: #fff1ec;
+}
+
+.progress-day-link:focus-visible {
+    outline: 3px solid var(--accent-soft);
+    outline-offset: 2px;
+}
+
 .progress-pinyin {
     color: var(--accent);
     font-style: italic;

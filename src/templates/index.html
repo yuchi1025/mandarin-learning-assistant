@@ -282,16 +282,44 @@
                 {% if progress_summary.daily_counts %}
                     <div class="progress-list compact-progress-list">
                         {% for day in progress_summary.daily_counts %}
-                            <div class="progress-row">
+                            <a
+                                href="{{ url_for('home', mode='progress', day=day.day) }}#day-searches"
+                                class="progress-row progress-day-link {% if progress_summary.selected_day == day.day %}selected{% endif %}"
+                                {% if progress_summary.selected_day == day.day %}aria-current="true"{% endif %}
+                            >
                                 <strong>{{ day.day }}</strong>
                                 <span>{{ day.count }} searches</span>
-                            </div>
+                            </a>
                         {% endfor %}
                     </div>
                 {% else %}
                     <p class="progress-empty">No search history yet.</p>
                 {% endif %}
             </section>
+
+            {% if progress_summary.selected_day %}
+                <section class="progress-panel" id="day-searches">
+                    <h2>Searches on {{ progress_summary.selected_day }}</h2>
+                    {% if progress_summary.selected_day_events %}
+                        <div class="progress-list">
+                            {% for event in progress_summary.selected_day_events %}
+                                <div class="progress-row">
+                                    <div>
+                                        <strong>{{ event.word }}</strong>
+                                        {% if event.traditional and event.traditional != event.word %}
+                                            <span class="progress-traditional">/ {{ event.traditional }}</span>
+                                        {% endif %}
+                                        <span class="progress-pinyin">{{ event.pinyin }}</span>
+                                    </div>
+                                    <span class="progress-source">{{ event.source }} · {{ event.mode }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="progress-empty">No searches recorded on this day.</p>
+                    {% endif %}
+                </section>
+            {% endif %}
 
             <section class="progress-panel">
                 <h2>Most Searched</h2>
@@ -317,6 +345,6 @@
         {% endif %}
     </main>
 
-    <script src="{{ url_for('static', filename='app.js') }}?v=3.1.1-progress-batch-ai"></script>
+    <script src="{{ url_for('static', filename='app.js') }}?v=3.1.1-progress-day-details"></script>
 </body>
 </html>
