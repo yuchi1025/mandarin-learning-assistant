@@ -35,6 +35,9 @@
             <a href="{{ url_for('home', mode='batch') }}" class="{% if mode == 'batch' %}active{% endif %}">
                 Batch Mode
             </a>
+            <a href="{{ url_for('home', mode='convert') }}" class="{% if mode == 'convert' %}active{% endif %}">
+                Convert Mode
+            </a>
             <a href="{{ url_for('home', mode='quiz') }}" class="{% if mode == 'quiz' %}active{% endif %}">
                 Quiz Mode
             </a>
@@ -187,6 +190,41 @@
                     </div>
                 </section>
             {% endfor %}
+        {% endif %}
+
+        {% if mode == 'convert' %}
+            <section class="convert-panel">
+                <form method="post" class="convert-form">
+                    <input type="hidden" name="form_type" value="convert">
+                    <label for="convert-input">Chinese text</label>
+                    <textarea
+                        id="convert-input"
+                        name="text"
+                        placeholder="Paste Simplified or Traditional Chinese text"
+                        required
+                    >{{ conversion_text }}</textarea>
+                    <button type="submit">Convert</button>
+                </form>
+            </section>
+
+            {% if conversion_text %}
+                <section class="convert-results" aria-label="Chinese conversion results">
+                    <article class="convert-result">
+                        <div class="convert-result-header">
+                            <h2>Simplified Chinese</h2>
+                            <button type="button" class="copy-button" data-copy-target="simplified-output">Copy</button>
+                        </div>
+                        <pre id="simplified-output">{{ converted_simplified }}</pre>
+                    </article>
+                    <article class="convert-result">
+                        <div class="convert-result-header">
+                            <h2>Traditional Chinese</h2>
+                            <button type="button" class="copy-button" data-copy-target="traditional-output">Copy</button>
+                        </div>
+                        <pre id="traditional-output">{{ converted_traditional }}</pre>
+                    </article>
+                </section>
+            {% endif %}
         {% endif %}
 
         {% if mode == 'quiz' %}
@@ -345,6 +383,6 @@
         {% endif %}
     </main>
 
-    <script src="{{ url_for('static', filename='app.js') }}?v=3.1.1-progress-day-details"></script>
+    <script src="{{ url_for('static', filename='app.js') }}?v=3.1.1-convert-mode"></script>
 </body>
 </html>

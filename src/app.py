@@ -795,6 +795,9 @@ def home():
     batch_missing = []
     batch_ai_queries = []
     ai_pending = False
+    conversion_text = ""
+    converted_simplified = ""
+    converted_traditional = ""
     quiz = build_quiz(recent_words=recent_words)
     quiz_feedback = None
     progress_summary = get_progress_summary(progress_day) if mode == "progress" else None
@@ -816,6 +819,11 @@ def home():
             results, batch_missing, batch_ai_queries = batch_search_entries(query)
             for entry in results:
                 log_progress_event(query, entry, "dictionary", "batch")
+        elif form_type == "convert":
+            mode = "convert"
+            conversion_text = request.form.get("text", "")
+            converted_simplified = simplify_known_traditional_text(conversion_text)
+            converted_traditional = traditionalize_known_simplified_text(conversion_text)
         elif form_type == "quiz":
             mode = "quiz"
             query = request.form.get("query", "")
@@ -849,6 +857,9 @@ def home():
         batch_missing=batch_missing,
         batch_ai_queries=batch_ai_queries,
         ai_pending=ai_pending,
+        conversion_text=conversion_text,
+        converted_simplified=converted_simplified,
+        converted_traditional=converted_traditional,
         quiz=quiz,
         quiz_feedback=quiz_feedback,
         recent_words=recent_words,

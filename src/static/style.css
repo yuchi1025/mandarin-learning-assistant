@@ -57,6 +57,7 @@ body {
 
 .mode-switch {
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 24px;
 }
@@ -97,6 +98,7 @@ h1 {
 }
 
 .search-panel,
+.convert-panel,
 .quiz-card,
 .result-card,
 .empty-state,
@@ -172,13 +174,15 @@ h1 {
 }
 
 .search-form,
-.batch-search-form {
+.batch-search-form,
+.convert-form {
     display: flex;
     gap: 12px;
 }
 
 .search-form input,
-.batch-search-form textarea {
+.batch-search-form textarea,
+.convert-form textarea {
     flex: 1;
     padding: 14px 16px;
     border-radius: 12px;
@@ -193,8 +197,23 @@ h1 {
     line-height: 1.5;
 }
 
+.convert-form {
+    flex-direction: column;
+}
+
+.convert-form label {
+    font-weight: bold;
+}
+
+.convert-form textarea {
+    min-height: 180px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
 .search-form button,
-.batch-search-form button {
+.batch-search-form button,
+.convert-form button {
     border: none;
     border-radius: 12px;
     background: var(--accent);
@@ -202,6 +221,65 @@ h1 {
     padding: 0 20px;
     font-size: 1rem;
     cursor: pointer;
+}
+
+.convert-panel {
+    padding: 22px;
+    margin-bottom: 18px;
+}
+
+.convert-results {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.convert-result {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--panel);
+    box-shadow: 0 10px 30px rgba(43, 33, 24, 0.08);
+}
+
+.convert-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.convert-result h2 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.convert-result pre {
+    min-height: 150px;
+    margin: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    font: inherit;
+    font-size: 1.15rem;
+    line-height: 1.7;
+}
+
+.copy-button {
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    cursor: pointer;
+    font: inherit;
+    padding: 7px 10px;
+}
+
+.copy-button:hover,
+.copy-button:focus-visible {
+    border-color: var(--accent);
 }
 
 .quiz-header h2 {
@@ -530,6 +608,7 @@ ul {
     .mode-switch,
     .search-form,
     .batch-search-form,
+    .convert-form,
     .card-header,
     .example-item,
     .progress-row {
@@ -541,8 +620,16 @@ ul {
         grid-template-columns: 1fr;
     }
 
+    .convert-results {
+        grid-template-columns: 1fr;
+    }
+
     .search-form button,
     .batch-search-form button {
+        padding: 14px 16px;
+    }
+
+    .convert-form button {
         padding: 14px 16px;
     }
 }

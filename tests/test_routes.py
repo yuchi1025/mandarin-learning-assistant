@@ -99,6 +99,18 @@ def test_batch_search_post_renders_multiple_cards():
     assert b"Batch Mode" in response.data
 
 
+def test_convert_mode_converts_both_chinese_scripts():
+    client = mandarin_app.app.test_client()
+
+    response = client.post("/", data={"form_type": "convert", "text": "我在學習中文。"})
+
+    assert response.status_code == 200
+    assert b"Convert Mode" in response.data
+    assert "我在学习中文。".encode("utf-8") in response.data
+    assert "我在學習中文。".encode("utf-8") in response.data
+    assert b"data-copy-target=\"simplified-output\"" in response.data
+
+
 def test_batch_search_deduplicates_queries_and_shows_missing_terms():
     client = mandarin_app.app.test_client()
 

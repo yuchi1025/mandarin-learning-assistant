@@ -398,8 +398,34 @@ function bindQuizOptions() {
     });
 }
 
+function bindCopyButtons() {
+    document.querySelectorAll("[data-copy-target]").forEach(function (button) {
+        button.addEventListener("click", function () {
+            const output = document.getElementById(button.dataset.copyTarget);
+            if (!output || !navigator.clipboard) {
+                return;
+            }
+
+            const originalLabel = button.textContent;
+            navigator.clipboard.writeText(output.textContent || "").then(function () {
+                button.textContent = "Copied";
+                window.setTimeout(function () {
+                    button.textContent = originalLabel;
+                }, 1400);
+            }).catch(function () {
+                button.textContent = "Copy failed";
+                window.setTimeout(function () {
+                    button.textContent = originalLabel;
+                }, 1400);
+            });
+        });
+    });
+}
+
 function focusSearchInput() {
-    const searchInput = document.getElementById("search-input") || document.getElementById("batch-search-input");
+    const searchInput = document.getElementById("search-input")
+        || document.getElementById("batch-search-input")
+        || document.getElementById("convert-input");
     if (searchInput) {
         searchInput.focus();
         searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
@@ -429,6 +455,7 @@ window.addEventListener("load", function () {
     focusSearchInput();
     bindAudioButtons();
     bindQuizOptions();
+    bindCopyButtons();
     renderRecentSearches();
     loadAiResults();
 });
