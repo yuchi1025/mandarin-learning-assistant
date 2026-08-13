@@ -298,6 +298,54 @@ def test_ai_explanation_simplifies_duplicate_traditional_word(monkeypatch):
     assert result["pinyin"] == "xué xí"
 
 
+def test_ai_explanation_retries_a_low_quality_result(monkeypatch):
+    response_payloads = iter([
+        {"message": {"content": '{"word":"我是","english":"I am","explanation":"A sentence fragment."}'}},
+        {
+            "message": {
+                "content": (
+                    '{"word":"作业","traditional":"作業","english":"homework",'
+                    '"part_of_speech":"noun","explanation":"Work a student does after class.",'
+                    '"examples":[]}'
+                )
+            }
+        },
+    ])
+    request_bodies = []
+
+    def fake_urlopen(request, timeout):
+        request_bodies.append(mandarin_app.json.loads(request.data.decode("utf-8")))
+        return FakeUrlopenResponse(mandarin_app.json.dumps(next(response_payloads)).encode("utf-8"))
+
+    monkeypatch.setattr(mandarin_app.urllib.request, "urlopen", fake_urlopen)
+
+    result, error = mandarin_app.fetch_ai_explanation("homework")
+
+    assert error is None
+    assert result["word"] == "作业"
+    assert len(request_bodies) == 2
+    assert "previous answer did not meet" in request_bodies[1]["messages"][1]["content"]
+
+
+def test_ai_explanation_keeps_error_after_failed_repair_retry(monkeypatch):
+    response_payload = {
+        "message": {"content": '{"word":"我是","english":"I am","explanation":"A sentence fragment."}'}
+    }
+    calls = []
+
+    def fake_urlopen(request, timeout):
+        calls.append(request)
+        return FakeUrlopenResponse(mandarin_app.json.dumps(response_payload).encode("utf-8"))
+
+    monkeypatch.setattr(mandarin_app.urllib.request, "urlopen", fake_urlopen)
+
+    result, error = mandarin_app.fetch_ai_explanation("homework")
+
+    assert result is None
+    assert "low-quality result" in error
+    assert len(calls) == 2
+
+
 def test_normalize_ai_word_forms_simplifies_known_traditional_characters():
     word, traditional = mandarin_app.normalize_ai_word_forms("不一樣", "不一樣", "不一樣")
 

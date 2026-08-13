@@ -607,67 +607,77 @@ def fetch_ai_explanation(query):
         "Set examples to exactly 2 short Chinese sentence objects with keys text and translation. "
         "If the input is not a real Mandarin word or phrase, explain that clearly and return examples as an empty list."
     )
-    user_prompt = (
-        f"Explain this Mandarin word or phrase for a learner: {query}\n"
-        "Return valid JSON only."
-    )
-    payload = {
-        "model": OLLAMA_MODEL,
-        "stream": False,
-        "format": "json",
-        "keep_alive": OLLAMA_KEEP_ALIVE,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-    }
-    request_data = json.dumps(payload).encode("utf-8")
-    http_request = urllib.request.Request(
-        OLLAMA_URL,
-        data=request_data,
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
+    for attempt in range(2):
+        retry_instruction = ""
+        if attempt:
+            retry_instruction = (
+                "Your previous answer did not meet the required quality checks. "
+                "Correct it now: provide a real Chinese word or phrase, a non-empty English meaning, "
+                "and a non-empty beginner-friendly explanation. "
+                "For Chinese input, the word or traditional field must exactly match the input. "
+            )
+        user_prompt = (
+            f"Explain this Mandarin word or phrase for a learner: {query}\n"
+            f"{retry_instruction}"
+            "Return valid JSON only."
+        )
+        payload = {
+            "model": OLLAMA_MODEL,
+            "stream": False,
+            "format": "json",
+            "keep_alive": OLLAMA_KEEP_ALIVE,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+        }
+        request_data = json.dumps(payload).encode("utf-8")
+        http_request = urllib.request.Request(
+            OLLAMA_URL,
+            data=request_data,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
 
-    try:
-        with urllib.request.urlopen(http_request, timeout=OLLAMA_TIMEOUT) as response:
-            response_data = json.loads(response.read().decode("utf-8"))
-    except (OSError, TimeoutError, socket.timeout, urllib.error.URLError, json.JSONDecodeError) as exc:
-        return None, f"AI explanation is unavailable right now. Start Ollama and load `{OLLAMA_MODEL}`. ({exc})"
+        try:
+            with urllib.request.urlopen(http_request, timeout=OLLAMA_TIMEOUT) as response:
+                response_data = json.loads(response.read().decode("utf-8"))
+        except (OSError, TimeoutError, socket.timeout, urllib.error.URLError, json.JSONDecodeError) as exc:
+            return None, f"AI explanation is unavailable right now. Start Ollama and load `{OLLAMA_MODEL}`. ({exc})"
 
-    try:
-        content = response_data["message"]["content"]
-        parsed = json.loads(content)
-    except (KeyError, TypeError, json.JSONDecodeError):
-        return None, "AI explanation is unavailable right now because the local model returned an invalid response."
+        try:
+            content = response_data["message"]["content"]
+            parsed = json.loads(content)
+        except (KeyError, TypeError, json.JSONDecodeError):
+            return None, "AI explanation is unavailable right now because the local model returned an invalid response."
 
-    examples = []
-    for example in parsed.get("examples", [])[:2]:
-        text = example.get("text", "").strip()
-        translation = example.get("translation", "").strip()
-        if not text:
-            continue
-        examples.append(make_structured_example(text, translation))
+        examples = []
+        for example in parsed.get("examples", [])[:2]:
+            text = example.get("text", "").strip()
+            translation = example.get("translation", "").strip()
+            if not text:
+                continue
+            examples.append(make_structured_example(text, translation))
 
-    word = parsed.get("word", query).strip() or query
-    traditional = parsed.get("traditional", word).strip() or word
-    word, traditional = normalize_ai_word_forms(query, word, traditional)
-    pinyin = to_sentence_pinyin(word) if contains_chinese(word) else parsed.get("pinyin", "").strip()
+        word = parsed.get("word", query).strip() or query
+        traditional = parsed.get("traditional", word).strip() or word
+        word, traditional = normalize_ai_word_forms(query, word, traditional)
+        pinyin = to_sentence_pinyin(word) if contains_chinese(word) else parsed.get("pinyin", "").strip()
 
-    ai_result = {
-        "word": word,
-        "traditional": traditional,
-        "pinyin": pinyin,
-        "english": parsed.get("english", "").strip(),
-        "part_of_speech": normalize_part_of_speech(parsed.get("part_of_speech", "word")),
-        "explanation": parsed.get("explanation", "").strip() or "No explanation available.",
-        "examples": examples,
-    }
+        ai_result = {
+            "word": word,
+            "traditional": traditional,
+            "pinyin": pinyin,
+            "english": parsed.get("english", "").strip(),
+            "part_of_speech": normalize_part_of_speech(parsed.get("part_of_speech", "word")),
+            "explanation": parsed.get("explanation", "").strip() or "No explanation available.",
+            "examples": examples,
+        }
 
-    if not validate_ai_result(query, ai_result):
-        return None, "AI explanation is unavailable right now because the local model returned a low-quality result."
+        if validate_ai_result(query, ai_result):
+            return ai_result, None
 
-    return ai_result, None
+    return None, "AI explanation is unavailable right now because the local model returned a low-quality result."
 
 
 def get_ai_explanation(query):
