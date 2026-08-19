@@ -1,5 +1,12 @@
 # Version Notes
 
+## Unreleased
+
+- Added simple local student profiles without authentication or passwords. Learners can be created and selected from the app, with the active learner remembered in the browser.
+- Moved progress ownership to stable SQLite student IDs. Search, batch search, and AI fallback progress now belong only to the selected learner, and Progress Mode is filtered to that learner.
+- Added a backward-safe SQLite migration: previously global progress is preserved and assigned to an `Existing progress` profile rather than being discarded.
+- Added Quiz Mode scoring and Mandarin question audio, plus consistent paired Simplified and Traditional Chinese display in Quiz Mode.
+
 ## v0
 
 - Built a simple Flask-based Mandarin lookup prototype with one search input and mock dictionary data.

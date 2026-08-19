@@ -11,6 +11,7 @@ import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
+import uuid
 from datetime import datetime
 
 from flask import after_this_request, Flask, jsonify, render_template, request, send_file, send_from_directory
@@ -150,11 +151,21 @@ def get_progress_connection():
     PROGRESS_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(PROGRESS_DB_PATH)
     connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA foreign_keys = ON")
     return connection
 
 
 def init_progress_db():
     with get_progress_connection() as connection:
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS students (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL COLLATE NOCASE UNIQUE,
+                created_at TEXT NOT NULL
+            )
+            """
+        )
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS search_events (
@@ -170,11 +181,58 @@ def init_progress_db():
             )
             """
         )
+        columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(search_events)")
+        }
+        if "student_id" not in columns:
+            connection.execute(
+                "ALTER TABLE search_events ADD COLUMN student_id INTEGER REFERENCES students(id)"
+            )
+
+        legacy_event_count = connection.execute(
+            "SELECT COUNT(*) AS count FROM search_events WHERE student_id IS NULL"
+        ).fetchone()["count"]
+        if legacy_event_count:
+            legacy_student = connection.execute(
+                "SELECT id FROM students WHERE name = ?", ("Existing progress",)
+            ).fetchone()
+            if legacy_student is None:
+                cursor = connection.execute(
+                    "INSERT INTO students (name, created_at) VALUES (?, ?)",
+                    ("Existing progress", datetime.now().isoformat(timespec="seconds")),
+                )
+                legacy_student_id = cursor.lastrowid
+            else:
+                legacy_student_id = legacy_student["id"]
+            connection.execute(
+                "UPDATE search_events SET student_id = ? WHERE student_id IS NULL",
+                (legacy_student_id,),
+            )
         connection.execute(
             "CREATE INDEX IF NOT EXISTS idx_search_events_searched_at ON search_events (searched_at)"
         )
         connection.execute(
             "CREATE INDEX IF NOT EXISTS idx_search_events_word ON search_events (word)"
+        )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_search_events_student_date ON search_events (student_id, searched_at)"
+        )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS quiz_attempts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER NOT NULL REFERENCES students(id),
+                vocabulary_word TEXT NOT NULL,
+                is_correct INTEGER NOT NULL CHECK (is_correct IN (0, 1)),
+                completed_at TEXT NOT NULL,
+                interaction_key TEXT NOT NULL,
+                UNIQUE (student_id, interaction_key)
+            )
+            """
+        )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_quiz_attempts_student_date ON quiz_attempts (student_id, completed_at)"
         )
 
 
@@ -182,9 +240,58 @@ def row_to_dict(row):
     return dict(row) if row else None
 
 
-def log_progress_event(query, entry, source, mode):
+def parse_student_id(value):
+    try:
+        student_id = int(value)
+    except (TypeError, ValueError):
+        return None
+    return student_id if student_id > 0 else None
+
+
+def list_students():
+    init_progress_db()
+    with get_progress_connection() as connection:
+        return [
+            row_to_dict(row)
+            for row in connection.execute("SELECT id, name FROM students ORDER BY name COLLATE NOCASE, id")
+        ]
+
+
+def get_student(student_id):
+    student_id = parse_student_id(student_id)
+    if student_id is None:
+        return None
+
+    init_progress_db()
+    with get_progress_connection() as connection:
+        return row_to_dict(
+            connection.execute("SELECT id, name FROM students WHERE id = ?", (student_id,)).fetchone()
+        )
+
+
+def create_student(name):
+    cleaned_name = str(name or "").strip()
+    if not cleaned_name:
+        return None
+
+    init_progress_db()
+    with get_progress_connection() as connection:
+        existing_student = connection.execute(
+            "SELECT id, name FROM students WHERE name = ?", (cleaned_name,)
+        ).fetchone()
+        if existing_student:
+            return row_to_dict(existing_student)
+        cursor = connection.execute(
+            "INSERT INTO students (name, created_at) VALUES (?, ?)",
+            (cleaned_name, datetime.now().isoformat(timespec="seconds")),
+        )
+        return {"id": cursor.lastrowid, "name": cleaned_name}
+
+
+def log_progress_event(query, entry, source, mode, student_id=None):
     word = str(entry.get("word", "")).strip()
-    if not word:
+    student_id = parse_student_id(student_id)
+    if not word or student_id is None:
         return
 
     init_progress_db()
@@ -192,9 +299,9 @@ def log_progress_event(query, entry, source, mode):
         connection.execute(
             """
             INSERT INTO search_events (
-                searched_at, query, word, traditional, pinyin, english, source, mode
+                searched_at, query, word, traditional, pinyin, english, source, mode, student_id
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 datetime.now().isoformat(timespec="seconds"),
@@ -205,12 +312,65 @@ def log_progress_event(query, entry, source, mode):
                 str(entry.get("english", "")).strip(),
                 source,
                 mode,
+                student_id,
             ),
         )
 
 
-def get_progress_summary(selected_day=None):
+def record_quiz_attempt(student_id, vocabulary_word, is_correct, interaction_key):
+    student_id = parse_student_id(student_id)
+    word = str(vocabulary_word or "").strip()
+    attempt_key = str(interaction_key or "").strip()
+    if student_id is None or not word or not attempt_key or get_student(student_id) is None:
+        return
+
     init_progress_db()
+    with get_progress_connection() as connection:
+        existing_attempt = connection.execute(
+            "SELECT id FROM quiz_attempts WHERE student_id = ? AND interaction_key = ?",
+            (student_id, attempt_key),
+        ).fetchone()
+        values = (word, int(bool(is_correct)), datetime.now().isoformat(timespec="seconds"), student_id, attempt_key)
+        if existing_attempt:
+            connection.execute(
+                """
+                UPDATE quiz_attempts
+                SET vocabulary_word = ?, is_correct = ?, completed_at = ?
+                WHERE student_id = ? AND interaction_key = ?
+                """,
+                values,
+            )
+        else:
+            connection.execute(
+                """
+                INSERT INTO quiz_attempts (student_id, vocabulary_word, is_correct, completed_at, interaction_key)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (student_id, word, int(bool(is_correct)), datetime.now().isoformat(timespec="seconds"), attempt_key),
+            )
+
+
+def get_empty_progress_summary(selected_day=None):
+    return {
+        "total_searches": 0,
+        "unique_words": 0,
+        "today_count": 0,
+        "today_events": [],
+        "selected_day": selected_day,
+        "selected_day_events": [],
+        "recent_events": [],
+        "daily_counts": [],
+        "top_words": [],
+        "quiz_stats": {"attempted": 0, "correct": 0, "accuracy": 0},
+    }
+
+
+def get_progress_summary(student_id, selected_day=None):
+    init_progress_db()
+    student_id = parse_student_id(student_id)
+    if get_student(student_id) is None:
+        return get_empty_progress_summary(selected_day)
+
     today = datetime.now().date().isoformat()
     if selected_day:
         try:
@@ -219,13 +379,16 @@ def get_progress_summary(selected_day=None):
             selected_day = None
 
     with get_progress_connection() as connection:
-        total_searches = connection.execute("SELECT COUNT(*) AS count FROM search_events").fetchone()["count"]
+        total_searches = connection.execute(
+            "SELECT COUNT(*) AS count FROM search_events WHERE student_id = ?", (student_id,)
+        ).fetchone()["count"]
         unique_words = connection.execute(
-            "SELECT COUNT(DISTINCT word) AS count FROM search_events WHERE word IS NOT NULL AND word != ''"
+            "SELECT COUNT(DISTINCT word) AS count FROM search_events WHERE student_id = ? AND word IS NOT NULL AND word != ''",
+            (student_id,),
         ).fetchone()["count"]
         today_count = connection.execute(
-            "SELECT COUNT(*) AS count FROM search_events WHERE substr(searched_at, 1, 10) = ?",
-            (today,),
+            "SELECT COUNT(*) AS count FROM search_events WHERE student_id = ? AND substr(searched_at, 1, 10) = ?",
+            (student_id, today),
         ).fetchone()["count"]
         today_events = [
             row_to_dict(row)
@@ -233,16 +396,16 @@ def get_progress_summary(selected_day=None):
                 """
                 SELECT searched_at, query, word, traditional, pinyin, english, source, mode
                 FROM search_events
-                WHERE id IN (
+                WHERE student_id = ? AND id IN (
                     SELECT MAX(id)
                     FROM search_events
-                    WHERE substr(searched_at, 1, 10) = ?
+                    WHERE student_id = ? AND substr(searched_at, 1, 10) = ?
                     GROUP BY word
                 )
                 ORDER BY searched_at DESC, id DESC
                 LIMIT 20
                 """,
-                (today,),
+                (student_id, student_id, today),
             )
         ]
         selected_day_events = [
@@ -251,15 +414,15 @@ def get_progress_summary(selected_day=None):
                 """
                 SELECT searched_at, query, word, traditional, pinyin, english, source, mode
                 FROM search_events
-                WHERE id IN (
+                WHERE student_id = ? AND id IN (
                     SELECT MAX(id)
                     FROM search_events
-                    WHERE substr(searched_at, 1, 10) = ?
+                    WHERE student_id = ? AND substr(searched_at, 1, 10) = ?
                     GROUP BY word
                 )
                 ORDER BY searched_at DESC, id DESC
                 """,
-                (selected_day,),
+                (student_id, student_id, selected_day),
             )
         ] if selected_day else []
         recent_events = [
@@ -268,9 +431,11 @@ def get_progress_summary(selected_day=None):
                 """
                 SELECT searched_at, query, word, traditional, pinyin, english, source, mode
                 FROM search_events
+                WHERE student_id = ?
                 ORDER BY searched_at DESC, id DESC
                 LIMIT 20
-                """
+                """,
+                (student_id,),
             )
         ]
         daily_counts = [
@@ -279,10 +444,12 @@ def get_progress_summary(selected_day=None):
                 """
                 SELECT substr(searched_at, 1, 10) AS day, COUNT(*) AS count
                 FROM search_events
+                WHERE student_id = ?
                 GROUP BY day
                 ORDER BY day DESC
                 LIMIT 14
-                """
+                """,
+                (student_id,),
             )
         ]
         top_words = [
@@ -291,13 +458,24 @@ def get_progress_summary(selected_day=None):
                 """
                 SELECT word, traditional, pinyin, english, COUNT(*) AS count
                 FROM search_events
-                WHERE word IS NOT NULL AND word != ''
+                WHERE student_id = ? AND word IS NOT NULL AND word != ''
                 GROUP BY word, traditional, pinyin, english
                 ORDER BY count DESC, MAX(searched_at) DESC
                 LIMIT 10
-                """
+                """,
+                (student_id,),
             )
         ]
+        quiz_stats_row = connection.execute(
+            """
+            SELECT COUNT(*) AS attempted, COALESCE(SUM(is_correct), 0) AS correct
+            FROM quiz_attempts
+            WHERE student_id = ?
+            """,
+            (student_id,),
+        ).fetchone()
+        quiz_attempted = quiz_stats_row["attempted"]
+        quiz_correct = quiz_stats_row["correct"]
 
     return {
         "total_searches": total_searches,
@@ -309,6 +487,11 @@ def get_progress_summary(selected_day=None):
         "recent_events": recent_events,
         "daily_counts": daily_counts,
         "top_words": top_words,
+        "quiz_stats": {
+            "attempted": quiz_attempted,
+            "correct": quiz_correct,
+            "accuracy": round((quiz_correct / quiz_attempted) * 100) if quiz_attempted else 0,
+        },
     }
 
 def simplify_known_traditional_text(text):
@@ -317,6 +500,13 @@ def simplify_known_traditional_text(text):
 
 def traditionalize_known_simplified_text(text):
     return TO_TRADITIONAL.convert(text)
+
+
+@app.template_filter("display_chinese_pair")
+def display_chinese_pair(text):
+    simplified = simplify_known_traditional_text(str(text or ""))
+    traditional = traditionalize_known_simplified_text(simplified)
+    return simplified if simplified == traditional else f"{simplified} / {traditional}"
 
 
 def clean_ai_word_form(text):
@@ -785,10 +975,22 @@ def build_quiz(question_word=None, exclude_word=None, choices=None, recent_words
     }
 
 
+def parse_quiz_score(value):
+    try:
+        return max(0, int(value or 0))
+    except (TypeError, ValueError):
+        return 0
+
+
 @app.route("/", methods=["GET", "POST"])
 def home():
     mode = request.args.get("mode", "search")
     progress_day = request.args.get("day")
+    student_id = parse_student_id(request.form.get("student_id") or request.args.get("student_id"))
+    students = list_students()
+    selected_student = get_student(student_id)
+    if selected_student is None:
+        student_id = None
     recent_words = request.args.getlist("recent_word")
     query = ""
     results = []
@@ -800,17 +1002,28 @@ def home():
     converted_traditional = ""
     quiz = build_quiz(recent_words=recent_words)
     quiz_feedback = None
-    progress_summary = get_progress_summary(progress_day) if mode == "progress" else None
+    quiz_score = {
+        "correct": parse_quiz_score(request.args.get("score_correct")),
+        "attempted": parse_quiz_score(request.args.get("score_attempted")),
+        "question_counted": request.args.get("question_counted") == "1",
+    }
+    quiz_attempt_key = request.form.get("quiz_attempt_key") or request.args.get("quiz_attempt_key") or uuid.uuid4().hex
+    progress_summary = get_progress_summary(student_id, progress_day) if mode == "progress" else None
 
     if request.method == "POST":
         form_type = request.form.get("form_type")
 
-        if form_type == "search":
+        if form_type == "student":
+            mode = request.form.get("return_mode", mode)
+            selected_student = create_student(request.form.get("student_name"))
+            student_id = selected_student["id"] if selected_student else None
+            students = list_students()
+        elif form_type == "search":
             mode = "search"
             query = request.form.get("query", "")
             results = search_entries(query)
             for entry in results:
-                log_progress_event(query, entry, "dictionary", "search")
+                log_progress_event(query, entry, "dictionary", "search", student_id)
             if not results and is_meaningful_query(query):
                 ai_pending = True
         elif form_type == "batch":
@@ -818,7 +1031,7 @@ def home():
             query = request.form.get("query", "")
             results, batch_missing, batch_ai_queries = batch_search_entries(query)
             for entry in results:
-                log_progress_event(query, entry, "dictionary", "batch")
+                log_progress_event(query, entry, "dictionary", "batch", student_id)
         elif form_type == "convert":
             mode = "convert"
             conversion_text = request.form.get("text", "")
@@ -832,12 +1045,27 @@ def home():
             selected_answer = request.form.get("selected_answer", "")
             current_choices = request.form.getlist("choice")
             recent_words = request.form.getlist("recent_word")
+            quiz_score = {
+                "correct": parse_quiz_score(request.form.get("score_correct")),
+                "attempted": parse_quiz_score(request.form.get("score_attempted")),
+                "question_counted": request.form.get("question_counted") == "1",
+            }
+            quiz_attempt_key = request.form.get("quiz_attempt_key") or uuid.uuid4().hex
             quiz = build_quiz(question_word, choices=current_choices or None, recent_words=recent_words)
             is_correct = selected_answer == quiz["correct_answer"]
+            record_quiz_attempt(student_id, quiz["word"], is_correct, quiz_attempt_key)
             if is_correct:
+                if not quiz_score["question_counted"]:
+                    quiz_score["attempted"] += 1
+                quiz_score["correct"] += 1
+                quiz_score["question_counted"] = False
                 recent_words = (recent_words + [question_word])[-RECENT_QUIZ_LIMIT:]
                 quiz = build_quiz(exclude_word=question_word, recent_words=recent_words)
+                quiz_attempt_key = uuid.uuid4().hex
             else:
+                if not quiz_score["question_counted"]:
+                    quiz_score["attempted"] += 1
+                    quiz_score["question_counted"] = True
                 wrong_entry = find_entry_by_english(selected_answer)
                 quiz_feedback = {
                     "selected_answer": selected_answer,
@@ -847,7 +1075,7 @@ def home():
                 }
 
     if mode == "progress":
-        progress_summary = get_progress_summary(progress_day)
+        progress_summary = get_progress_summary(student_id, progress_day)
 
     return render_template(
         "index.html",
@@ -860,8 +1088,12 @@ def home():
         conversion_text=conversion_text,
         converted_simplified=converted_simplified,
         converted_traditional=converted_traditional,
+        students=students,
+        selected_student=selected_student,
         quiz=quiz,
         quiz_feedback=quiz_feedback,
+        quiz_score=quiz_score,
+        quiz_attempt_key=quiz_attempt_key,
         recent_words=recent_words,
         progress_summary=progress_summary,
     )
@@ -871,6 +1103,7 @@ def home():
 def ai_explanation():
     query = request.args.get("query", "")
     mode = request.args.get("mode", "search")
+    student_id = parse_student_id(request.args.get("student_id"))
     if not is_meaningful_query(query):
         return jsonify({"ok": False, "error": "Please enter a real Chinese word, pinyin, or English meaning."}), 400
 
@@ -878,7 +1111,7 @@ def ai_explanation():
     if error:
         return jsonify({"ok": False, "error": error}), 503
 
-    log_progress_event(query, result, "ai", mode if mode in {"search", "batch"} else "search")
+    log_progress_event(query, result, "ai", mode if mode in {"search", "batch"} else "search", student_id)
     return jsonify({"ok": True, "result": result})
 
 

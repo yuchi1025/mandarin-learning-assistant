@@ -26,6 +26,7 @@ Current version: `v3.1.1`
   - Added local AI fallback so unknown valid words can show a structured explanation instead of only returning “not found.”
   - Added Quiz Mode so lookup can turn into active recall practice with immediate feedback.
   - Added Progress Mode so searched words are stored locally and can be reviewed by day.
+  - Added local student profiles so multiple learners can share one app installation while keeping progress separate.
 
 ---
 
@@ -229,7 +230,7 @@ Set `OLLAMA_AUTO_START=0` if you prefer to manage Ollama yourself.
 
 The app still runs without Ollama. In that case, built-in dictionary lookup and quiz mode work normally, while unknown-word AI fallback returns an unavailable message.
 
-Progress history is stored locally in `data/progress.db`. This runtime database is ignored by git.
+Progress history and local student profiles are stored in `data/progress.db`. This runtime database is ignored by git. Create or select a learner from the profile area above the modes before searching to record progress for that learner. The selected learner is remembered in the browser, and Progress Mode only shows that learner's history. Existing unprofiled history is preserved during migration under an `Existing progress` learner.
 
 ---
 
@@ -253,7 +254,7 @@ Run the automated tests:
 python3 -m pytest
 ```
 
-The pytest suite covers dictionary quality, consistent dictionary field order, tone-marked dictionary pinyin, exact search behavior, partial search behavior, punctuation-only input, basic Flask routes, static JavaScript loading, invalid AI endpoint input, batch search, progress logging, AI-learned quiz entries, AI cache cleanup, and cleaned sentence-audio text.
+The pytest suite covers dictionary quality, consistent dictionary field order, tone-marked dictionary pinyin, exact search behavior, partial search behavior, punctuation-only input, basic Flask routes, static JavaScript loading, invalid AI endpoint input, batch search, student-scoped progress logging and legacy migration, AI-learned quiz entries, AI cache cleanup, and cleaned sentence-audio text.
 
 ---
 
@@ -268,6 +269,7 @@ How to use the project.
   - `nǐ hǎo`
   - `zuo bian`
 - Expected behaviour:
+  - Create or choose a learner to keep local progress separate on a shared computer.
   - Search:
     - Dictionary words return immediate results
     - `学校` or `school` returns the `学校` dictionary card

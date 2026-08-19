@@ -1,5 +1,6 @@
 const INTERNAL_NAVIGATION_KEY = "mandarin_internal_navigation";
 const RECENT_SEARCHES_KEY = "mandarin_recent_searches";
+const SELECTED_STUDENT_KEY = "mandarin_selected_student";
 
 function markInternalNavigation() {
     window.sessionStorage.setItem(INTERNAL_NAVIGATION_KEY, "true");
@@ -251,7 +252,9 @@ function renderAiError(card, message) {
 function loadAiResult(card) {
     const query = card.dataset.aiQuery;
     const mode = card.dataset.aiMode || "search";
-    return fetch(`/api/ai-explanation?query=${encodeURIComponent(query)}&mode=${encodeURIComponent(mode)}`)
+    const studentId = card.dataset.studentId;
+    const studentParam = studentId ? `&student_id=${encodeURIComponent(studentId)}` : "";
+    return fetch(`/api/ai-explanation?query=${encodeURIComponent(query)}&mode=${encodeURIComponent(mode)}${studentParam}`)
         .then(function (response) {
             return response.json().then(function (data) {
                 return { status: response.status, data: data };
@@ -354,12 +357,6 @@ function bindQuizOptions() {
 
     const radios = quizForm.querySelectorAll('input[name="selected_answer"]');
     const correctAnswer = quizForm.dataset.correctAnswer;
-    const nextUrl = quizForm.dataset.nextUrl;
-    const recentWords = Array.from(quizForm.querySelectorAll('input[name="recent_word"]')).map(function (input) {
-        return input.value;
-    });
-    const currentWord = quizForm.querySelector('input[name="question_word"]').value;
-
     radios.forEach(function (radio) {
         radio.addEventListener("change", function () {
             if (radio.value === correctAnswer) {
@@ -378,17 +375,14 @@ function bindQuizOptions() {
                 }
 
                 radios.forEach(function (item) {
-                    item.disabled = true;
+                    if (item !== radio) {
+                        item.disabled = true;
+                    }
                 });
 
                 window.setTimeout(function () {
-                    const params = new URLSearchParams();
-                    params.set("mode", "quiz");
-                    recentWords.concat([currentWord]).slice(-5).forEach(function (word) {
-                        params.append("recent_word", word);
-                    });
                     markInternalNavigation();
-                    window.location.href = nextUrl + "&" + params.toString().replace(/^mode=quiz&?/, "");
+                    quizForm.submit();
                 }, 220);
             } else {
                 markInternalNavigation();
@@ -420,6 +414,30 @@ function bindCopyButtons() {
             });
         });
     });
+}
+
+function rememberSelectedStudent() {
+    const selector = document.getElementById("student-select");
+    if (!selector) {
+        return;
+    }
+
+    const selectedStudentId = selector.value;
+    if (selectedStudentId) {
+        window.localStorage.setItem(SELECTED_STUDENT_KEY, selectedStudentId);
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const rememberedStudentId = window.localStorage.getItem(SELECTED_STUDENT_KEY);
+    const hasRememberedStudent = rememberedStudentId
+        && Array.from(selector.options).some(function (option) {
+            return option.value === rememberedStudentId;
+        });
+    if (!params.get("student_id") && hasRememberedStudent) {
+        params.set("student_id", rememberedStudentId);
+        markInternalNavigation();
+        window.location.replace(`${window.location.pathname}?${params.toString()}`);
+    }
 }
 
 function focusSearchInput() {
@@ -456,6 +474,7 @@ window.addEventListener("load", function () {
     bindAudioButtons();
     bindQuizOptions();
     bindCopyButtons();
+    rememberSelectedStudent();
     renderRecentSearches();
     loadAiResults();
 });

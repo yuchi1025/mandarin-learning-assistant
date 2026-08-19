@@ -32,6 +32,10 @@ def use_temp_progress_db(monkeypatch, tmp_path):
     return db_path
 
 
+def create_test_student():
+    return mandarin_app.create_student("Test learner")
+
+
 def test_home_page_loads():
     client = mandarin_app.app.test_client()
 
@@ -41,6 +45,22 @@ def test_home_page_loads():
     assert b"Mandarin Learning Assistant" in response.data
 
 
+def test_first_use_profile_state_creates_a_selected_student(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    client = mandarin_app.app.test_client()
+
+    first_use_response = client.get("/", query_string={"mode": "progress"})
+    create_response = client.post(
+        "/",
+        data={"form_type": "student", "student_name": "Mei", "return_mode": "progress"},
+    )
+
+    assert b"Create your first learner" in first_use_response.data
+    assert b"Progress Needs a Learner" in first_use_response.data
+    assert b"Mei" in create_response.data
+    assert mandarin_app.list_students() == [{"id": 1, "name": "Mei"}]
+
+
 def test_static_app_js_loads():
     client = mandarin_app.app.test_client()
 
@@ -48,6 +68,7 @@ def test_static_app_js_loads():
 
     assert response.status_code == 200
     assert b"function speakMandarin" in response.data
+    assert b"if (item !== radio)" in response.data
 
 
 def test_search_post_renders_result():
@@ -61,10 +82,11 @@ def test_search_post_renders_result():
 
 def test_search_post_logs_dictionary_progress(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
     client = mandarin_app.app.test_client()
 
-    response = client.post("/", data={"form_type": "search", "query": "airport"})
-    summary = mandarin_app.get_progress_summary()
+    response = client.post("/", data={"form_type": "search", "query": "airport", "student_id": student["id"]})
+    summary = mandarin_app.get_progress_summary(student["id"])
 
     assert response.status_code == 200
     assert summary["total_searches"] == 1
@@ -76,11 +98,12 @@ def test_search_post_logs_dictionary_progress(monkeypatch, tmp_path):
 
 def test_progress_summary_shows_each_word_once_per_day(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
     client = mandarin_app.app.test_client()
 
-    client.post("/", data={"form_type": "search", "query": "airport"})
-    client.post("/", data={"form_type": "search", "query": "airport"})
-    summary = mandarin_app.get_progress_summary()
+    client.post("/", data={"form_type": "search", "query": "airport", "student_id": student["id"]})
+    client.post("/", data={"form_type": "search", "query": "airport", "student_id": student["id"]})
+    summary = mandarin_app.get_progress_summary(student["id"])
 
     assert summary["total_searches"] == 2
     assert len(summary["today_events"]) == 1
@@ -135,10 +158,11 @@ def test_batch_search_renders_ai_placeholders_for_unknown_words():
 
 def test_batch_search_logs_dictionary_progress(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
     client = mandarin_app.app.test_client()
 
-    response = client.post("/", data={"form_type": "batch", "query": "airport\nfriend"})
-    summary = mandarin_app.get_progress_summary()
+    response = client.post("/", data={"form_type": "batch", "query": "airport\nfriend", "student_id": student["id"]})
+    summary = mandarin_app.get_progress_summary(student["id"])
 
     assert response.status_code == 200
     assert summary["total_searches"] == 2
@@ -172,6 +196,7 @@ def test_ai_endpoint_rejects_punctuation_only_query():
 
 def test_ai_endpoint_logs_progress(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
     client = mandarin_app.app.test_client()
     result = {
         "word": "狮子",
@@ -185,8 +210,8 @@ def test_ai_endpoint_logs_progress(monkeypatch, tmp_path):
 
     monkeypatch.setattr(mandarin_app, "get_ai_explanation", lambda query: (result, None))
 
-    response = client.get("/api/ai-explanation", query_string={"query": "lion", "mode": "batch"})
-    summary = mandarin_app.get_progress_summary()
+    response = client.get("/api/ai-explanation", query_string={"query": "lion", "mode": "batch", "student_id": student["id"]})
+    summary = mandarin_app.get_progress_summary(student["id"])
 
     assert response.status_code == 200
     assert summary["total_searches"] == 1
@@ -197,29 +222,286 @@ def test_ai_endpoint_logs_progress(monkeypatch, tmp_path):
 
 def test_progress_mode_renders_summary(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
     client = mandarin_app.app.test_client()
 
-    client.post("/", data={"form_type": "search", "query": "airport"})
-    response = client.get("/", query_string={"mode": "progress"})
+    client.post("/", data={"form_type": "search", "query": "airport", "student_id": student["id"]})
+    response = client.get("/", query_string={"mode": "progress", "student_id": student["id"]})
 
     assert response.status_code == 200
     assert b"Progress Mode" in response.data
     assert b"Total Searches" in response.data
+    assert b"Quiz Results" in response.data
     assert "机场".encode("utf-8") in response.data
 
 
 def test_progress_mode_shows_searches_for_selected_day(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
     client = mandarin_app.app.test_client()
 
-    client.post("/", data={"form_type": "search", "query": "airport"})
+    client.post("/", data={"form_type": "search", "query": "airport", "student_id": student["id"]})
     day = mandarin_app.datetime.now().date().isoformat()
-    response = client.get("/", query_string={"mode": "progress", "day": day})
+    response = client.get("/", query_string={"mode": "progress", "day": day, "student_id": student["id"]})
 
     assert response.status_code == 200
     assert f"Searches on {day}".encode("utf-8") in response.data
     assert "机场".encode("utf-8") in response.data
     assert b"progress-day-link selected" in response.data
+
+
+def test_student_profiles_keep_progress_separate(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    alice = mandarin_app.create_student("Alice")
+    ben = mandarin_app.create_student("Ben")
+    client = mandarin_app.app.test_client()
+
+    client.post("/", data={"form_type": "search", "query": "airport", "student_id": alice["id"]})
+    client.post("/", data={"form_type": "search", "query": "friend", "student_id": ben["id"]})
+
+    alice_summary = mandarin_app.get_progress_summary(alice["id"])
+    ben_summary = mandarin_app.get_progress_summary(ben["id"])
+
+    assert alice_summary["total_searches"] == 1
+    assert alice_summary["today_events"][0]["word"] == "机场"
+    assert ben_summary["total_searches"] == 1
+    assert ben_summary["today_events"][0]["word"] == "朋友"
+
+
+def test_quiz_attempts_persist_one_final_result_per_quiz_interaction(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    attempt_key = "alice-learning-1"
+
+    mandarin_app.record_quiz_attempt(student["id"], "学习", False, attempt_key)
+    mandarin_app.record_quiz_attempt(student["id"], "学习", True, attempt_key)
+
+    with mandarin_app.get_progress_connection() as connection:
+        attempts = [
+            mandarin_app.row_to_dict(row)
+            for row in connection.execute(
+                "SELECT vocabulary_word, is_correct FROM quiz_attempts WHERE student_id = ?",
+                (student["id"],),
+            )
+        ]
+    summary = mandarin_app.get_progress_summary(student["id"])
+
+    assert attempts == [{"vocabulary_word": "学习", "is_correct": 1}]
+    assert summary["quiz_stats"] == {"attempted": 1, "correct": 1, "accuracy": 100}
+
+
+def test_quiz_route_updates_one_attempt_after_a_wrong_retry(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    quiz = {
+        "word": "学习",
+        "traditional": "學習",
+        "pinyin": "xué xí",
+        "correct_answer": "to study",
+        "choices": ["to study", "airport"],
+    }
+    monkeypatch.setattr(mandarin_app, "build_quiz", lambda *args, **kwargs: quiz)
+    monkeypatch.setattr(
+        mandarin_app,
+        "find_entry_by_english",
+        lambda english: {"word": "机场", "pinyin": "jī chǎng"},
+    )
+    client = mandarin_app.app.test_client()
+    base_data = {
+        "form_type": "quiz",
+        "student_id": student["id"],
+        "question_word": "学习",
+        "quiz_attempt_key": "quiz-route-1",
+        "choice": ["to study", "airport"],
+    }
+
+    client.post("/", data={**base_data, "selected_answer": "airport"})
+    client.post("/", data={**base_data, "selected_answer": "to study"})
+
+    with mandarin_app.get_progress_connection() as connection:
+        attempt_count = connection.execute(
+            "SELECT COUNT(*) AS count FROM quiz_attempts WHERE student_id = ?", (student["id"],)
+        ).fetchone()["count"]
+    assert attempt_count == 1
+    assert mandarin_app.get_progress_summary(student["id"])["quiz_stats"]["correct"] == 1
+
+
+def test_quiz_attempt_stats_are_isolated_by_student(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    alice = mandarin_app.create_student("Alice")
+    ben = mandarin_app.create_student("Ben")
+
+    mandarin_app.record_quiz_attempt(alice["id"], "学习", True, "alice-1")
+    mandarin_app.record_quiz_attempt(alice["id"], "朋友", False, "alice-2")
+    mandarin_app.record_quiz_attempt(ben["id"], "机场", False, "ben-1")
+
+    assert mandarin_app.get_progress_summary(alice["id"])["quiz_stats"] == {
+        "attempted": 2,
+        "correct": 1,
+        "accuracy": 50,
+    }
+    assert mandarin_app.get_progress_summary(ben["id"])["quiz_stats"] == {
+        "attempted": 1,
+        "correct": 0,
+        "accuracy": 0,
+    }
+
+
+def test_progress_database_migrates_legacy_events_to_a_stable_profile(monkeypatch, tmp_path):
+    db_path = use_temp_progress_db(monkeypatch, tmp_path)
+    with mandarin_app.sqlite3.connect(db_path) as connection:
+        connection.execute(
+            """
+            CREATE TABLE search_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                searched_at TEXT NOT NULL,
+                query TEXT NOT NULL,
+                word TEXT,
+                traditional TEXT,
+                pinyin TEXT,
+                english TEXT,
+                source TEXT NOT NULL,
+                mode TEXT NOT NULL
+            )
+            """
+        )
+        connection.execute(
+            """
+            INSERT INTO search_events (searched_at, query, word, traditional, pinyin, english, source, mode)
+            VALUES ('2026-01-01T09:00:00', 'airport', '机场', '機場', 'jī chǎng', 'airport', 'dictionary', 'search')
+            """
+        )
+
+    mandarin_app.init_progress_db()
+    students = mandarin_app.list_students()
+    summary = mandarin_app.get_progress_summary(students[0]["id"])
+
+    assert students == [{"id": students[0]["id"], "name": "Existing progress"}]
+    assert summary["total_searches"] == 1
+    assert summary["today_events"] == []
+
+
+def test_quiz_mode_displays_both_chinese_scripts(monkeypatch):
+    quiz = {
+        "word": "机场",
+        "traditional": "機場",
+        "pinyin": "jī chǎng",
+        "correct_answer": "airport",
+        "choices": ["airport", "機場"],
+    }
+    monkeypatch.setattr(mandarin_app, "build_quiz", lambda *args, **kwargs: quiz)
+    client = mandarin_app.app.test_client()
+
+    response = client.get("/", query_string={"mode": "quiz"})
+
+    assert response.status_code == 200
+    assert "机场 / 機場".encode("utf-8") in response.data
+    assert "<span>机场 / 機場</span>".encode("utf-8") in response.data
+    assert b'data-speak="\xe6\x9c\xba\xe5\x9c\xba"' in response.data
+    assert b"Play pronunciation for" in response.data
+
+
+def test_display_chinese_pair_normalizes_both_script_inputs():
+    assert mandarin_app.display_chinese_pair("机场") == "机场 / 機場"
+    assert mandarin_app.display_chinese_pair("機場") == "机场 / 機場"
+
+
+def test_quiz_feedback_displays_both_chinese_scripts(monkeypatch):
+    quiz = {
+        "word": "学习",
+        "traditional": "學習",
+        "pinyin": "xué xí",
+        "correct_answer": "to study",
+        "choices": ["to study", "airport"],
+    }
+    monkeypatch.setattr(mandarin_app, "build_quiz", lambda *args, **kwargs: quiz)
+    monkeypatch.setattr(
+        mandarin_app,
+        "find_entry_by_english",
+        lambda english: {"word": "机场", "pinyin": "jī chǎng"},
+    )
+    client = mandarin_app.app.test_client()
+
+    response = client.post(
+        "/",
+        data={
+            "form_type": "quiz",
+            "question_word": "学习",
+            "selected_answer": "airport",
+            "choice": ["to study", "airport"],
+        },
+    )
+
+    assert response.status_code == 200
+    assert "\"机场 / 機場\" (jī chǎng),\n                            not \"学习 / 學習\"".encode("utf-8") in response.data
+
+
+def test_quiz_score_counts_a_wrong_answer_only_once_before_a_retry(monkeypatch):
+    quiz = {
+        "word": "学习",
+        "traditional": "學習",
+        "pinyin": "xué xí",
+        "correct_answer": "to study",
+        "choices": ["to study", "airport"],
+    }
+    monkeypatch.setattr(mandarin_app, "build_quiz", lambda *args, **kwargs: quiz)
+    monkeypatch.setattr(
+        mandarin_app,
+        "find_entry_by_english",
+        lambda english: {"word": "机场", "pinyin": "jī chǎng"},
+    )
+    client = mandarin_app.app.test_client()
+    base_data = {
+        "form_type": "quiz",
+        "question_word": "学习",
+        "choice": ["to study", "airport"],
+    }
+
+    wrong_response = client.post(
+        "/",
+        data={**base_data, "selected_answer": "airport", "score_correct": "0", "score_attempted": "0"},
+    )
+    retry_response = client.post(
+        "/",
+        data={
+            **base_data,
+            "selected_answer": "to study",
+            "score_correct": "0",
+            "score_attempted": "1",
+            "question_counted": "1",
+        },
+    )
+
+    assert b"Score: 0 / 1" in wrong_response.data
+    assert b"Score: 1 / 1" in retry_response.data
+
+
+def test_quiz_score_counts_a_first_try_correct_answer_and_resets_for_a_new_session(monkeypatch):
+    quiz = {
+        "word": "学习",
+        "traditional": "學習",
+        "pinyin": "xué xí",
+        "correct_answer": "to study",
+        "choices": ["to study", "airport"],
+    }
+    monkeypatch.setattr(mandarin_app, "build_quiz", lambda *args, **kwargs: quiz)
+    client = mandarin_app.app.test_client()
+
+    correct_response = client.post(
+        "/",
+        data={
+            "form_type": "quiz",
+            "question_word": "学习",
+            "selected_answer": "to study",
+            "choice": ["to study", "airport"],
+            "score_correct": "0",
+            "score_attempted": "0",
+        },
+    )
+    new_session_response = client.get("/", query_string={"mode": "quiz"})
+
+    assert b"Score: 1 / 1" in correct_response.data
+    assert b"Score: 0 / 0" in new_session_response.data
 
 
 def test_ai_result_accepts_traditional_query_match():

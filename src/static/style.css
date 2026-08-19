@@ -78,6 +78,62 @@ body {
     border-color: var(--accent);
 }
 
+.student-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 12px;
+    margin: -8px 0 24px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--panel);
+}
+
+.student-select-form,
+.student-create-form {
+    display: flex;
+    align-items: end;
+    gap: 8px;
+}
+
+.student-select-form label,
+.student-create-form label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.student-select-form select,
+.student-create-form input {
+    display: block;
+    min-height: 36px;
+    margin-top: 4px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    font: inherit;
+    padding: 6px 8px;
+}
+
+.student-create-form button {
+    min-height: 36px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    padding: 6px 10px;
+}
+
+.student-note {
+    width: 100%;
+    margin: 0;
+    color: #6a5b4d;
+}
+
 .eyebrow {
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -284,6 +340,12 @@ h1 {
 
 .quiz-header h2 {
     margin: 0 0 10px;
+}
+
+.quiz-score {
+    margin: 0 0 16px;
+    color: #6a5b4d;
+    font-weight: bold;
 }
 
 .quiz-word {
@@ -512,14 +574,7 @@ h1 {
     font-weight: 700;
 }
 
-.quiz-traditional {
-    color: #6a5b4d;
-    font-size: 1.2rem;
-    font-style: normal;
-}
-
-.traditional-word::before,
-.quiz-traditional::before {
+.traditional-word::before {
     content: "/";
     margin-right: 8px;
     color: #9c8d7c;
@@ -606,6 +661,9 @@ ul {
 
 @media (max-width: 640px) {
     .mode-switch,
+    .student-panel,
+    .student-select-form,
+    .student-create-form,
     .search-form,
     .batch-search-form,
     .convert-form,
