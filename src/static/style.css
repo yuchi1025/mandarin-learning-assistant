@@ -567,6 +567,12 @@ h1 {
     font-style: italic;
 }
 
+.word-block > span {
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
 .card-header .traditional-word {
     color: var(--ink);
     font-size: 2rem;
@@ -648,7 +654,8 @@ ul {
 .example-pinyin {
     color: var(--accent);
     font-style: italic;
-    font-size: 0.95rem;
+    font-size: 1.05rem;
+    line-height: 1.45;
 }
 
 .example-translation {
