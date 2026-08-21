@@ -268,7 +268,7 @@ def test_student_profiles_keep_progress_separate(monkeypatch, tmp_path):
     assert ben_summary["today_events"][0]["word"] == "朋友"
 
 
-def test_quiz_attempts_persist_one_final_result_per_quiz_interaction(monkeypatch, tmp_path):
+def test_quiz_attempts_preserve_first_answer_after_a_correct_retry(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
     student = mandarin_app.create_student("Alice")
     attempt_key = "alice-learning-1"
@@ -280,14 +280,14 @@ def test_quiz_attempts_persist_one_final_result_per_quiz_interaction(monkeypatch
         attempts = [
             mandarin_app.row_to_dict(row)
             for row in connection.execute(
-                "SELECT vocabulary_word, is_correct FROM quiz_attempts WHERE student_id = ?",
+                "SELECT vocabulary_word, is_correct, first_attempt_correct FROM quiz_attempts WHERE student_id = ?",
                 (student["id"],),
             )
         ]
     summary = mandarin_app.get_progress_summary(student["id"])
 
-    assert attempts == [{"vocabulary_word": "学习", "is_correct": 1}]
-    assert summary["quiz_stats"] == {"attempted": 1, "correct": 1, "accuracy": 100}
+    assert attempts == [{"vocabulary_word": "学习", "is_correct": 1, "first_attempt_correct": 0}]
+    assert summary["quiz_stats"] == {"attempted": 1, "correct": 0, "accuracy": 0}
 
 
 def test_quiz_route_updates_one_attempt_after_a_wrong_retry(monkeypatch, tmp_path):
@@ -319,11 +319,15 @@ def test_quiz_route_updates_one_attempt_after_a_wrong_retry(monkeypatch, tmp_pat
     client.post("/", data={**base_data, "selected_answer": "to study"})
 
     with mandarin_app.get_progress_connection() as connection:
-        attempt_count = connection.execute(
-            "SELECT COUNT(*) AS count FROM quiz_attempts WHERE student_id = ?", (student["id"],)
-        ).fetchone()["count"]
-    assert attempt_count == 1
-    assert mandarin_app.get_progress_summary(student["id"])["quiz_stats"]["correct"] == 1
+        attempt = mandarin_app.row_to_dict(connection.execute(
+            "SELECT is_correct, first_attempt_correct FROM quiz_attempts WHERE student_id = ?", (student["id"],)
+        ).fetchone())
+    assert attempt == {"is_correct": 1, "first_attempt_correct": 0}
+    assert mandarin_app.get_progress_summary(student["id"])["quiz_stats"] == {
+        "attempted": 1,
+        "correct": 0,
+        "accuracy": 0,
+    }
 
 
 def test_quiz_attempt_stats_are_isolated_by_student(monkeypatch, tmp_path):
@@ -345,6 +349,56 @@ def test_quiz_attempt_stats_are_isolated_by_student(monkeypatch, tmp_path):
         "correct": 0,
         "accuracy": 0,
     }
+
+
+def test_review_mistakes_records_unresolved_words_per_student(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    alice = mandarin_app.create_student("Alice")
+    ben = mandarin_app.create_student("Ben")
+
+    mandarin_app.record_quiz_attempt(alice["id"], "学习", False, "alice-study")
+    mandarin_app.record_quiz_attempt(ben["id"], "朋友", False, "ben-friend")
+
+    assert [entry["word"] for entry in mandarin_app.get_review_mistake_entries(alice["id"])] == ["学习"]
+    assert [entry["word"] for entry in mandarin_app.get_review_mistake_entries(ben["id"])] == ["朋友"]
+
+
+def test_review_mistakes_uses_only_unresolved_words_and_preserves_history(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+
+    mandarin_app.record_quiz_attempt(student["id"], "学习", False, "study-wrong")
+    mandarin_app.record_quiz_attempt(student["id"], "朋友", False, "friend-wrong")
+    mandarin_app.record_quiz_attempt(student["id"], "学习", True, "study-improved")
+
+    review_words = [entry["word"] for entry in mandarin_app.get_review_mistake_entries(student["id"])]
+    quiz = mandarin_app.build_quiz(allowed_words=review_words)
+    with mandarin_app.get_progress_connection() as connection:
+        history_count = connection.execute(
+            "SELECT COUNT(*) AS count FROM quiz_attempts WHERE student_id = ? AND vocabulary_word = ?",
+            (student["id"], "学习"),
+        ).fetchone()["count"]
+
+    assert review_words == ["朋友"]
+    assert quiz["word"] == "朋友"
+    assert len(quiz["choices"]) > 1
+    assert history_count == 2
+
+
+def test_review_mistakes_empty_state_for_selected_student(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    client = mandarin_app.app.test_client()
+
+    response = client.get(
+        "/",
+        query_string={"mode": "quiz", "quiz_source": "review", "student_id": student["id"]},
+    )
+
+    assert response.status_code == 200
+    assert b"Review Mistakes" in response.data
+    assert b"No mistakes to review" in response.data
+    assert b"quiz-form" not in response.data
 
 
 def test_progress_database_migrates_legacy_events_to_a_stable_profile(monkeypatch, tmp_path):
@@ -379,6 +433,47 @@ def test_progress_database_migrates_legacy_events_to_a_stable_profile(monkeypatc
     assert students == [{"id": students[0]["id"], "name": "Existing progress"}]
     assert summary["total_searches"] == 1
     assert summary["today_events"] == []
+
+
+def test_quiz_attempt_migration_preserves_legacy_score_results(monkeypatch, tmp_path):
+    db_path = use_temp_progress_db(monkeypatch, tmp_path)
+    with mandarin_app.sqlite3.connect(db_path) as connection:
+        connection.execute(
+            "CREATE TABLE students (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, created_at TEXT NOT NULL)"
+        )
+        connection.execute("INSERT INTO students (name, created_at) VALUES ('Alice', '2026-01-01T09:00:00')")
+        connection.execute(
+            """
+            CREATE TABLE quiz_attempts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER NOT NULL,
+                vocabulary_word TEXT NOT NULL,
+                is_correct INTEGER NOT NULL,
+                completed_at TEXT NOT NULL,
+                interaction_key TEXT NOT NULL,
+                UNIQUE (student_id, interaction_key)
+            )
+            """
+        )
+        connection.execute(
+            """
+            INSERT INTO quiz_attempts (student_id, vocabulary_word, is_correct, completed_at, interaction_key)
+            VALUES (1, '学习', 0, '2026-01-01T09:00:00', 'legacy-quiz-1')
+            """
+        )
+
+    mandarin_app.init_progress_db()
+    with mandarin_app.get_progress_connection() as connection:
+        first_attempt_correct = connection.execute(
+            "SELECT first_attempt_correct FROM quiz_attempts WHERE interaction_key = 'legacy-quiz-1'"
+        ).fetchone()["first_attempt_correct"]
+
+    assert first_attempt_correct == 0
+    assert mandarin_app.get_progress_summary(1)["quiz_stats"] == {
+        "attempted": 1,
+        "correct": 0,
+        "accuracy": 0,
+    }
 
 
 def test_quiz_mode_displays_both_chinese_scripts(monkeypatch):
@@ -473,7 +568,114 @@ def test_quiz_score_counts_a_wrong_answer_only_once_before_a_retry(monkeypatch):
     )
 
     assert b"Score: 0 / 1" in wrong_response.data
-    assert b"Score: 1 / 1" in retry_response.data
+    assert b"Score: 0 / 1" in retry_response.data
+
+
+def test_quiz_score_ignores_multiple_wrong_retries_before_completion(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    quiz = {
+        "word": "学习",
+        "traditional": "學習",
+        "pinyin": "xué xí",
+        "correct_answer": "to study",
+        "choices": ["to study", "airport"],
+    }
+    monkeypatch.setattr(mandarin_app, "build_quiz", lambda *args, **kwargs: quiz)
+    monkeypatch.setattr(
+        mandarin_app,
+        "find_entry_by_english",
+        lambda english: {"word": "机场", "pinyin": "jī chǎng"},
+    )
+    client = mandarin_app.app.test_client()
+    base_data = {
+        "form_type": "quiz",
+        "student_id": student["id"],
+        "question_word": "学习",
+        "quiz_attempt_key": "retry-score-1",
+        "choice": ["to study", "airport"],
+    }
+
+    first_wrong = client.post("/", data={**base_data, "selected_answer": "airport"})
+    second_wrong = client.post(
+        "/",
+        data={
+            **base_data,
+            "selected_answer": "airport",
+            "score_attempted": "1",
+            "question_counted": "1",
+        },
+    )
+    completed = client.post(
+        "/",
+        data={
+            **base_data,
+            "selected_answer": "to study",
+            "score_attempted": "1",
+            "question_counted": "1",
+        },
+    )
+
+    assert b"Score: 0 / 1" in first_wrong.data
+    assert b"Score: 0 / 1" in second_wrong.data
+    assert b"Score: 0 / 1" in completed.data
+    assert mandarin_app.get_progress_summary(student["id"])["quiz_stats"] == {
+        "attempted": 1,
+        "correct": 0,
+        "accuracy": 0,
+    }
+
+
+def test_quiz_score_counts_the_next_question_separately(monkeypatch):
+    study_quiz = {
+        "word": "学习",
+        "traditional": "學習",
+        "pinyin": "xué xí",
+        "correct_answer": "to study",
+        "choices": ["to study", "airport"],
+    }
+    friend_quiz = {
+        "word": "朋友",
+        "traditional": "朋友",
+        "pinyin": "péng you",
+        "correct_answer": "friend",
+        "choices": ["friend", "airport"],
+    }
+    monkeypatch.setattr(
+        mandarin_app,
+        "build_quiz",
+        lambda question_word=None, *args, **kwargs: friend_quiz if question_word == "朋友" else study_quiz,
+    )
+    monkeypatch.setattr(
+        mandarin_app,
+        "find_entry_by_english",
+        lambda english: {"word": "机场", "pinyin": "jī chǎng"},
+    )
+    client = mandarin_app.app.test_client()
+
+    first_response = client.post(
+        "/",
+        data={
+            "form_type": "quiz",
+            "question_word": "学习",
+            "selected_answer": "to study",
+            "choice": ["to study", "airport"],
+        },
+    )
+    second_response = client.post(
+        "/",
+        data={
+            "form_type": "quiz",
+            "question_word": "朋友",
+            "selected_answer": "airport",
+            "choice": ["friend", "airport"],
+            "score_correct": "1",
+            "score_attempted": "1",
+        },
+    )
+
+    assert b"Score: 1 / 1" in first_response.data
+    assert b"Score: 1 / 2" in second_response.data
 
 
 def test_quiz_score_counts_a_first_try_correct_answer_and_resets_for_a_new_session(monkeypatch):

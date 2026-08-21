@@ -225,12 +225,22 @@ def init_progress_db():
                 student_id INTEGER NOT NULL REFERENCES students(id),
                 vocabulary_word TEXT NOT NULL,
                 is_correct INTEGER NOT NULL CHECK (is_correct IN (0, 1)),
+                first_attempt_correct INTEGER NOT NULL CHECK (first_attempt_correct IN (0, 1)),
                 completed_at TEXT NOT NULL,
                 interaction_key TEXT NOT NULL,
                 UNIQUE (student_id, interaction_key)
             )
             """
         )
+        quiz_attempt_columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(quiz_attempts)")
+        }
+        if "first_attempt_correct" not in quiz_attempt_columns:
+            connection.execute("ALTER TABLE quiz_attempts ADD COLUMN first_attempt_correct INTEGER")
+            connection.execute(
+                "UPDATE quiz_attempts SET first_attempt_correct = is_correct WHERE first_attempt_correct IS NULL"
+            )
         connection.execute(
             "CREATE INDEX IF NOT EXISTS idx_quiz_attempts_student_date ON quiz_attempts (student_id, completed_at)"
         )
@@ -343,11 +353,52 @@ def record_quiz_attempt(student_id, vocabulary_word, is_correct, interaction_key
         else:
             connection.execute(
                 """
-                INSERT INTO quiz_attempts (student_id, vocabulary_word, is_correct, completed_at, interaction_key)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO quiz_attempts (
+                    student_id, vocabulary_word, is_correct, first_attempt_correct, completed_at, interaction_key
+                )
+                VALUES (?, ?, ?, ?, ?, ?)
                 """,
-                (student_id, word, int(bool(is_correct)), datetime.now().isoformat(timespec="seconds"), attempt_key),
+                (
+                    student_id,
+                    word,
+                    int(bool(is_correct)),
+                    int(bool(is_correct)),
+                    datetime.now().isoformat(timespec="seconds"),
+                    attempt_key,
+                ),
             )
+
+
+def get_review_mistake_entries(student_id):
+    student_id = parse_student_id(student_id)
+    if student_id is None or get_student(student_id) is None:
+        return []
+
+    init_progress_db()
+    with get_progress_connection() as connection:
+        mistake_words = [
+            row["vocabulary_word"]
+            for row in connection.execute(
+                """
+                SELECT vocabulary_word
+                FROM quiz_attempts
+                WHERE student_id = ?
+                    AND id IN (
+                        SELECT MAX(id)
+                        FROM quiz_attempts
+                        WHERE student_id = ?
+                        GROUP BY vocabulary_word
+                    )
+                    AND is_correct = 0
+                    AND first_attempt_correct = 0
+                ORDER BY completed_at ASC, id ASC
+                """,
+                (student_id, student_id),
+            )
+        ]
+
+    entries_by_word = {entry["word"]: entry for entry in get_quiz_entries()}
+    return [entries_by_word[word] for word in mistake_words if word in entries_by_word]
 
 
 def get_empty_progress_summary(selected_day=None):
@@ -468,7 +519,7 @@ def get_progress_summary(student_id, selected_day=None):
         ]
         quiz_stats_row = connection.execute(
             """
-            SELECT COUNT(*) AS attempted, COALESCE(SUM(is_correct), 0) AS correct
+            SELECT COUNT(*) AS attempted, COALESCE(SUM(first_attempt_correct), 0) AS correct
             FROM quiz_attempts
             WHERE student_id = ?
             """,
@@ -920,10 +971,17 @@ def find_entry_by_english(english_meaning):
     return None
 
 
-def build_quiz(question_word=None, exclude_word=None, choices=None, recent_words=None):
+def build_quiz(question_word=None, exclude_word=None, choices=None, recent_words=None, allowed_words=None):
     correct_entry = None
     recent_words = recent_words or []
-    quiz_entries = get_quiz_entries()
+    all_quiz_entries = get_quiz_entries()
+    quiz_entries = all_quiz_entries
+    if allowed_words is not None:
+        allowed_word_set = set(allowed_words)
+        quiz_entries = [entry for entry in all_quiz_entries if entry["word"] in allowed_word_set]
+
+    if not quiz_entries:
+        return None
 
     if question_word:
         for entry in quiz_entries:
@@ -944,7 +1002,7 @@ def build_quiz(question_word=None, exclude_word=None, choices=None, recent_words
 
     if choices is None:
         wrong_answers = []
-        for entry in quiz_entries:
+        for entry in all_quiz_entries:
             english = str(entry.get("english", "")).strip()
             if entry["word"] == correct_entry["word"] or not english:
                 continue
@@ -982,6 +1040,10 @@ def parse_quiz_score(value):
         return 0
 
 
+def normalize_quiz_source(value):
+    return "review" if value == "review" else "normal"
+
+
 @app.route("/", methods=["GET", "POST"])
 def home():
     mode = request.args.get("mode", "search")
@@ -1000,7 +1062,15 @@ def home():
     conversion_text = ""
     converted_simplified = ""
     converted_traditional = ""
-    quiz = build_quiz(recent_words=recent_words)
+    quiz_source = normalize_quiz_source(request.form.get("quiz_source") or request.args.get("quiz_source"))
+    review_words = request.form.getlist("review_word") or request.args.getlist("review_word")
+    if quiz_source == "review" and not review_words:
+        review_words = [entry["word"] for entry in get_review_mistake_entries(student_id)]
+    quiz = build_quiz(
+        recent_words=recent_words,
+        allowed_words=review_words if quiz_source == "review" else None,
+    )
+    review_empty = quiz_source == "review" and not review_words
     quiz_feedback = None
     quiz_score = {
         "correct": parse_quiz_score(request.args.get("score_correct")),
@@ -1045,22 +1115,60 @@ def home():
             selected_answer = request.form.get("selected_answer", "")
             current_choices = request.form.getlist("choice")
             recent_words = request.form.getlist("recent_word")
+            quiz_source = normalize_quiz_source(request.form.get("quiz_source"))
+            review_words = request.form.getlist("review_word")
             quiz_score = {
                 "correct": parse_quiz_score(request.form.get("score_correct")),
                 "attempted": parse_quiz_score(request.form.get("score_attempted")),
                 "question_counted": request.form.get("question_counted") == "1",
             }
             quiz_attempt_key = request.form.get("quiz_attempt_key") or uuid.uuid4().hex
-            quiz = build_quiz(question_word, choices=current_choices or None, recent_words=recent_words)
+            quiz = build_quiz(
+                question_word,
+                choices=current_choices or None,
+                recent_words=recent_words,
+                allowed_words=review_words if quiz_source == "review" else None,
+            )
+            if quiz is None:
+                review_empty = quiz_source == "review"
+                quiz_attempt_key = uuid.uuid4().hex
+                return render_template(
+                    "index.html",
+                    mode=mode,
+                    query=query,
+                    results=results,
+                    batch_missing=batch_missing,
+                    batch_ai_queries=batch_ai_queries,
+                    ai_pending=ai_pending,
+                    conversion_text=conversion_text,
+                    converted_simplified=converted_simplified,
+                    converted_traditional=converted_traditional,
+                    students=students,
+                    selected_student=selected_student,
+                    quiz=None,
+                    quiz_feedback=None,
+                    quiz_score=quiz_score,
+                    quiz_attempt_key=quiz_attempt_key,
+                    quiz_source=quiz_source,
+                    review_words=review_words,
+                    review_empty=review_empty,
+                    recent_words=recent_words,
+                    progress_summary=progress_summary,
+                )
             is_correct = selected_answer == quiz["correct_answer"]
             record_quiz_attempt(student_id, quiz["word"], is_correct, quiz_attempt_key)
             if is_correct:
                 if not quiz_score["question_counted"]:
                     quiz_score["attempted"] += 1
-                quiz_score["correct"] += 1
+                    quiz_score["correct"] += 1
                 quiz_score["question_counted"] = False
                 recent_words = (recent_words + [question_word])[-RECENT_QUIZ_LIMIT:]
-                quiz = build_quiz(exclude_word=question_word, recent_words=recent_words)
+                if quiz_source == "review":
+                    review_words = [word for word in review_words if word != question_word]
+                    quiz = build_quiz(recent_words=recent_words, allowed_words=review_words)
+                    review_empty = quiz is None
+                else:
+                    quiz = build_quiz(exclude_word=question_word, recent_words=recent_words)
                 quiz_attempt_key = uuid.uuid4().hex
             else:
                 if not quiz_score["question_counted"]:
@@ -1094,6 +1202,9 @@ def home():
         quiz_feedback=quiz_feedback,
         quiz_score=quiz_score,
         quiz_attempt_key=quiz_attempt_key,
+        quiz_source=quiz_source,
+        review_words=review_words,
+        review_empty=review_empty,
         recent_words=recent_words,
         progress_summary=progress_summary,
     )

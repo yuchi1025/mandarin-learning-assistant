@@ -342,6 +342,38 @@ h1 {
     margin: 0 0 10px;
 }
 
+.quiz-source-switch {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.quiz-source-switch a {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    padding: 8px 12px;
+    text-decoration: none;
+}
+
+.quiz-source-switch a:hover,
+.quiz-source-switch a:focus-visible,
+.quiz-source-switch a.active {
+    border-color: var(--accent);
+    background: #fff1ec;
+}
+
+.quiz-empty-state h2 {
+    margin: 0 0 8px;
+    font-size: 1.2rem;
+}
+
+.quiz-empty-state p {
+    margin: 0;
+    color: #6a5b4d;
+}
+
 .quiz-score {
     margin: 0 0 16px;
     color: #6a5b4d;
