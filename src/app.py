@@ -389,7 +389,6 @@ def get_review_mistake_entries(student_id):
                         WHERE student_id = ?
                         GROUP BY vocabulary_word
                     )
-                    AND is_correct = 0
                     AND first_attempt_correct = 0
                 ORDER BY completed_at ASC, id ASC
                 """,

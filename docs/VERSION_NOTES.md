@@ -6,7 +6,7 @@
 - Moved progress ownership to stable SQLite student IDs. Search, batch search, and AI fallback progress now belong only to the selected learner, and Progress Mode is filtered to that learner.
 - Added a backward-safe SQLite migration: previously global progress is preserved and assigned to an `Existing progress` profile rather than being discarded.
 - Added Quiz Mode scoring and Mandarin question audio, plus consistent paired Simplified and Traditional Chinese display in Quiz Mode.
-- Added a learner-specific Review Mistakes quiz source. It derives unresolved words from each learner's latest quiz result, keeps the full attempt history, and removes a word from review once it is answered correctly.
+- Added a learner-specific Review Mistakes quiz source. It derives words missed on the first answer from each learner's latest quiz result, keeps the full attempt history, and removes a word from the current review session once it is answered correctly.
 
 ## v0
 

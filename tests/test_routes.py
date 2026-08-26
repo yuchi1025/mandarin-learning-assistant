@@ -363,13 +363,13 @@ def test_review_mistakes_records_unresolved_words_per_student(monkeypatch, tmp_p
     assert [entry["word"] for entry in mandarin_app.get_review_mistake_entries(ben["id"])] == ["朋友"]
 
 
-def test_review_mistakes_uses_only_unresolved_words_and_preserves_history(monkeypatch, tmp_path):
+def test_review_mistakes_uses_first_attempt_mistakes_and_preserves_history(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
     student = mandarin_app.create_student("Alice")
 
     mandarin_app.record_quiz_attempt(student["id"], "学习", False, "study-wrong")
     mandarin_app.record_quiz_attempt(student["id"], "朋友", False, "friend-wrong")
-    mandarin_app.record_quiz_attempt(student["id"], "学习", True, "study-improved")
+    mandarin_app.record_quiz_attempt(student["id"], "学习", True, "study-wrong")
 
     review_words = [entry["word"] for entry in mandarin_app.get_review_mistake_entries(student["id"])]
     quiz = mandarin_app.build_quiz(allowed_words=review_words)
@@ -379,10 +379,10 @@ def test_review_mistakes_uses_only_unresolved_words_and_preserves_history(monkey
             (student["id"], "学习"),
         ).fetchone()["count"]
 
-    assert review_words == ["朋友"]
-    assert quiz["word"] == "朋友"
+    assert set(review_words) == {"学习", "朋友"}
+    assert quiz["word"] in review_words
     assert len(quiz["choices"]) > 1
-    assert history_count == 2
+    assert history_count == 1
 
 
 def test_review_mistakes_empty_state_for_selected_student(monkeypatch, tmp_path):

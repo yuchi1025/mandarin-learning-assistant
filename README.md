@@ -25,7 +25,7 @@ Current version: `v3.1.1`
   - Enabled learners to search by Chinese, English, pinyin with tone marks, or pinyin without tone marks.
   - Added local AI fallback so unknown valid words can show a structured explanation instead of only returning “not found.”
   - Added Quiz Mode so lookup can turn into active recall practice with immediate feedback.
-  - Added a learner-specific Review Mistakes quiz source for revisiting unresolved wrong answers while preserving quiz history.
+  - Added a learner-specific Review Mistakes quiz source for revisiting words missed on their first answer while preserving quiz history.
   - Added Progress Mode so searched words are stored locally and can be reviewed by day.
   - Added local student profiles so multiple learners can share one app installation while keeping progress separate.
 
@@ -293,8 +293,8 @@ How to use the project.
   - Quiz Mode:
     - A wrong quiz answer shows feedback while keeping the same question available
     - A correct quiz answer advances to the next quiz after a short delay
-    - Review Mistakes only includes the selected learner's unresolved wrong answers and removes a word from the current review when it is answered correctly
-    - Review Mistakes shows an empty state when the selected learner has no unresolved mistakes
+    - Review Mistakes only includes words the selected learner missed on their first answer and removes a word from the current review session when it is answered correctly
+    - Review Mistakes shows an empty state when the selected learner has no first-attempt mistakes
   - Session behaviour:
     - Successful AI fallback searches can be practised in Quiz Mode during the same server session
     - Switching between Search Mode and Quiz Mode keeps AI-learned quiz words available
