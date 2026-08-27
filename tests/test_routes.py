@@ -69,6 +69,7 @@ def test_static_app_js_loads():
     assert response.status_code == 200
     assert b"function speakMandarin" in response.data
     assert b"if (item !== radio)" in response.data
+    assert b"function bindAiSaveButton" in response.data
 
 
 def test_search_post_renders_result():
@@ -266,6 +267,142 @@ def test_student_profiles_keep_progress_separate(monkeypatch, tmp_path):
     assert alice_summary["today_events"][0]["word"] == "机场"
     assert ben_summary["total_searches"] == 1
     assert ben_summary["today_events"][0]["word"] == "朋友"
+
+
+def test_saved_vocabulary_saves_once_and_persists_across_requests(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    client = mandarin_app.app.test_client()
+
+    assert mandarin_app.save_vocabulary(student["id"], "机场") is True
+    assert mandarin_app.save_vocabulary(student["id"], "机场") is True
+    response = client.get("/", query_string={"mode": "saved", "student_id": student["id"]})
+    with mandarin_app.get_progress_connection() as connection:
+        saved_count = connection.execute(
+            "SELECT COUNT(*) AS count FROM saved_vocabulary WHERE student_id = ? AND vocabulary_word = ?",
+            (student["id"], "机场"),
+        ).fetchone()["count"]
+
+    assert saved_count == 1
+    assert [entry["word"] for entry in mandarin_app.get_saved_vocabulary_entries(student["id"])] == ["机场"]
+    assert "机场 / 機場".encode("utf-8") in response.data
+    assert b"Play pronunciation for" in response.data
+
+
+def test_saved_vocabulary_can_be_unsaved(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+
+    mandarin_app.save_vocabulary(student["id"], "机场")
+
+    assert mandarin_app.unsave_vocabulary(student["id"], "机场") is True
+    assert mandarin_app.get_saved_vocabulary_entries(student["id"]) == []
+
+
+def test_saved_vocabulary_is_isolated_by_student(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    alice = mandarin_app.create_student("Alice")
+    ben = mandarin_app.create_student("Ben")
+
+    mandarin_app.save_vocabulary(alice["id"], "机场")
+    mandarin_app.save_vocabulary(ben["id"], "朋友")
+
+    assert [entry["word"] for entry in mandarin_app.get_saved_vocabulary_entries(alice["id"])] == ["机场"]
+    assert [entry["word"] for entry in mandarin_app.get_saved_vocabulary_entries(ben["id"])] == ["朋友"]
+
+
+def test_saved_vocabulary_route_toggles_a_dictionary_result(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    client = mandarin_app.app.test_client()
+
+    saved_response = client.post(
+        "/",
+        data={
+            "form_type": "saved-vocabulary",
+            "saved_action": "save",
+            "student_id": student["id"],
+            "return_mode": "search",
+            "query": "airport",
+            "vocabulary_word": "机场",
+        },
+    )
+    unsaved_response = client.post(
+        "/",
+        data={
+            "form_type": "saved-vocabulary",
+            "saved_action": "unsave",
+            "student_id": student["id"],
+            "return_mode": "saved",
+            "vocabulary_word": "机场",
+        },
+    )
+
+    assert b"Unsave" in saved_response.data
+    assert "机场".encode("utf-8") in saved_response.data
+    assert b"No saved vocabulary yet" in unsaved_response.data
+
+
+def test_saved_vocabulary_rejects_unknown_words(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+
+    assert mandarin_app.save_vocabulary(student["id"], "not-a-dictionary-word") is False
+    assert mandarin_app.get_saved_vocabulary_entries(student["id"]) == []
+
+
+def test_saved_ai_vocabulary_persists_a_validated_snapshot(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    ai_entry = {
+        "word": "狮子",
+        "traditional": "獅子",
+        "pinyin": "shī zi",
+        "english": "lion",
+        "part_of_speech": "noun",
+        "explanation": "A large wild cat.",
+        "examples": [{"text": "狮子很大。", "translation": "Lions are large."}],
+    }
+
+    saved_entry = mandarin_app.save_ai_vocabulary(student["id"], ai_entry)
+    mandarin_app.AI_EXPLANATION_CACHE.clear()
+    saved_entries = mandarin_app.get_saved_vocabulary_entries(student["id"])
+
+    assert saved_entry["word"] == "狮子"
+    assert [entry["word"] for entry in saved_entries] == ["狮子"]
+    assert saved_entries[0]["traditional"] == "獅子"
+    assert saved_entries[0]["examples"][0]["speech_text"] == "狮子很大。"
+
+
+def test_saved_ai_vocabulary_api_requires_a_validated_entry(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    client = mandarin_app.app.test_client()
+
+    invalid_response = client.post(
+        "/api/saved-vocabulary",
+        json={"action": "save-ai", "student_id": student["id"], "result": {"word": "狮子"}},
+    )
+    valid_response = client.post(
+        "/api/saved-vocabulary",
+        json={
+            "action": "save-ai",
+            "student_id": student["id"],
+            "result": {
+                "word": "狮子",
+                "traditional": "獅子",
+                "pinyin": "shī zi",
+                "english": "lion",
+                "part_of_speech": "noun",
+                "explanation": "A large wild cat.",
+                "examples": [],
+            },
+        },
+    )
+
+    assert invalid_response.status_code == 400
+    assert valid_response.get_json() == {"ok": True, "saved": True, "word": "狮子"}
+    assert mandarin_app.is_vocabulary_saved(student["id"], "狮子") is True
 
 
 def test_quiz_attempts_preserve_first_answer_after_a_correct_retry(monkeypatch, tmp_path):

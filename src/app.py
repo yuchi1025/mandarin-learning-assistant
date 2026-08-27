@@ -145,6 +145,7 @@ def load_dictionary():
 
 
 DICTIONARY_ENTRIES = load_dictionary()
+DICTIONARY_ENTRIES_BY_WORD = {entry["word"]: entry for entry in DICTIONARY_ENTRIES}
 
 
 def get_progress_connection():
@@ -244,6 +245,31 @@ def init_progress_db():
         connection.execute(
             "CREATE INDEX IF NOT EXISTS idx_quiz_attempts_student_date ON quiz_attempts (student_id, completed_at)"
         )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS saved_vocabulary (
+                student_id INTEGER NOT NULL REFERENCES students(id),
+                vocabulary_word TEXT NOT NULL,
+                saved_at TEXT NOT NULL,
+                source TEXT NOT NULL DEFAULT 'dictionary',
+                entry_json TEXT,
+                PRIMARY KEY (student_id, vocabulary_word)
+            )
+            """
+        )
+        saved_vocabulary_columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(saved_vocabulary)")
+        }
+        if "source" not in saved_vocabulary_columns:
+            connection.execute(
+                "ALTER TABLE saved_vocabulary ADD COLUMN source TEXT NOT NULL DEFAULT 'dictionary'"
+            )
+        if "entry_json" not in saved_vocabulary_columns:
+            connection.execute("ALTER TABLE saved_vocabulary ADD COLUMN entry_json TEXT")
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_saved_vocabulary_student_date ON saved_vocabulary (student_id, saved_at)"
+        )
 
 
 def row_to_dict(row):
@@ -296,6 +322,143 @@ def create_student(name):
             (cleaned_name, datetime.now().isoformat(timespec="seconds")),
         )
         return {"id": cursor.lastrowid, "name": cleaned_name}
+
+
+def get_saved_vocabulary_entries(student_id):
+    student_id = parse_student_id(student_id)
+    if student_id is None or get_student(student_id) is None:
+        return []
+
+    init_progress_db()
+    with get_progress_connection() as connection:
+        saved_words = [
+            row_to_dict(row)
+            for row in connection.execute(
+                """
+                SELECT vocabulary_word, source, entry_json
+                FROM saved_vocabulary
+                WHERE student_id = ?
+                ORDER BY saved_at DESC, vocabulary_word
+                """,
+                (student_id,),
+            )
+        ]
+
+    entries = []
+    for saved_word in saved_words:
+        if saved_word["source"] == "dictionary":
+            entry = DICTIONARY_ENTRIES_BY_WORD.get(saved_word["vocabulary_word"])
+        else:
+            entry = deserialize_saved_ai_entry(saved_word["entry_json"])
+        if entry:
+            entries.append(entry)
+    return entries
+
+
+def save_vocabulary(student_id, vocabulary_word):
+    student_id = parse_student_id(student_id)
+    word = str(vocabulary_word or "").strip()
+    if student_id is None or word not in DICTIONARY_ENTRIES_BY_WORD or get_student(student_id) is None:
+        return False
+
+    init_progress_db()
+    with get_progress_connection() as connection:
+        connection.execute(
+            """
+            INSERT OR IGNORE INTO saved_vocabulary (student_id, vocabulary_word, saved_at)
+            VALUES (?, ?, ?)
+            """,
+            (student_id, word, datetime.now().isoformat(timespec="seconds")),
+        )
+    return True
+
+
+def unsave_vocabulary(student_id, vocabulary_word):
+    student_id = parse_student_id(student_id)
+    word = str(vocabulary_word or "").strip()
+    if student_id is None or not word or get_student(student_id) is None:
+        return False
+
+    init_progress_db()
+    with get_progress_connection() as connection:
+        connection.execute(
+            "DELETE FROM saved_vocabulary WHERE student_id = ? AND vocabulary_word = ?",
+            (student_id, word),
+        )
+    return True
+
+
+def is_vocabulary_saved(student_id, vocabulary_word):
+    student_id = parse_student_id(student_id)
+    word = str(vocabulary_word or "").strip()
+    if student_id is None or not word or get_student(student_id) is None:
+        return False
+
+    init_progress_db()
+    with get_progress_connection() as connection:
+        return connection.execute(
+            "SELECT 1 FROM saved_vocabulary WHERE student_id = ? AND vocabulary_word = ?",
+            (student_id, word),
+        ).fetchone() is not None
+
+
+def normalize_saved_ai_entry(result):
+    if not isinstance(result, dict):
+        return None
+
+    word = str(result.get("word", "")).strip()
+    traditional = str(result.get("traditional", word)).strip() or word
+    word, traditional = normalize_ai_word_forms(word, word, traditional)
+    examples = []
+    for example in result.get("examples", [])[:2]:
+        if not isinstance(example, dict):
+            continue
+        text = str(example.get("text", "")).strip()
+        if text:
+            examples.append(make_structured_example(text, str(example.get("translation", "")).strip()))
+
+    entry = {
+        "word": word,
+        "traditional": traditional,
+        "pinyin": str(result.get("pinyin", "")).strip() or to_sentence_pinyin(word),
+        "english": str(result.get("english", "")).strip(),
+        "part_of_speech": normalize_part_of_speech(str(result.get("part_of_speech", "word"))),
+        "explanation": str(result.get("explanation", "")).strip(),
+        "examples": examples,
+    }
+    return entry if validate_ai_result(word, entry) else None
+
+
+def deserialize_saved_ai_entry(entry_json):
+    try:
+        return normalize_saved_ai_entry(json.loads(entry_json or ""))
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return None
+
+
+def save_ai_vocabulary(student_id, result):
+    student_id = parse_student_id(student_id)
+    entry = normalize_saved_ai_entry(result)
+    if student_id is None or entry is None or get_student(student_id) is None:
+        return None
+    if entry["word"] in DICTIONARY_ENTRIES_BY_WORD:
+        return DICTIONARY_ENTRIES_BY_WORD[entry["word"]] if save_vocabulary(student_id, entry["word"]) else None
+
+    init_progress_db()
+    with get_progress_connection() as connection:
+        connection.execute(
+            """
+            INSERT OR IGNORE INTO saved_vocabulary (student_id, vocabulary_word, saved_at, source, entry_json)
+            VALUES (?, ?, ?, 'ai', ?)
+            """,
+            (
+                student_id,
+                entry["word"],
+                datetime.now().isoformat(timespec="seconds"),
+                json.dumps(entry, ensure_ascii=True),
+            ),
+        )
+    return entry
 
 
 def log_progress_event(query, entry, source, mode, student_id=None):
@@ -1106,6 +1269,20 @@ def home():
             conversion_text = request.form.get("text", "")
             converted_simplified = simplify_known_traditional_text(conversion_text)
             converted_traditional = traditionalize_known_simplified_text(conversion_text)
+        elif form_type == "saved-vocabulary":
+            mode = request.form.get("return_mode", "saved")
+            vocabulary_word = request.form.get("vocabulary_word", "")
+            if request.form.get("saved_action") == "save":
+                save_vocabulary(student_id, vocabulary_word)
+            elif request.form.get("saved_action") == "unsave":
+                unsave_vocabulary(student_id, vocabulary_word)
+
+            if mode == "search":
+                query = request.form.get("query", "")
+                results = search_entries(query) if query else []
+            elif mode == "batch":
+                query = request.form.get("query", "")
+                results, batch_missing, batch_ai_queries = batch_search_entries(query) if query else ([], [], [])
         elif form_type == "quiz":
             mode = "quiz"
             query = request.form.get("query", "")
@@ -1184,6 +1361,9 @@ def home():
     if mode == "progress":
         progress_summary = get_progress_summary(student_id, progress_day)
 
+    saved_entries = get_saved_vocabulary_entries(student_id) if mode == "saved" else []
+    saved_words = {entry["word"] for entry in get_saved_vocabulary_entries(student_id)}
+
     return render_template(
         "index.html",
         mode=mode,
@@ -1206,6 +1386,8 @@ def home():
         review_empty=review_empty,
         recent_words=recent_words,
         progress_summary=progress_summary,
+        saved_entries=saved_entries,
+        saved_words=saved_words,
     )
 
 
@@ -1222,7 +1404,26 @@ def ai_explanation():
         return jsonify({"ok": False, "error": error}), 503
 
     log_progress_event(query, result, "ai", mode if mode in {"search", "batch"} else "search", student_id)
-    return jsonify({"ok": True, "result": result})
+    return jsonify({"ok": True, "result": result, "saved": is_vocabulary_saved(student_id, result["word"])})
+
+
+@app.post("/api/saved-vocabulary")
+def saved_vocabulary_api():
+    payload = request.get_json(silent=True) or {}
+    student_id = parse_student_id(payload.get("student_id"))
+    action = payload.get("action")
+    if action == "save-ai":
+        entry = save_ai_vocabulary(student_id, payload.get("result"))
+        if entry is None:
+            return jsonify({"ok": False, "error": "Choose a learner and save a valid AI result."}), 400
+        return jsonify({"ok": True, "saved": True, "word": entry["word"]})
+    if action == "unsave":
+        word = str(payload.get("vocabulary_word", "")).strip()
+        if not unsave_vocabulary(student_id, word):
+            return jsonify({"ok": False, "error": "Choose a learner and a saved word."}), 400
+        return jsonify({"ok": True, "saved": False, "word": word})
+
+    return jsonify({"ok": False, "error": "Unsupported saved vocabulary action."}), 400
 
 
 @app.post("/api/clear-ai-cache")

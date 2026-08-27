@@ -194,7 +194,11 @@ function renderExample(sentence) {
     `;
 }
 
-function renderAiResult(card, item) {
+function renderAiResult(card, item, isSaved) {
+    const studentId = card.dataset.studentId;
+    const saveControl = studentId
+        ? `<button type="button" class="saved-toggle ai-save-button" data-saved="${isSaved ? "true" : "false"}">${isSaved ? "Unsave" : "Save"}</button>`
+        : `<button type="button" class="saved-toggle" disabled title="Choose a learner first">Save</button>`;
     const pinyinLine = item.pinyin ? `<span>${escapeHtml(item.pinyin)}</span>` : "";
     const traditionalLine = item.traditional && item.traditional !== item.word
         ? `<span class="traditional-word">${escapeHtml(item.traditional)}</span>`
@@ -211,7 +215,11 @@ function renderAiResult(card, item) {
         `
         : "";
 
+    card.classList.add("result-card-with-save");
     card.innerHTML = `
+        <div class="result-card-save-form save-vocabulary-form">
+            ${saveControl}
+        </div>
         <div class="card-header">
             <div class="word-block">
                 <div class="word-line">
@@ -239,7 +247,49 @@ function renderAiResult(card, item) {
         <p><strong>Simple explanation:</strong> ${escapeHtml(item.explanation)}</p>
         ${examplesBlock}
     `;
+    bindAiSaveButton(card, item, studentId);
     bindAudioButtons(card);
+}
+
+function bindAiSaveButton(card, item, studentId) {
+    const button = card.querySelector(".ai-save-button");
+    if (!button) {
+        return;
+    }
+
+    button.addEventListener("click", function () {
+        const isSaved = button.dataset.saved === "true";
+        const payload = isSaved
+            ? { action: "unsave", student_id: studentId, vocabulary_word: item.word }
+            : { action: "save-ai", student_id: studentId, result: item };
+
+        button.disabled = true;
+        fetch("/api/saved-vocabulary", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        })
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    return { ok: response.ok && data.ok, data: data };
+                });
+            })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error(response.data.error || "Could not update saved vocabulary.");
+                }
+                const nowSaved = response.data.saved;
+                button.dataset.saved = nowSaved ? "true" : "false";
+                button.textContent = nowSaved ? "Unsave" : "Save";
+                button.title = "";
+            })
+            .catch(function (error) {
+                button.title = error.message;
+            })
+            .finally(function () {
+                button.disabled = false;
+            });
+    });
 }
 
 function renderAiError(card, message) {
@@ -266,7 +316,7 @@ function loadAiResult(card) {
                 renderAiError(card, payload.data.error || "Unknown error.");
                 return;
             }
-            renderAiResult(card, payload.data.result);
+            renderAiResult(card, payload.data.result, payload.data.saved);
         })
         .catch(function () {
             renderAiError(card, "Could not reach the local AI service.");

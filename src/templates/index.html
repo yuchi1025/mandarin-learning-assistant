@@ -6,7 +6,7 @@
     <title>Mandarin Learning Assistant</title>
     <link rel="icon" type="image/png" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3.1.1-saved-corner">
 </head>
 <body>
     <main class="page">
@@ -43,6 +43,9 @@
             </a>
             <a href="{{ url_for('home', mode='progress', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'progress' %}active{% endif %}">
                 Progress Mode
+            </a>
+            <a href="{{ url_for('home', mode='saved', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'saved' %}active{% endif %}">
+                Saved Vocabulary
             </a>
         </nav>
 
@@ -160,7 +163,21 @@
             {% endif %}
 
             {% for item in results %}
-                <section class="result-card">
+                <section class="result-card result-card-with-save">
+                    <form method="post" class="save-vocabulary-form result-card-save-form">
+                        <input type="hidden" name="form_type" value="saved-vocabulary">
+                        <input type="hidden" name="student_id" value="{{ selected_student.id if selected_student else '' }}">
+                        <input type="hidden" name="return_mode" value="{{ mode }}">
+                        <input type="hidden" name="query" value="{{ query }}">
+                        <input type="hidden" name="vocabulary_word" value="{{ item.word }}">
+                        {% if item.word in saved_words %}
+                            <input type="hidden" name="saved_action" value="unsave">
+                            <button type="submit" class="saved-toggle">Unsave</button>
+                        {% else %}
+                            <input type="hidden" name="saved_action" value="save">
+                            <button type="submit" class="saved-toggle" {% if not selected_student %}disabled title="Choose a learner first"{% endif %}>Save</button>
+                        {% endif %}
+                    </form>
                     <div class="card-header">
                         <div class="word-block">
                             <div class="word-line">
@@ -219,6 +236,58 @@
                     </div>
                 </section>
             {% endfor %}
+        {% endif %}
+
+        {% if mode == 'saved' %}
+            {% if selected_student and saved_entries %}
+                <section class="saved-vocabulary-header">
+                    <h2>Saved Vocabulary</h2>
+                    <p>{{ selected_student.name }}'s study list</p>
+                </section>
+                <section class="saved-vocabulary-list">
+                    {% for item in saved_entries %}
+                        <article class="saved-vocabulary-row">
+                            <div class="saved-vocabulary-word">
+                                <strong>{{ item.word | display_chinese_pair }}</strong>
+                                <span>{{ item.pinyin }}</span>
+                            </div>
+                            <span class="saved-vocabulary-meaning">{{ item.english }}</span>
+                            <div class="saved-vocabulary-actions">
+                                <button
+                                    type="button"
+                                    class="audio-button inline-audio-button"
+                                    data-speak="{{ item.word }}"
+                                    aria-label="Play pronunciation for {{ item.word }}"
+                                    title="Play pronunciation"
+                                >
+                                    <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon">
+                                        <path d="M3 10v4h4l5 4V6L7 10H3z"></path>
+                                        <path d="M16 8a5 5 0 0 1 0 8"></path>
+                                        <path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"></path>
+                                    </svg>
+                                </button>
+                                <form method="post" class="save-vocabulary-form">
+                                    <input type="hidden" name="form_type" value="saved-vocabulary">
+                                    <input type="hidden" name="student_id" value="{{ selected_student.id }}">
+                                    <input type="hidden" name="return_mode" value="saved">
+                                    <input type="hidden" name="vocabulary_word" value="{{ item.word }}">
+                                    <input type="hidden" name="saved_action" value="unsave">
+                                    <button type="submit" class="saved-toggle">Unsave</button>
+                                </form>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </section>
+            {% else %}
+                <section class="empty-state saved-vocabulary-empty">
+                    {% if selected_student %}
+                        <p>No saved vocabulary yet. Save a dictionary result to build a study list.</p>
+                    {% else %}
+                        <p>Choose a learner to view saved vocabulary.</p>
+                    {% endif %}
+                </section>
+            {% endif %}
+            <p class="audio-status" id="audio-status" hidden></p>
         {% endif %}
 
         {% if mode == 'convert' %}
@@ -494,6 +563,6 @@
         {% endif %}
     </main>
 
-    <script src="{{ url_for('static', filename='app.js') }}?v=3.1.1-quiz-submit-fix"></script>
+    <script src="{{ url_for('static', filename='app.js') }}?v=3.1.1-ai-saved-vocabulary"></script>
 </body>
 </html>
