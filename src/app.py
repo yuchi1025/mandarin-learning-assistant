@@ -563,6 +563,66 @@ def get_review_mistake_entries(student_id):
     return [entries_by_word[word] for word in mistake_words if word in entries_by_word]
 
 
+def get_recent_search_entries(student_id):
+    student_id = parse_student_id(student_id)
+    if student_id is None or get_student(student_id) is None:
+        return []
+
+    init_progress_db()
+    with get_progress_connection() as connection:
+        events = [
+            row_to_dict(row)
+            for row in connection.execute(
+                """
+                SELECT word, traditional, pinyin, english
+                FROM search_events
+                WHERE student_id = ? AND id IN (
+                    SELECT MAX(id)
+                    FROM search_events
+                    WHERE student_id = ? AND word IS NOT NULL AND word != ''
+                    GROUP BY word
+                )
+                ORDER BY id DESC
+                LIMIT 30
+                """,
+                (student_id, student_id),
+            )
+        ]
+
+    entries_by_word = {entry["word"]: entry for entry in get_quiz_entries()}
+    entries_by_word.update({entry["word"]: entry for entry in get_saved_vocabulary_entries(student_id)})
+    entries = []
+    for event in events:
+        word = str(event["word"] or "").strip()
+        entry = entries_by_word.get(word)
+        if entry is None:
+            pinyin = str(event["pinyin"] or "").strip()
+            english = str(event["english"] or "").strip()
+            if not pinyin or not english:
+                continue
+            entry = {
+                "word": word,
+                "traditional": str(event["traditional"] or word).strip() or word,
+                "pinyin": pinyin,
+                "english": english,
+                "part_of_speech": "word",
+                "explanation": "",
+                "examples": [],
+            }
+        entries.append(entry)
+    return entries
+
+
+def get_quiz_pool(source, student_id):
+    if source == "recent":
+        return get_recent_search_entries(student_id)
+    if source == "saved":
+        return get_saved_vocabulary_entries(student_id)
+    if source == "review":
+        return get_review_mistake_entries(student_id)
+    return get_quiz_entries()
+
+
 def get_empty_progress_summary(selected_day=None):
     return {
         "total_searches": 0,
@@ -1133,14 +1193,14 @@ def find_entry_by_english(english_meaning):
     return None
 
 
-def build_quiz(question_word=None, exclude_word=None, choices=None, recent_words=None, allowed_words=None):
+def build_quiz(question_word=None, exclude_word=None, choices=None, recent_words=None, allowed_words=None, pool_entries=None):
     correct_entry = None
     recent_words = recent_words or []
     all_quiz_entries = get_quiz_entries()
-    quiz_entries = all_quiz_entries
+    quiz_entries = pool_entries if pool_entries is not None else all_quiz_entries
     if allowed_words is not None:
         allowed_word_set = set(allowed_words)
-        quiz_entries = [entry for entry in all_quiz_entries if entry["word"] in allowed_word_set]
+        quiz_entries = [entry for entry in quiz_entries if entry["word"] in allowed_word_set]
 
     if not quiz_entries:
         return None
@@ -1203,7 +1263,7 @@ def parse_quiz_score(value):
 
 
 def normalize_quiz_source(value):
-    return "review" if value == "review" else "normal"
+    return value if value in {"all", "recent", "saved", "review"} else "all"
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -1225,14 +1285,18 @@ def home():
     converted_simplified = ""
     converted_traditional = ""
     quiz_source = normalize_quiz_source(request.form.get("quiz_source") or request.args.get("quiz_source"))
-    review_words = request.form.getlist("review_word") or request.args.getlist("review_word")
-    if quiz_source == "review" and not review_words:
-        review_words = [entry["word"] for entry in get_review_mistake_entries(student_id)]
+    quiz_pool_words = request.form.getlist("quiz_pool_word") or request.args.getlist("quiz_pool_word")
+    quiz_pool = get_quiz_pool(quiz_source, student_id)
+    if quiz_source != "all":
+        if quiz_pool_words:
+            quiz_pool = [entry for entry in quiz_pool if entry["word"] in set(quiz_pool_words)]
+        else:
+            quiz_pool_words = [entry["word"] for entry in quiz_pool]
     quiz = build_quiz(
         recent_words=recent_words,
-        allowed_words=review_words if quiz_source == "review" else None,
+        pool_entries=quiz_pool,
     )
-    review_empty = quiz_source == "review" and not review_words
+    quiz_source_empty = quiz_source != "all" and not quiz_pool_words
     quiz_feedback = None
     quiz_score = {
         "correct": parse_quiz_score(request.args.get("score_correct")),
@@ -1292,7 +1356,10 @@ def home():
             current_choices = request.form.getlist("choice")
             recent_words = request.form.getlist("recent_word")
             quiz_source = normalize_quiz_source(request.form.get("quiz_source"))
-            review_words = request.form.getlist("review_word")
+            quiz_pool_words = request.form.getlist("quiz_pool_word")
+            quiz_pool = get_quiz_pool(quiz_source, student_id)
+            if quiz_source != "all":
+                quiz_pool = [entry for entry in quiz_pool if entry["word"] in set(quiz_pool_words)]
             quiz_score = {
                 "correct": parse_quiz_score(request.form.get("score_correct")),
                 "attempted": parse_quiz_score(request.form.get("score_attempted")),
@@ -1303,10 +1370,10 @@ def home():
                 question_word,
                 choices=current_choices or None,
                 recent_words=recent_words,
-                allowed_words=review_words if quiz_source == "review" else None,
+                pool_entries=quiz_pool,
             )
             if quiz is None:
-                review_empty = quiz_source == "review"
+                quiz_source_empty = quiz_source != "all"
                 quiz_attempt_key = uuid.uuid4().hex
                 return render_template(
                     "index.html",
@@ -1326,8 +1393,8 @@ def home():
                     quiz_score=quiz_score,
                     quiz_attempt_key=quiz_attempt_key,
                     quiz_source=quiz_source,
-                    review_words=review_words,
-                    review_empty=review_empty,
+                    quiz_pool_words=quiz_pool_words,
+                    quiz_source_empty=quiz_source_empty,
                     recent_words=recent_words,
                     progress_summary=progress_summary,
                 )
@@ -1339,10 +1406,11 @@ def home():
                     quiz_score["correct"] += 1
                 quiz_score["question_counted"] = False
                 recent_words = (recent_words + [question_word])[-RECENT_QUIZ_LIMIT:]
-                if quiz_source == "review":
-                    review_words = [word for word in review_words if word != question_word]
-                    quiz = build_quiz(recent_words=recent_words, allowed_words=review_words)
-                    review_empty = quiz is None
+                if quiz_source != "all":
+                    quiz_pool_words = [word for word in quiz_pool_words if word != question_word]
+                    next_pool = [entry for entry in get_quiz_pool(quiz_source, student_id) if entry["word"] in set(quiz_pool_words)]
+                    quiz = build_quiz(recent_words=recent_words, pool_entries=next_pool)
+                    quiz_source_empty = quiz is None
                 else:
                     quiz = build_quiz(exclude_word=question_word, recent_words=recent_words)
                 quiz_attempt_key = uuid.uuid4().hex
@@ -1382,8 +1450,8 @@ def home():
         quiz_score=quiz_score,
         quiz_attempt_key=quiz_attempt_key,
         quiz_source=quiz_source,
-        review_words=review_words,
-        review_empty=review_empty,
+        quiz_pool_words=quiz_pool_words,
+        quiz_source_empty=quiz_source_empty,
         recent_words=recent_words,
         progress_summary=progress_summary,
         saved_entries=saved_entries,

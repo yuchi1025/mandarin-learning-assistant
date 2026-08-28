@@ -405,6 +405,92 @@ def test_saved_ai_vocabulary_api_requires_a_validated_entry(monkeypatch, tmp_pat
     assert mandarin_app.is_vocabulary_saved(student["id"], "狮子") is True
 
 
+def test_quiz_pools_use_the_selected_learners_persisted_vocabulary(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    alice = mandarin_app.create_student("Alice")
+    ben = mandarin_app.create_student("Ben")
+    airport = mandarin_app.DICTIONARY_ENTRIES_BY_WORD["机场"]
+    friend = mandarin_app.DICTIONARY_ENTRIES_BY_WORD["朋友"]
+
+    mandarin_app.log_progress_event("airport", airport, "dictionary", "search", alice["id"])
+    mandarin_app.log_progress_event("friend", friend, "dictionary", "search", ben["id"])
+    mandarin_app.save_vocabulary(alice["id"], "机场")
+    mandarin_app.save_vocabulary(ben["id"], "朋友")
+    mandarin_app.record_quiz_attempt(alice["id"], "机场", False, "alice-airport")
+    mandarin_app.record_quiz_attempt(ben["id"], "朋友", False, "ben-friend")
+
+    assert mandarin_app.get_quiz_pool("all", alice["id"])
+    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("recent", alice["id"])] == ["机场"]
+    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("saved", alice["id"])] == ["机场"]
+    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("review", alice["id"])] == ["机场"]
+    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("recent", ben["id"])] == ["朋友"]
+    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("saved", ben["id"])] == ["朋友"]
+    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("review", ben["id"])] == ["朋友"]
+
+
+def test_quiz_source_empty_states_are_learner_specific(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    client = mandarin_app.app.test_client()
+
+    recent_response = client.get(
+        "/", query_string={"mode": "quiz", "quiz_source": "recent", "student_id": student["id"]}
+    )
+    saved_response = client.get(
+        "/", query_string={"mode": "quiz", "quiz_source": "saved", "student_id": student["id"]}
+    )
+
+    assert b"No recent searches to practise" in recent_response.data
+    assert b"No saved words to practise" in saved_response.data
+
+
+def test_quiz_source_survives_retries_and_advances_within_its_pool(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    saved_entries = [
+        mandarin_app.DICTIONARY_ENTRIES_BY_WORD["机场"],
+        mandarin_app.DICTIONARY_ENTRIES_BY_WORD["朋友"],
+    ]
+    monkeypatch.setattr(
+        mandarin_app,
+        "get_quiz_pool",
+        lambda source, student_id: saved_entries if source == "saved" else mandarin_app.get_quiz_entries(),
+    )
+    monkeypatch.setattr(
+        mandarin_app,
+        "find_entry_by_english",
+        lambda english: {"word": "学习", "pinyin": "xué xí"},
+    )
+    client = mandarin_app.app.test_client()
+    base_data = {
+        "form_type": "quiz",
+        "student_id": student["id"],
+        "quiz_source": "saved",
+        "question_word": "机场",
+        "quiz_attempt_key": "saved-source-1",
+        "quiz_pool_word": ["机场", "朋友"],
+        "choice": ["airport", "friend"],
+    }
+
+    retry_response = client.post("/", data={**base_data, "selected_answer": "friend"})
+    next_response = client.post(
+        "/",
+        data={
+            **base_data,
+            "selected_answer": "airport",
+            "score_attempted": "1",
+            "question_counted": "1",
+        },
+    )
+
+    assert b"Saved Words" in retry_response.data
+    assert b'name="quiz_pool_word" value="\xe6\x9c\xba\xe5\x9c\xba"' in retry_response.data
+    assert b"Score: 0 / 1" in retry_response.data
+    assert b"Saved Words" in next_response.data
+    assert b'name="quiz_pool_word" value="\xe6\x9c\x8b\xe5\x8f\x8b"' in next_response.data
+    assert b"Score: 0 / 1" in next_response.data
+
+
 def test_quiz_attempts_preserve_first_answer_after_a_correct_retry(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
     student = mandarin_app.create_student("Alice")

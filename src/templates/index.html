@@ -329,10 +329,22 @@
         {% if mode == 'quiz' %}
             <nav class="quiz-source-switch" aria-label="Quiz source">
                 <a
-                    href="{{ url_for('home', mode='quiz', student_id=selected_student.id if selected_student else None) }}"
-                    class="{% if quiz_source == 'normal' %}active{% endif %}"
+                    href="{{ url_for('home', mode='quiz', quiz_source='all', student_id=selected_student.id if selected_student else None) }}"
+                    class="{% if quiz_source == 'all' %}active{% endif %}"
                 >
-                    Normal Quiz
+                    All Words
+                </a>
+                <a
+                    href="{{ url_for('home', mode='quiz', quiz_source='recent', student_id=selected_student.id if selected_student else None) }}"
+                    class="{% if quiz_source == 'recent' %}active{% endif %}"
+                >
+                    Recent Searches
+                </a>
+                <a
+                    href="{{ url_for('home', mode='quiz', quiz_source='saved', student_id=selected_student.id if selected_student else None) }}"
+                    class="{% if quiz_source == 'saved' %}active{% endif %}"
+                >
+                    Saved Words
                 </a>
                 <a
                     href="{{ url_for('home', mode='quiz', quiz_source='review', student_id=selected_student.id if selected_student else None) }}"
@@ -342,20 +354,31 @@
                 </a>
             </nav>
 
-            {% if review_empty %}
+            {% if quiz_source_empty %}
                 <section class="quiz-card quiz-empty-state">
-                    {% if selected_student %}
-                        <h2>No mistakes to review</h2>
-                        <p>This learner has no unresolved quiz mistakes.</p>
-                    {% else %}
+                    {% if not selected_student %}
                         <h2>Choose a learner first</h2>
-                        <p>Select a learner to review that learner's quiz mistakes.</p>
+                        <p>Select a learner to practise that learner's vocabulary.</p>
+                    {% elif quiz_source == 'recent' %}
+                        <h2>No recent searches to practise</h2>
+                        <p>Search for a few vocabulary words first, then return here.</p>
+                    {% elif quiz_source == 'saved' %}
+                        <h2>No saved words to practise</h2>
+                        <p>Save vocabulary from a result card to build a practice list.</p>
+                    {% else %}
+                        <h2>No mistakes to review</h2>
+                        <p>This learner has no first-attempt mistakes yet.</p>
                     {% endif %}
                 </section>
             {% elif quiz %}
             <section class="quiz-card">
                 <div class="quiz-header">
-                    <p class="eyebrow">{% if quiz_source == 'review' %}Review Mistakes{% else %}Easy Quiz{% endif %}</p>
+                    <p class="eyebrow">
+                        {% if quiz_source == 'recent' %}Recent Searches
+                        {% elif quiz_source == 'saved' %}Saved Words
+                        {% elif quiz_source == 'review' %}Review Mistakes
+                        {% else %}All Words{% endif %}
+                    </p>
                     <h2>What does this Mandarin word mean?</h2>
                     <p class="quiz-score">Score: {{ quiz_score.correct }} / {{ quiz_score.attempted }}</p>
                 </div>
@@ -397,8 +420,8 @@
                     {% for recent_word in recent_words %}
                         <input type="hidden" name="recent_word" value="{{ recent_word }}">
                     {% endfor %}
-                    {% for review_word in review_words %}
-                        <input type="hidden" name="review_word" value="{{ review_word }}">
+                    {% for pool_word in quiz_pool_words %}
+                        <input type="hidden" name="quiz_pool_word" value="{{ pool_word }}">
                     {% endfor %}
                     <div class="quiz-options">
                         {% for choice in quiz.choices %}
