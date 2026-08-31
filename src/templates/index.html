@@ -6,7 +6,7 @@
     <title>Mandarin Learning Assistant</title>
     <link rel="icon" type="image/png" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3.1.1-saved-corner">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3.1.1-listening-quiz">
 </head>
 <body>
     <main class="page">
@@ -329,28 +329,43 @@
         {% if mode == 'quiz' %}
             <nav class="quiz-source-switch" aria-label="Quiz source">
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source='all', student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source='all', quiz_type=quiz_type, student_id=selected_student.id if selected_student else None) }}"
                     class="{% if quiz_source == 'all' %}active{% endif %}"
                 >
                     All Words
                 </a>
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source='recent', student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source='recent', quiz_type=quiz_type, student_id=selected_student.id if selected_student else None) }}"
                     class="{% if quiz_source == 'recent' %}active{% endif %}"
                 >
                     Recent Searches
                 </a>
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source='saved', student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source='saved', quiz_type=quiz_type, student_id=selected_student.id if selected_student else None) }}"
                     class="{% if quiz_source == 'saved' %}active{% endif %}"
                 >
                     Saved Words
                 </a>
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source='review', student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source='review', quiz_type=quiz_type, student_id=selected_student.id if selected_student else None) }}"
                     class="{% if quiz_source == 'review' %}active{% endif %}"
                 >
                     Review Mistakes
+                </a>
+            </nav>
+
+            <nav class="quiz-type-switch" aria-label="Quiz type">
+                <a
+                    href="{{ url_for('home', mode='quiz', quiz_source=quiz_source, quiz_type='meaning', student_id=selected_student.id if selected_student else None) }}"
+                    class="{% if quiz_type == 'meaning' %}active{% endif %}"
+                >
+                    Meaning Quiz
+                </a>
+                <a
+                    href="{{ url_for('home', mode='quiz', quiz_source=quiz_source, quiz_type='listening', student_id=selected_student.id if selected_student else None) }}"
+                    class="{% if quiz_type == 'listening' %}active{% endif %}"
+                >
+                    Listening Quiz
                 </a>
             </nav>
 
@@ -382,6 +397,16 @@
                     <h2>What does this Mandarin word mean?</h2>
                     <p class="quiz-score">Score: {{ quiz_score.correct }} / {{ quiz_score.attempted }}</p>
                 </div>
+                {% if quiz_type == 'listening' and not listening_reveal %}
+                    <button
+                        type="button"
+                        class="listening-play-button"
+                        data-speak="{{ quiz.word }}"
+                        aria-label="Play Mandarin quiz audio"
+                    >
+                        Play Audio
+                    </button>
+                {% else %}
                 <p class="quiz-word">
                     {{ quiz.word | display_chinese_pair }}
                     <button
@@ -399,10 +424,14 @@
                     </button>
                     <span>({{ quiz.pinyin }})</span>
                 </p>
+                {% if quiz_type == 'listening' and listening_reveal %}
+                    <p class="listening-reveal-meaning">{{ quiz.correct_answer }}</p>
+                {% endif %}
+                {% endif %}
                 <p class="audio-status" id="audio-status" hidden></p>
                 <form
                     method="post"
-                    class="quiz-form"
+                    class="quiz-form{% if listening_reveal %} quiz-reveal-form{% endif %}"
                     data-correct-answer="{{ quiz.correct_answer }}"
                     data-next-url="{{ url_for('home', mode='quiz', student_id=selected_student.id if selected_student else None) }}"
                     data-score-correct="{{ quiz_score.correct }}"
@@ -412,6 +441,7 @@
                     <input type="hidden" name="form_type" value="quiz">
                     <input type="hidden" name="student_id" value="{{ selected_student.id if selected_student else '' }}">
                     <input type="hidden" name="quiz_source" value="{{ quiz_source }}">
+                    <input type="hidden" name="quiz_type" value="{{ quiz_type }}">
                     <input type="hidden" name="question_word" value="{{ quiz.word }}">
                     <input type="hidden" name="quiz_attempt_key" value="{{ quiz_attempt_key }}">
                     <input type="hidden" name="score_correct" value="{{ quiz_score.correct }}">
@@ -423,6 +453,10 @@
                     {% for pool_word in quiz_pool_words %}
                         <input type="hidden" name="quiz_pool_word" value="{{ pool_word }}">
                     {% endfor %}
+                    {% if listening_reveal %}
+                        <input type="hidden" name="advance_listening_quiz" value="1">
+                        <p class="listening-continue">Next question</p>
+                    {% else %}
                     <div class="quiz-options">
                         {% for choice in quiz.choices %}
                             <input type="hidden" name="choice" value="{{ choice }}">
@@ -438,14 +472,19 @@
                             </label>
                         {% endfor %}
                     </div>
+                    {% endif %}
                 </form>
 
                 {% if quiz_feedback %}
                     <div class="quiz-feedback wrong">
                         <p>
+                            {% if quiz_type == 'listening' %}
+                                That answer is not correct. Try again.
+                            {% else %}
                             "{{ quiz_feedback.selected_answer | display_chinese_pair }}" matches
                             "{{ quiz_feedback.wrong_word | display_chinese_pair }}" ({{ quiz_feedback.wrong_pinyin }}),
                             not "{{ quiz.word | display_chinese_pair }}". Try again.
+                            {% endif %}
                         </p>
                     </div>
                 {% endif %}
@@ -586,6 +625,6 @@
         {% endif %}
     </main>
 
-    <script src="{{ url_for('static', filename='app.js') }}?v=3.1.1-ai-saved-vocabulary"></script>
+    <script src="{{ url_for('static', filename='app.js') }}?v=3.1.1-listening-quiz"></script>
 </body>
 </html>

@@ -434,13 +434,15 @@ h1 {
     margin: 0 0 10px;
 }
 
-.quiz-source-switch {
+.quiz-source-switch,
+.quiz-type-switch {
     display: flex;
     gap: 8px;
     margin-bottom: 14px;
 }
 
-.quiz-source-switch a {
+.quiz-source-switch a,
+.quiz-type-switch a {
     border: 1px solid var(--border);
     border-radius: 8px;
     background: #fff;
@@ -451,9 +453,43 @@ h1 {
 
 .quiz-source-switch a:hover,
 .quiz-source-switch a:focus-visible,
-.quiz-source-switch a.active {
+.quiz-source-switch a.active,
+.quiz-type-switch a:hover,
+.quiz-type-switch a:focus-visible,
+.quiz-type-switch a.active {
     border-color: var(--accent);
     background: #fff1ec;
+}
+
+.listening-play-button {
+    width: 100%;
+    margin: 4px 0 20px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 14px 18px;
+}
+
+.listening-play-button:hover,
+.listening-play-button:focus-visible {
+    background: #94391f;
+}
+
+.listening-reveal-meaning {
+    margin: -10px 0 18px;
+    color: #6a5b4d;
+    font-weight: bold;
+}
+
+.listening-continue {
+    margin: 0;
+    color: #6a5b4d;
+    text-align: center;
 }
 
 .quiz-empty-state h2 {

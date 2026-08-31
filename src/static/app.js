@@ -442,6 +442,18 @@ function bindQuizOptions() {
     });
 }
 
+function bindListeningReveal() {
+    const revealForm = document.querySelector(".quiz-reveal-form");
+    if (!revealForm) {
+        return;
+    }
+
+    window.setTimeout(function () {
+        markInternalNavigation();
+        revealForm.submit();
+    }, 1200);
+}
+
 function bindCopyButtons() {
     document.querySelectorAll("[data-copy-target]").forEach(function (button) {
         button.addEventListener("click", function () {
@@ -523,6 +535,7 @@ window.addEventListener("load", function () {
     focusSearchInput();
     bindAudioButtons();
     bindQuizOptions();
+    bindListeningReveal();
     bindCopyButtons();
     rememberSelectedStudent();
     renderRecentSearches();

@@ -70,6 +70,7 @@ def test_static_app_js_loads():
     assert b"function speakMandarin" in response.data
     assert b"if (item !== radio)" in response.data
     assert b"function bindAiSaveButton" in response.data
+    assert b"function bindListeningReveal" in response.data
 
 
 def test_search_post_renders_result():
@@ -489,6 +490,119 @@ def test_quiz_source_survives_retries_and_advances_within_its_pool(monkeypatch, 
     assert b"Saved Words" in next_response.data
     assert b'name="quiz_pool_word" value="\xe6\x9c\x8b\xe5\x8f\x8b"' in next_response.data
     assert b"Score: 0 / 1" in next_response.data
+
+
+def test_listening_quiz_hides_word_and_pinyin_but_keeps_audio_target(monkeypatch):
+    quiz = {
+        "word": "学习",
+        "traditional": "學習",
+        "pinyin": "xué xí",
+        "correct_answer": "to study",
+        "choices": ["to study", "airport"],
+    }
+    monkeypatch.setattr(mandarin_app, "build_quiz", lambda *args, **kwargs: quiz)
+    client = mandarin_app.app.test_client()
+
+    response = client.get("/", query_string={"mode": "quiz", "quiz_type": "listening"})
+
+    assert b"Listening Quiz" in response.data
+    assert b"Play Audio" in response.data
+    assert b'class="quiz-word"' not in response.data
+    assert "xué xí".encode("utf-8") not in response.data
+    assert b'data-speak="\xe5\xad\xa6\xe4\xb9\xa0"' in response.data
+
+
+def test_listening_quiz_scores_and_reveals_after_a_correct_first_answer(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    quiz = {
+        "word": "学习",
+        "traditional": "學習",
+        "pinyin": "xué xí",
+        "correct_answer": "to study",
+        "choices": ["to study", "airport"],
+    }
+    monkeypatch.setattr(mandarin_app, "build_quiz", lambda *args, **kwargs: quiz)
+    client = mandarin_app.app.test_client()
+
+    response = client.post(
+        "/",
+        data={
+            "form_type": "quiz",
+            "student_id": student["id"],
+            "quiz_type": "listening",
+            "question_word": "学习",
+            "quiz_attempt_key": "listening-correct-1",
+            "choice": ["to study", "airport"],
+            "selected_answer": "to study",
+        },
+    )
+
+    assert b"Score: 1 / 1" in response.data
+    assert "学习 / 學習".encode("utf-8") in response.data
+    assert "xué xí".encode("utf-8") in response.data
+    assert b"to study" in response.data
+    assert b"advance_listening_quiz" in response.data
+
+
+def test_listening_wrong_retry_preserves_mistake_and_source(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    quiz_entries = [
+        mandarin_app.DICTIONARY_ENTRIES_BY_WORD["学习"],
+        mandarin_app.DICTIONARY_ENTRIES_BY_WORD["朋友"],
+    ]
+    correct_answer = quiz_entries[0]["english"]
+    monkeypatch.setattr(
+        mandarin_app,
+        "get_quiz_pool",
+        lambda source, student_id: quiz_entries if source == "saved" else mandarin_app.get_quiz_entries(),
+    )
+    monkeypatch.setattr(
+        mandarin_app,
+        "find_entry_by_english",
+        lambda english: {"word": "机场", "pinyin": "jī chǎng"},
+    )
+    client = mandarin_app.app.test_client()
+    base_data = {
+        "form_type": "quiz",
+        "student_id": student["id"],
+        "quiz_source": "saved",
+        "quiz_type": "listening",
+        "question_word": "学习",
+        "quiz_attempt_key": "listening-retry-1",
+        "quiz_pool_word": ["学习", "朋友"],
+        "choice": [correct_answer, "airport"],
+    }
+
+    wrong_response = client.post("/", data={**base_data, "selected_answer": "airport"})
+    reveal_response = client.post(
+        "/",
+        data={
+            **base_data,
+                "selected_answer": correct_answer,
+            "score_attempted": "1",
+            "question_counted": "1",
+        },
+    )
+    next_response = client.post(
+        "/",
+        data={
+            **base_data,
+            "advance_listening_quiz": "1",
+            "score_attempted": "1",
+            "question_counted": "0",
+        },
+    )
+
+    assert b"Score: 0 / 1" in wrong_response.data
+    assert b'class="quiz-word"' not in wrong_response.data
+    assert [entry["word"] for entry in mandarin_app.get_review_mistake_entries(student["id"])] == ["学习"]
+    assert b"Score: 0 / 1" in reveal_response.data
+    assert "学习 / 學習".encode("utf-8") in reveal_response.data
+    assert b'name="quiz_source" value="saved"' in next_response.data
+    assert b'name="quiz_type" value="listening"' in next_response.data
+    assert b'\xe6\x9c\x8b\xe5\x8f\x8b' in next_response.data
 
 
 def test_quiz_attempts_preserve_first_answer_after_a_correct_retry(monkeypatch, tmp_path):
