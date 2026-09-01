@@ -71,6 +71,7 @@ def test_static_app_js_loads():
     assert b"if (item !== radio)" in response.data
     assert b"function bindAiSaveButton" in response.data
     assert b"function bindListeningReveal" in response.data
+    assert b"function restoreBatchMode" in response.data
 
 
 def test_search_post_renders_result():
@@ -80,6 +81,37 @@ def test_search_post_renders_result():
 
     assert response.status_code == 200
     assert "机场".encode("utf-8") in response.data
+
+
+def test_search_category_filters_results_and_renders_category_label():
+    client = mandarin_app.app.test_client()
+
+    response = client.post(
+        "/", data={"form_type": "search", "query": "airport", "category": "places"}
+    )
+
+    assert response.status_code == 200
+    assert "机场".encode("utf-8") in response.data
+    assert b"Places &amp; travel" in response.data
+
+
+def test_search_category_does_not_return_words_from_another_category():
+    client = mandarin_app.app.test_client()
+
+    response = client.post(
+        "/", data={"form_type": "search", "query": "airport", "category": "food"}
+    )
+
+    assert response.status_code == 200
+    assert "机场".encode("utf-8") not in response.data
+
+
+def test_category_filter_applies_to_quiz_pool():
+    places = mandarin_app.filter_entries_by_category(mandarin_app.get_quiz_pool("all", None), "places")
+
+    assert places
+    assert {entry["category"] for entry in places} == {"places"}
+    assert "机场" in {entry["word"] for entry in places}
 
 
 def test_search_post_logs_dictionary_progress(monkeypatch, tmp_path):
@@ -122,6 +154,22 @@ def test_batch_search_post_renders_multiple_cards():
     assert "朋友".encode("utf-8") in response.data
     assert "学习".encode("utf-8") in response.data
     assert b"Batch Mode" in response.data
+
+
+def test_batch_mode_restores_a_query_without_logging_duplicate_progress(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
+    client = mandarin_app.app.test_client()
+
+    client.post("/", data={"form_type": "batch", "query": "airport", "student_id": student["id"]})
+    response = client.get(
+        "/",
+        query_string={"mode": "batch", "batch_query": "airport", "student_id": student["id"]},
+    )
+
+    assert response.status_code == 200
+    assert "机场".encode("utf-8") in response.data
+    assert mandarin_app.get_progress_summary(student["id"])["total_searches"] == 1
 
 
 def test_convert_mode_converts_both_chinese_scripts():
@@ -185,6 +233,13 @@ def test_batch_search_entries_routes_unknown_words_to_ai():
     assert [entry["word"] for entry in results] == ["机场"]
     assert missing_queries == ["!!!"]
     assert ai_queries == ["notarealword"]
+
+
+def test_batch_card_orders_follow_the_input_sequence():
+    entry_orders, ai_orders = mandarin_app.get_batch_card_orders("airport\nnotarealword\nfriend")
+
+    assert entry_orders == {"机场": 0, "朋友": 2}
+    assert ai_orders == {"notarealword": 1}
 
 
 def test_ai_endpoint_rejects_punctuation_only_query():

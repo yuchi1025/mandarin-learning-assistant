@@ -28,6 +28,7 @@ Current version: `v3.1.1`
   - Added a learner-specific Review Mistakes quiz source for revisiting words missed on their first answer while preserving quiz history.
   - Added Progress Mode so searched words are stored locally and can be reviewed by day.
   - Added local student profiles so multiple learners can share one app installation while keeping progress separate.
+  - Added topic categories across Search, Batch, Saved Vocabulary, and Quiz Mode so learners can focus practice on one vocabulary area.
 
 ---
 
@@ -45,8 +46,9 @@ From the learner's perspective:
 8. Click a Recent Searches chip to return to an older lookup.
 9. Search a word not in the built-in dictionary and watch the local AI loading state.
 10. Use Batch Mode to search several words at once.
-11. Open Progress Mode to review today’s searched words and overall activity.
-12. Switch to Quiz Mode, choose a wrong answer, then choose the correct answer.
+11. Choose a vocabulary category to focus search results, saved words, or quiz practice.
+12. Open Progress Mode to review today’s searched words and overall activity.
+13. Switch to Quiz Mode, choose a wrong answer, then choose the correct answer.
 13. Continue to the next quiz and choose a correct answer directly.
 14. Select Review Mistakes to practise that learner's unresolved quiz answers.
 

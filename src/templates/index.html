@@ -6,7 +6,7 @@
     <title>Mandarin Learning Assistant</title>
     <link rel="icon" type="image/png" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3.1.1-listening-quiz">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3.1.1-categories">
 </head>
 <body>
     <main class="page">
@@ -82,6 +82,13 @@
                     <form method="post" class="batch-search-form" id="batch-search-form">
                         <input type="hidden" name="form_type" value="batch">
                         <input type="hidden" name="student_id" value="{{ selected_student.id if selected_student else '' }}">
+                        <label class="category-select-label" for="batch-category">Category</label>
+                        <select id="batch-category" name="category" class="category-select">
+                            <option value="all">All categories</option>
+                            {% for category_key, category_label in category_labels.items() %}
+                                <option value="{{ category_key }}" {% if category == category_key %}selected{% endif %}>{{ category_label }}</option>
+                            {% endfor %}
+                        </select>
                         <textarea
                             id="batch-search-input"
                             name="query"
@@ -94,6 +101,13 @@
                     <form method="post" class="search-form" id="search-form">
                         <input type="hidden" name="form_type" value="search">
                         <input type="hidden" name="student_id" value="{{ selected_student.id if selected_student else '' }}">
+                        <label class="category-select-label" for="search-category">Category</label>
+                        <select id="search-category" name="category" class="category-select">
+                            <option value="all">All categories</option>
+                            {% for category_key, category_label in category_labels.items() %}
+                                <option value="{{ category_key }}" {% if category == category_key %}selected{% endif %}>{{ category_label }}</option>
+                            {% endfor %}
+                        </select>
                         <input
                             id="search-input"
                             type="text"
@@ -144,6 +158,7 @@
                 </section>
             {% endif %}
 
+            <div class="batch-result-order">
             {% if mode == 'search' and ai_pending %}
                 <section class="result-card ai-result-card ai-loading-card" id="ai-result-card" data-ai-query="{{ query }}" data-ai-mode="search" data-student-id="{{ selected_student.id if selected_student else '' }}">
                     <div class="ai-loading-shell">
@@ -154,7 +169,7 @@
 
             {% if mode == 'batch' and batch_ai_queries %}
                 {% for ai_query in batch_ai_queries %}
-                    <section class="result-card ai-result-card ai-loading-card batch-ai-result-card" data-ai-query="{{ ai_query }}" data-ai-mode="batch" data-student-id="{{ selected_student.id if selected_student else '' }}">
+                    <section class="result-card ai-result-card ai-loading-card batch-ai-result-card" data-ai-query="{{ ai_query }}" data-ai-mode="batch" data-student-id="{{ selected_student.id if selected_student else '' }}" style="order: {{ batch_ai_orders.get(ai_query, 999) }}">
                         <div class="ai-loading-shell">
                             <div class="ai-spinner" aria-hidden="true"></div>
                         </div>
@@ -163,11 +178,12 @@
             {% endif %}
 
             {% for item in results %}
-                <section class="result-card result-card-with-save">
+                <section class="result-card result-card-with-save"{% if mode == 'batch' %} style="order: {{ batch_entry_orders.get(item.word, 999) }}"{% endif %}>
                     <form method="post" class="save-vocabulary-form result-card-save-form">
                         <input type="hidden" name="form_type" value="saved-vocabulary">
                         <input type="hidden" name="student_id" value="{{ selected_student.id if selected_student else '' }}">
                         <input type="hidden" name="return_mode" value="{{ mode }}">
+                        <input type="hidden" name="category" value="{{ category }}">
                         <input type="hidden" name="query" value="{{ query }}">
                         <input type="hidden" name="vocabulary_word" value="{{ item.word }}">
                         {% if item.word in saved_words %}
@@ -199,6 +215,7 @@
                                     </svg>
                                 </button>
                                 <span class="part-of-speech">{{ item.part_of_speech }}</span>
+                                <span class="word-category">{{ category_labels.get(item.category, category_labels['everyday']) }}</span>
                             </div>
                             <span>{{ item.pinyin }}</span>
                         </div>
@@ -236,13 +253,27 @@
                     </div>
                 </section>
             {% endfor %}
+            </div>
         {% endif %}
 
         {% if mode == 'saved' %}
             {% if selected_student and saved_entries %}
                 <section class="saved-vocabulary-header">
-                    <h2>Saved Vocabulary</h2>
-                    <p>{{ selected_student.name }}'s study list</p>
+                    <div>
+                        <h2>Saved Vocabulary</h2>
+                        <p>{{ selected_student.name }}'s study list</p>
+                    </div>
+                    <form method="get" class="category-filter-form">
+                        <input type="hidden" name="mode" value="saved">
+                        <input type="hidden" name="student_id" value="{{ selected_student.id }}">
+                        <label for="saved-category">Category</label>
+                        <select id="saved-category" name="category" class="category-select" onchange="this.form.submit()">
+                            <option value="all">All categories</option>
+                            {% for category_key, category_label in category_labels.items() %}
+                                <option value="{{ category_key }}" {% if category == category_key %}selected{% endif %}>{{ category_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
                 </section>
                 <section class="saved-vocabulary-list">
                     {% for item in saved_entries %}
@@ -252,6 +283,7 @@
                                 <span>{{ item.pinyin }}</span>
                             </div>
                             <span class="saved-vocabulary-meaning">{{ item.english }}</span>
+                            <span class="word-category">{{ category_labels.get(item.category, category_labels['everyday']) }}</span>
                             <div class="saved-vocabulary-actions">
                                 <button
                                     type="button"
@@ -270,6 +302,7 @@
                                     <input type="hidden" name="form_type" value="saved-vocabulary">
                                     <input type="hidden" name="student_id" value="{{ selected_student.id }}">
                                     <input type="hidden" name="return_mode" value="saved">
+                                    <input type="hidden" name="category" value="{{ category }}">
                                     <input type="hidden" name="vocabulary_word" value="{{ item.word }}">
                                     <input type="hidden" name="saved_action" value="unsave">
                                     <button type="submit" class="saved-toggle">Unsave</button>
@@ -281,7 +314,24 @@
             {% else %}
                 <section class="empty-state saved-vocabulary-empty">
                     {% if selected_student %}
-                        <p>No saved vocabulary yet. Save a dictionary result to build a study list.</p>
+                        <form method="get" class="category-filter-form">
+                            <input type="hidden" name="mode" value="saved">
+                            <input type="hidden" name="student_id" value="{{ selected_student.id }}">
+                            <label for="empty-saved-category">Category</label>
+                            <select id="empty-saved-category" name="category" class="category-select" onchange="this.form.submit()">
+                                <option value="all">All categories</option>
+                                {% for category_key, category_label in category_labels.items() %}
+                                    <option value="{{ category_key }}" {% if category == category_key %}selected{% endif %}>{{ category_label }}</option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                        <p>
+                            {% if category == 'all' %}
+                                No saved vocabulary yet. Save a dictionary result to build a study list.
+                            {% else %}
+                                No saved vocabulary in this category yet. Save a dictionary result to build a study list.
+                            {% endif %}
+                        </p>
                     {% else %}
                         <p>Choose a learner to view saved vocabulary.</p>
                     {% endif %}
@@ -329,25 +379,25 @@
         {% if mode == 'quiz' %}
             <nav class="quiz-source-switch" aria-label="Quiz source">
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source='all', quiz_type=quiz_type, student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source='all', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
                     class="{% if quiz_source == 'all' %}active{% endif %}"
                 >
                     All Words
                 </a>
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source='recent', quiz_type=quiz_type, student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source='recent', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
                     class="{% if quiz_source == 'recent' %}active{% endif %}"
                 >
                     Recent Searches
                 </a>
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source='saved', quiz_type=quiz_type, student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source='saved', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
                     class="{% if quiz_source == 'saved' %}active{% endif %}"
                 >
                     Saved Words
                 </a>
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source='review', quiz_type=quiz_type, student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source='review', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
                     class="{% if quiz_source == 'review' %}active{% endif %}"
                 >
                     Review Mistakes
@@ -356,18 +406,32 @@
 
             <nav class="quiz-type-switch" aria-label="Quiz type">
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source=quiz_source, quiz_type='meaning', student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source=quiz_source, quiz_type='meaning', category=category, student_id=selected_student.id if selected_student else None) }}"
                     class="{% if quiz_type == 'meaning' %}active{% endif %}"
                 >
                     Meaning Quiz
                 </a>
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source=quiz_source, quiz_type='listening', student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source=quiz_source, quiz_type='listening', category=category, student_id=selected_student.id if selected_student else None) }}"
                     class="{% if quiz_type == 'listening' %}active{% endif %}"
                 >
                     Listening Quiz
                 </a>
             </nav>
+
+            <form method="get" class="category-filter-form quiz-category-filter">
+                <input type="hidden" name="mode" value="quiz">
+                <input type="hidden" name="student_id" value="{{ selected_student.id if selected_student else '' }}">
+                <input type="hidden" name="quiz_source" value="{{ quiz_source }}">
+                <input type="hidden" name="quiz_type" value="{{ quiz_type }}">
+                <label for="quiz-category">Category</label>
+                <select id="quiz-category" name="category" class="category-select" onchange="this.form.submit()">
+                    <option value="all">All categories</option>
+                    {% for category_key, category_label in category_labels.items() %}
+                        <option value="{{ category_key }}" {% if category == category_key %}selected{% endif %}>{{ category_label }}</option>
+                    {% endfor %}
+                </select>
+            </form>
 
             {% if quiz_source_empty %}
                 <section class="quiz-card quiz-empty-state">
@@ -433,7 +497,7 @@
                     method="post"
                     class="quiz-form{% if listening_reveal %} quiz-reveal-form{% endif %}"
                     data-correct-answer="{{ quiz.correct_answer }}"
-                    data-next-url="{{ url_for('home', mode='quiz', student_id=selected_student.id if selected_student else None) }}"
+                    data-next-url="{{ url_for('home', mode='quiz', quiz_source=quiz_source, quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
                     data-score-correct="{{ quiz_score.correct }}"
                     data-score-attempted="{{ quiz_score.attempted }}"
                     data-question-counted="{{ '1' if quiz_score.question_counted else '0' }}"
@@ -442,6 +506,7 @@
                     <input type="hidden" name="student_id" value="{{ selected_student.id if selected_student else '' }}">
                     <input type="hidden" name="quiz_source" value="{{ quiz_source }}">
                     <input type="hidden" name="quiz_type" value="{{ quiz_type }}">
+                    <input type="hidden" name="category" value="{{ category }}">
                     <input type="hidden" name="question_word" value="{{ quiz.word }}">
                     <input type="hidden" name="quiz_attempt_key" value="{{ quiz_attempt_key }}">
                     <input type="hidden" name="score_correct" value="{{ quiz_score.correct }}">
@@ -625,6 +690,6 @@
         {% endif %}
     </main>
 
-    <script src="{{ url_for('static', filename='app.js') }}?v=3.1.1-listening-quiz"></script>
+    <script src="{{ url_for('static', filename='app.js') }}?v=3.1.1-batch-state"></script>
 </body>
 </html>

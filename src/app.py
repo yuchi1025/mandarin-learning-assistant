@@ -48,6 +48,36 @@ VALID_PARTS_OF_SPEECH = {
     "measure word",
     "word",
 }
+CATEGORY_LABELS = {
+    "basics": "Basics & greetings",
+    "actions": "Actions & routines",
+    "time": "Time & dates",
+    "places": "Places & travel",
+    "food": "Food & shopping",
+    "people": "People & home",
+    "study": "School & work",
+    "descriptions": "Descriptions",
+    "grammar": "Grammar & questions",
+    "health": "Health & weather",
+    "technology": "Technology & media",
+    "everyday": "Everyday life",
+}
+CATEGORY_WORDS = {
+    "basics": "你好 谢谢 可以 不要 早上好 晚上好 再见 对不起 没关系 请 请问 没事 是 不是 有 没有 要 想 会 能 应该 怎么 哪里 什么时候 谁 哪个 几 很 也 都 还 就 但是 所以 如果 和 在 里 上 下".split(),
+    "actions": "吃饭 喝水 等一下 知道 觉得 喜欢 不喜欢 回家 出去 进来 看 听 说 打开 关上 开始 结束 找 给 带 用 做 去 来 到 走 坐 住 睡觉 起床 洗澡 洗手 穿 拿 放 送 帮忙 问 回答 懂 明白 认识 记得 忘记".split(),
+    "time": "现在 时间 今天 明天 昨天 早上 中午 晚上 周末".split(),
+    "places": "车站 地铁 公交车 出租车 机场 火车 飞机 路 左边 右边 前面 后面 旁边".split(),
+    "food": "多少钱 买 卖 商店 超市 饭店 水 咖啡 茶 饭 面条 苹果 香蕉 鸡蛋 牛奶 钱 卡 现金 票".split(),
+    "people": "家 人 男人 女人 孩子 爸爸 妈妈 哥哥 姐姐 弟弟 妹妹 房间 厨房 洗手间 门 窗户 桌子 椅子".split(),
+    "study": "学习 工作 下班 上班 学校 公司 医院 老师 学生 同事 书".split(),
+    "descriptions": "累 开心 热 冷 好吃 好喝 漂亮 贵 便宜 快 慢 远 近 忙 空 新 旧 大 小 多 少".split(),
+    "grammar": "为什么 因为".split(),
+    "health": "天气 雨 太阳 药 身体 生病".split(),
+    "technology": "手机 电脑 电视 电影 音乐 电话 消息 照片".split(),
+}
+CATEGORY_BY_WORD = {
+    word: category for category, words in CATEGORY_WORDS.items() for word in words
+}
 
 
 DICTIONARY_PATH = Path(__file__).resolve().parent.parent / "data" / "dictionary.json"
@@ -138,6 +168,7 @@ def load_dictionary():
                 "explanation": str(raw_entry.get("explanation", "")).strip(),
                 "examples": structured_examples,
                 "search_pinyin": remove_tone_marks(pinyin),
+                "category": CATEGORY_BY_WORD.get(word, "everyday"),
             }
         )
 
@@ -146,6 +177,21 @@ def load_dictionary():
 
 DICTIONARY_ENTRIES = load_dictionary()
 DICTIONARY_ENTRIES_BY_WORD = {entry["word"]: entry for entry in DICTIONARY_ENTRIES}
+
+
+def normalize_category(value):
+    return value if value in CATEGORY_LABELS else "all"
+
+
+def get_entry_category(entry):
+    return entry.get("category") or CATEGORY_BY_WORD.get(entry.get("word", ""), "everyday")
+
+
+def filter_entries_by_category(entries, category):
+    category = normalize_category(category)
+    if category == "all":
+        return entries
+    return [entry for entry in entries if get_entry_category(entry) == category]
 
 
 def get_progress_connection():
@@ -938,7 +984,7 @@ def split_batch_queries(text):
     return queries
 
 
-def batch_search_entries(text):
+def batch_search_entries(text, category="all"):
     results = []
     missing_queries = []
     ai_queries = []
@@ -954,17 +1000,39 @@ def batch_search_entries(text):
             continue
 
         added_match = False
-        for entry in matches:
+        for entry in filter_entries_by_category(matches, category):
             if entry["word"] in seen_words:
                 continue
             results.append(entry)
             seen_words.add(entry["word"])
             added_match = True
 
-        if not added_match:
-            ai_queries.append(query)
-
     return results, missing_queries, ai_queries
+
+
+def get_batch_card_orders(text, category="all"):
+    entry_orders = {}
+    ai_orders = {}
+    seen_words = set()
+    order = 0
+
+    for query in split_batch_queries(text):
+        matches = search_entries(query)
+        if not matches:
+            if is_meaningful_query(query):
+                ai_orders[query] = order
+                order += 1
+            continue
+
+        added_match = False
+        for entry in filter_entries_by_category(matches, category):
+            if entry["word"] in seen_words:
+                continue
+            entry_orders[entry["word"]] = order
+            seen_words.add(entry["word"])
+            order += 1
+            added_match = True
+    return entry_orders, ai_orders
 
 
 def is_meaningful_query(query):
@@ -1270,14 +1338,21 @@ def normalize_quiz_type(value):
     return "listening" if value == "listening" else "meaning"
 
 
-def build_next_quiz(quiz_source, student_id, question_word, quiz_pool_words, recent_words):
+def build_next_quiz(quiz_source, student_id, question_word, quiz_pool_words, recent_words, category="all"):
     if quiz_source == "all":
-        return build_quiz(exclude_word=question_word, recent_words=recent_words), quiz_pool_words
+        return (
+            build_quiz(
+                exclude_word=question_word,
+                recent_words=recent_words,
+                pool_entries=filter_entries_by_category(get_quiz_pool("all", student_id), category),
+            ),
+            quiz_pool_words,
+        )
 
     remaining_words = [word for word in quiz_pool_words if word != question_word]
     allowed_words = set(remaining_words)
     next_pool = [
-        entry for entry in get_quiz_pool(quiz_source, student_id)
+        entry for entry in filter_entries_by_category(get_quiz_pool(quiz_source, student_id), category)
         if entry["word"] in allowed_words
     ]
     return build_quiz(recent_words=recent_words, pool_entries=next_pool), remaining_words
@@ -1292,19 +1367,27 @@ def home():
     selected_student = get_student(student_id)
     if selected_student is None:
         student_id = None
+    category = normalize_category(request.form.get("category") or request.args.get("category"))
     recent_words = request.args.getlist("recent_word")
     query = ""
     results = []
     batch_missing = []
     batch_ai_queries = []
+    batch_entry_orders = {}
+    batch_ai_orders = {}
     ai_pending = False
     conversion_text = ""
     converted_simplified = ""
     converted_traditional = ""
+    if request.method == "GET" and mode == "batch":
+        query = request.args.get("batch_query", "")
+        if query:
+            results, batch_missing, batch_ai_queries = batch_search_entries(query, category)
+            batch_entry_orders, batch_ai_orders = get_batch_card_orders(query, category)
     quiz_source = normalize_quiz_source(request.form.get("quiz_source") or request.args.get("quiz_source"))
     quiz_type = normalize_quiz_type(request.form.get("quiz_type") or request.args.get("quiz_type"))
     quiz_pool_words = request.form.getlist("quiz_pool_word") or request.args.getlist("quiz_pool_word")
-    quiz_pool = get_quiz_pool(quiz_source, student_id)
+    quiz_pool = filter_entries_by_category(get_quiz_pool(quiz_source, student_id), category)
     if quiz_source != "all":
         if quiz_pool_words:
             quiz_pool = [entry for entry in quiz_pool if entry["word"] in set(quiz_pool_words)]
@@ -1336,15 +1419,16 @@ def home():
         elif form_type == "search":
             mode = "search"
             query = request.form.get("query", "")
-            results = search_entries(query)
+            results = filter_entries_by_category(search_entries(query), category)
             for entry in results:
                 log_progress_event(query, entry, "dictionary", "search", student_id)
-            if not results and is_meaningful_query(query):
+            if not results and category == "all" and is_meaningful_query(query):
                 ai_pending = True
         elif form_type == "batch":
             mode = "batch"
             query = request.form.get("query", "")
-            results, batch_missing, batch_ai_queries = batch_search_entries(query)
+            results, batch_missing, batch_ai_queries = batch_search_entries(query, category)
+            batch_entry_orders, batch_ai_orders = get_batch_card_orders(query, category)
             for entry in results:
                 log_progress_event(query, entry, "dictionary", "batch", student_id)
         elif form_type == "convert":
@@ -1362,10 +1446,11 @@ def home():
 
             if mode == "search":
                 query = request.form.get("query", "")
-                results = search_entries(query) if query else []
+                results = filter_entries_by_category(search_entries(query), category) if query else []
             elif mode == "batch":
                 query = request.form.get("query", "")
-                results, batch_missing, batch_ai_queries = batch_search_entries(query) if query else ([], [], [])
+                results, batch_missing, batch_ai_queries = batch_search_entries(query, category) if query else ([], [], [])
+                batch_entry_orders, batch_ai_orders = get_batch_card_orders(query, category) if query else ({}, {})
         elif form_type == "quiz":
             mode = "quiz"
             query = request.form.get("query", "")
@@ -1376,8 +1461,9 @@ def home():
             recent_words = request.form.getlist("recent_word")
             quiz_source = normalize_quiz_source(request.form.get("quiz_source"))
             quiz_type = normalize_quiz_type(request.form.get("quiz_type"))
+            category = normalize_category(request.form.get("category"))
             quiz_pool_words = request.form.getlist("quiz_pool_word")
-            quiz_pool = get_quiz_pool(quiz_source, student_id)
+            quiz_pool = filter_entries_by_category(get_quiz_pool(quiz_source, student_id), category)
             if quiz_source != "all":
                 quiz_pool = [entry for entry in quiz_pool if entry["word"] in set(quiz_pool_words)]
             quiz_score = {
@@ -1420,11 +1506,13 @@ def home():
                     listening_reveal=False,
                     recent_words=recent_words,
                     progress_summary=progress_summary,
+                    category=category,
+                    category_labels=CATEGORY_LABELS,
                 )
             if advance_listening_quiz:
                 recent_words = (recent_words + [question_word])[-RECENT_QUIZ_LIMIT:]
                 quiz, quiz_pool_words = build_next_quiz(
-                    quiz_source, student_id, question_word, quiz_pool_words, recent_words
+                    quiz_source, student_id, question_word, quiz_pool_words, recent_words, category
                 )
                 quiz_source_empty = quiz is None
                 quiz_attempt_key = uuid.uuid4().hex
@@ -1441,7 +1529,7 @@ def home():
                     else:
                         recent_words = (recent_words + [question_word])[-RECENT_QUIZ_LIMIT:]
                         quiz, quiz_pool_words = build_next_quiz(
-                            quiz_source, student_id, question_word, quiz_pool_words, recent_words
+                            quiz_source, student_id, question_word, quiz_pool_words, recent_words, category
                         )
                         quiz_source_empty = quiz is None
                         quiz_attempt_key = uuid.uuid4().hex
@@ -1460,7 +1548,7 @@ def home():
     if mode == "progress":
         progress_summary = get_progress_summary(student_id, progress_day)
 
-    saved_entries = get_saved_vocabulary_entries(student_id) if mode == "saved" else []
+    saved_entries = filter_entries_by_category(get_saved_vocabulary_entries(student_id), category) if mode == "saved" else []
     saved_words = {entry["word"] for entry in get_saved_vocabulary_entries(student_id)}
 
     return render_template(
@@ -1470,6 +1558,8 @@ def home():
         results=results,
         batch_missing=batch_missing,
         batch_ai_queries=batch_ai_queries,
+        batch_entry_orders=batch_entry_orders,
+        batch_ai_orders=batch_ai_orders,
         ai_pending=ai_pending,
         conversion_text=conversion_text,
         converted_simplified=converted_simplified,
@@ -1489,6 +1579,8 @@ def home():
         progress_summary=progress_summary,
         saved_entries=saved_entries,
         saved_words=saved_words,
+        category=category,
+        category_labels=CATEGORY_LABELS,
     )
 
 

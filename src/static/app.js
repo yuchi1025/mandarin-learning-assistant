@@ -1,6 +1,7 @@
 const INTERNAL_NAVIGATION_KEY = "mandarin_internal_navigation";
 const RECENT_SEARCHES_KEY = "mandarin_recent_searches";
 const SELECTED_STUDENT_KEY = "mandarin_selected_student";
+const BATCH_QUERY_KEY_PREFIX = "mandarin_batch_query_";
 
 function markInternalNavigation() {
     window.sessionStorage.setItem(INTERNAL_NAVIGATION_KEY, "true");
@@ -512,6 +513,38 @@ function focusSearchInput() {
     }
 }
 
+function getBatchQueryStorageKey() {
+    const studentSelector = document.getElementById("student-select");
+    const studentId = (studentSelector && studentSelector.value)
+        || new URLSearchParams(window.location.search).get("student_id")
+        || "unselected";
+    return `${BATCH_QUERY_KEY_PREFIX}${studentId}`;
+}
+
+function restoreBatchMode() {
+    const input = document.getElementById("batch-search-input");
+    if (!input) {
+        return;
+    }
+
+    const persistQuery = function () {
+        window.localStorage.setItem(getBatchQueryStorageKey(), input.value);
+    };
+    input.addEventListener("input", persistQuery);
+    const form = input.closest("form");
+    if (form) {
+        form.addEventListener("submit", persistQuery);
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const storedQuery = window.localStorage.getItem(getBatchQueryStorageKey()) || "";
+    if (!input.value.trim() && storedQuery.trim() && !params.get("batch_query")) {
+        params.set("batch_query", storedQuery);
+        markInternalNavigation();
+        window.location.replace(`${window.location.pathname}?${params.toString()}`);
+    }
+}
+
 window.addEventListener("load", function () {
     const isRefresh = isRefreshNavigation();
     if (isRefresh) {
@@ -538,6 +571,7 @@ window.addEventListener("load", function () {
     bindListeningReveal();
     bindCopyButtons();
     rememberSelectedStudent();
+    restoreBatchMode();
     renderRecentSearches();
     loadAiResults();
 });

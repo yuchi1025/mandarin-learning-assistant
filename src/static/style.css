@@ -172,6 +172,11 @@ h1 {
     margin-bottom: 24px;
 }
 
+.batch-result-order {
+    display: flex;
+    flex-direction: column;
+}
+
 .recent-searches {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -245,6 +250,10 @@ h1 {
 }
 
 .saved-vocabulary-header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 14px;
     margin: 0 0 14px;
 }
 
@@ -265,7 +274,7 @@ h1 {
 
 .saved-vocabulary-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(120px, 0.8fr) auto;
+    grid-template-columns: minmax(0, 1fr) minmax(120px, 0.8fr) auto auto;
     align-items: center;
     gap: 14px;
     padding: 14px;
@@ -296,6 +305,50 @@ h1 {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.category-select-label,
+.category-filter-form label {
+    font-size: 0.9rem;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.category-select {
+    min-height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    font: inherit;
+    padding: 8px 10px;
+}
+
+.category-filter-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 14px;
+}
+
+.saved-vocabulary-header .category-filter-form {
+    margin: 0;
+}
+
+.quiz-category-filter {
+    justify-content: flex-end;
+}
+
+.word-category {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #d9c7af;
+    border-radius: 999px;
+    background: #fff7ed;
+    color: #76502f;
+    font-size: 0.78rem;
+    line-height: 1.2;
+    padding: 3px 7px;
 }
 
 .recent-search-chip,
@@ -834,6 +887,8 @@ ul {
     .search-form,
     .batch-search-form,
     .convert-form,
+    .saved-vocabulary-header,
+    .category-filter-form,
     .card-header,
     .example-item,
     .progress-row {

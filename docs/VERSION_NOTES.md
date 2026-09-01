@@ -7,6 +7,7 @@
 - Added a backward-safe SQLite migration: previously global progress is preserved and assigned to an `Existing progress` profile rather than being discarded.
 - Added Quiz Mode scoring and Mandarin question audio, plus consistent paired Simplified and Traditional Chinese display in Quiz Mode.
 - Added a learner-specific Review Mistakes quiz source. It derives words missed on the first answer from each learner's latest quiz result, keeps the full attempt history, and removes a word from the current review session once it is answered correctly.
+- Added fixed topic categories for the built-in vocabulary without changing the canonical dictionary JSON schema. Learners can filter Search, Batch, Saved Vocabulary, and Quiz Mode by category.
 
 ## v0
 
