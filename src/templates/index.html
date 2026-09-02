@@ -6,7 +6,7 @@
     <title>Mandarin Learning Assistant</title>
     <link rel="icon" type="image/png" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3.1.1-categories">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3.2.0-title-large">
 </head>
 <body>
     <main class="page">
@@ -18,36 +18,12 @@
                     class="hero-logo"
                 >
                 <div class="hero-copy">
-                    <p class="eyebrow">v3.1.1</p>
+                    <p class="eyebrow">v3.2.0</p>
                     <h1>Mandarin Learning Assistant</h1>
                     <p class="hero-credit">© 2026 Yuchi</p>
                 </div>
             </div>
-            <p class="intro">
-                Search by Chinese word, pinyin, or English meaning.
-            </p>
         </section>
-
-        <nav class="mode-switch">
-            <a href="{{ url_for('home', mode='search', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'search' %}active{% endif %}">
-                Search Mode
-            </a>
-            <a href="{{ url_for('home', mode='batch', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'batch' %}active{% endif %}">
-                Batch Mode
-            </a>
-            <a href="{{ url_for('home', mode='convert', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'convert' %}active{% endif %}">
-                Convert Mode
-            </a>
-            <a href="{{ url_for('home', mode='quiz', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'quiz' %}active{% endif %}">
-                Quiz Mode
-            </a>
-            <a href="{{ url_for('home', mode='progress', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'progress' %}active{% endif %}">
-                Progress Mode
-            </a>
-            <a href="{{ url_for('home', mode='saved', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'saved' %}active{% endif %}">
-                Saved Vocabulary
-            </a>
-        </nav>
 
         <section class="student-panel">
             {% if students %}
@@ -75,6 +51,31 @@
                 <p class="student-note">Choose or create a learner to save separate progress.</p>
             {% endif %}
         </section>
+
+        <nav class="mode-switch">
+            <a href="{{ url_for('home', mode='search', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'search' %}active{% endif %}">
+                Search Mode
+            </a>
+            <a href="{{ url_for('home', mode='batch', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'batch' %}active{% endif %}">
+                Batch Mode
+            </a>
+            <a href="{{ url_for('home', mode='convert', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'convert' %}active{% endif %}">
+                Convert Mode
+            </a>
+            <a href="{{ url_for('home', mode='quiz', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'quiz' %}active{% endif %}">
+                Quiz Mode
+            </a>
+            <a href="{{ url_for('home', mode='progress', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'progress' %}active{% endif %}">
+                Progress Mode
+            </a>
+            <a href="{{ url_for('home', mode='saved', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'saved' %}active{% endif %}">
+                Saved Vocabulary
+            </a>
+        </nav>
+
+        {% if mode == 'search' or mode == 'batch' %}
+            <p class="intro">Search by Chinese word, pinyin, or English meaning.</p>
+        {% endif %}
 
         {% if mode == 'search' or mode == 'batch' %}
             <section class="search-panel">
@@ -690,6 +691,6 @@
         {% endif %}
     </main>
 
-    <script src="{{ url_for('static', filename='app.js') }}?v=3.1.1-batch-state"></script>
+    <script src="{{ url_for('static', filename='app.js') }}?v=3.2.0"></script>
 </body>
 </html>

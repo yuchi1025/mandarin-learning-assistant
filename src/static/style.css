@@ -49,6 +49,29 @@ body {
     min-width: 0;
 }
 
+.hero-copy h1 {
+    margin: 0 0 12px;
+    font-size: 3rem;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+    .hero-brand {
+        display: block;
+    }
+
+    .hero-logo {
+        width: 52px;
+        height: 52px;
+        margin-bottom: 8px;
+    }
+
+    .hero-copy h1 {
+        font-size: 1.3rem;
+    }
+}
+
 .hero-credit {
     margin: 0;
     color: #6a5b4d;

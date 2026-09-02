@@ -21,6 +21,13 @@ def test_exact_pinyin_match_returns_only_exact_word():
     assert words_for("zuo bian") == ["左边"]
 
 
+def test_new_daily_use_word_returns_a_dictionary_entry():
+    result = mandarin_app.search_entries("產品")
+
+    assert [entry["word"] for entry in result] == ["产品"]
+    assert result[0]["english"] == "product"
+
+
 def test_partial_search_still_works():
     assert words_for("cof")[0] == "咖啡"
 

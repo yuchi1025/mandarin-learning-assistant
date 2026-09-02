@@ -4,7 +4,7 @@
 
 ![Mandarin Learning Assistant banner](assets/logo/brand-banner.png)
 
-Current version: `v3.1.1`
+Current version: `v3.2.0`
 
 ## Overview
 
@@ -100,7 +100,7 @@ The demo video shows a visible cursor performing Chinese search, English search,
 - Process:
   - Discussed the initial idea of an AI Mandarin Learning Assistant with ChatGPT.
   - Used a ChatGPT-recommended starter prompt to begin the project in Codex.
-  - Iterated in Codex from a simple prototype into a structured v3.1.1 project with data, tests, validation, screenshots, and demo media.
+  - Iterated in Codex from a simple prototype into a structured v3.2.0 project with data, tests, validation, screenshots, and demo media.
 - Key prompts used:
   - Initial Idea And Setup:
     - ChatGPT-recommended v0 starter prompt:
@@ -243,7 +243,7 @@ Progress history and local student profiles are stored in `data/progress.db`. Th
 Validate the built-in dictionary after editing it:
 
 ```bash
-python3 scripts/validate_dictionary.py --expected-count 200
+python3 scripts/validate_dictionary.py --expected-count 300
 ```
 
 The script checks for invalid JSON, missing required fields, inconsistent field order, empty values, duplicate words, malformed examples, tone-marked dictionary pinyin, and the optional expected entry count.
@@ -353,8 +353,8 @@ Key folders and files:
 - `src/static/style.css` contains layout, card, quiz, loading, and branding styles.
 - `src/static/app.js` contains Vanilla JavaScript for audio, recent searches, async AI loading, and quiz interaction.
 - `tests/` contains pytest coverage for dictionary quality, consistent field order, tone-marked pinyin, search behavior, Flask routes, static JavaScript loading, and cleaned sentence-audio text.
-- `docs/VERSION_NOTES.md` records the project progress from v0 to v3.1.1.
-- `scripts/validate_dictionary.py` validates the 200-entry dictionary, required fields, consistent field order, duplicate words, examples, and tone-marked pinyin.
+- `docs/VERSION_NOTES.md` records the project progress from v0 to v3.2.0.
+- `scripts/validate_dictionary.py` validates the 300-entry dictionary, required fields, consistent field order, duplicate words, examples, and tone-marked pinyin.
 - `assets/logo/` contains the product banner, app icon, and favicon source.
 - `assets/screenshots/` contains Search Mode, Search Result, and Quiz Mode screenshots.
 - `assets/demo/` contains the MP4 demo with audio and the silent GIF preview.

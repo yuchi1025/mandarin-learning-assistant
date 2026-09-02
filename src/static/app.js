@@ -205,6 +205,7 @@ function renderAiResult(card, item, isSaved) {
         ? `<span class="traditional-word">${escapeHtml(item.traditional)}</span>`
         : "";
     const meaningLine = item.english ? `<p><strong>Meaning:</strong> ${escapeHtml(item.english)}</p>` : "";
+    const categoryLabel = item.category_label || "Everyday life";
     const examplesBlock = item.examples && item.examples.length
         ? `
             <div>
@@ -240,6 +241,7 @@ function renderAiResult(card, item, isSaved) {
                         </svg>
                     </button>
                     <span class="part-of-speech">${escapeHtml(item.part_of_speech)}</span>
+                    <span class="word-category">${escapeHtml(categoryLabel)}</span>
                 </div>
                 ${pinyinLine}
             </div>

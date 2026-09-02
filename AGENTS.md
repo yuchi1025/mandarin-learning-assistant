@@ -4,7 +4,7 @@
 
 This project is a beginner-friendly Flask web app for Mandarin learning.
 
-Current version: `v3.1.1`
+Current version: `v3.2.0`
 
 It currently has two user modes:
 
@@ -99,7 +99,7 @@ If the result comes from AI:
 - `src/static/style.css`
   - layout and styling
 - `data/dictionary.json`
-  - 200 built-in daily-use Mandarin dictionary entries
+  - 300 built-in daily-use Mandarin dictionary entries
 - `scripts/validate_dictionary.py`
   - validates required dictionary fields, examples, duplicates, and optional expected count
 - `tests/`
@@ -127,7 +127,7 @@ If the result comes from AI:
 
 ## Validation and Tests
 
-- Validate dictionary data with `python3 scripts/validate_dictionary.py --expected-count 200`.
+- Validate dictionary data with `python3 scripts/validate_dictionary.py --expected-count 300`.
 - Run automated tests with `python3 -m pytest`.
 - Dictionary validation should require stored tone-marked pinyin to match each Chinese word.
 - Dictionary validation should require the same field order for every entry: `word`, `pinyin`, `english`, `part_of_speech`, `explanation`, `examples`.

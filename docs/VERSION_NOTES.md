@@ -1,6 +1,6 @@
 # Version Notes
 
-## Unreleased
+## v3.2.0
 
 - Added simple local student profiles without authentication or passwords. Learners can be created and selected from the app, with the active learner remembered in the browser.
 - Moved progress ownership to stable SQLite student IDs. Search, batch search, and AI fallback progress now belong only to the selected learner, and Progress Mode is filtered to that learner.
@@ -8,6 +8,7 @@
 - Added Quiz Mode scoring and Mandarin question audio, plus consistent paired Simplified and Traditional Chinese display in Quiz Mode.
 - Added a learner-specific Review Mistakes quiz source. It derives words missed on the first answer from each learner's latest quiz result, keeps the full attempt history, and removes a word from the current review session once it is answered correctly.
 - Added fixed topic categories for the built-in vocabulary without changing the canonical dictionary JSON schema. Learners can filter Search, Batch, Saved Vocabulary, and Quiz Mode by category.
+- Expanded the built-in dictionary from 200 to 300 daily-use words, including common work, travel, food, health, and conversation vocabulary.
 
 ## v0
 

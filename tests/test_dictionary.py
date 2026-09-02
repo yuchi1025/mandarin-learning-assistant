@@ -20,7 +20,7 @@ def load_entries():
 def test_dictionary_is_valid():
     entries = load_entries()
 
-    assert validate_entries(entries, expected_count=200) == []
+    assert validate_entries(entries, expected_count=300) == []
 
 
 def test_dictionary_words_are_unique():
@@ -55,3 +55,12 @@ def test_dictionary_has_traditional_words():
 
     assert all(entry["traditional"].strip() for entry in entries)
     assert any(entry["traditional"] != entry["word"] for entry in entries)
+
+
+def test_dictionary_includes_new_daily_use_words():
+    entries_by_word = {entry["word"]: entry for entry in load_entries()}
+
+    assert entries_by_word["产品"]["traditional"] == "產品"
+    assert entries_by_word["建议"]["pinyin"] == "jiàn yì"
+    assert entries_by_word["教练"]["english"] == "coach"
+    assert entries_by_word["检查"]["english"] == "to check; inspection"

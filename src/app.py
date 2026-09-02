@@ -63,17 +63,17 @@ CATEGORY_LABELS = {
     "everyday": "Everyday life",
 }
 CATEGORY_WORDS = {
-    "basics": "你好 谢谢 可以 不要 早上好 晚上好 再见 对不起 没关系 请 请问 没事 是 不是 有 没有 要 想 会 能 应该 怎么 哪里 什么时候 谁 哪个 几 很 也 都 还 就 但是 所以 如果 和 在 里 上 下".split(),
-    "actions": "吃饭 喝水 等一下 知道 觉得 喜欢 不喜欢 回家 出去 进来 看 听 说 打开 关上 开始 结束 找 给 带 用 做 去 来 到 走 坐 住 睡觉 起床 洗澡 洗手 穿 拿 放 送 帮忙 问 回答 懂 明白 认识 记得 忘记".split(),
-    "time": "现在 时间 今天 明天 昨天 早上 中午 晚上 周末".split(),
-    "places": "车站 地铁 公交车 出租车 机场 火车 飞机 路 左边 右边 前面 后面 旁边".split(),
-    "food": "多少钱 买 卖 商店 超市 饭店 水 咖啡 茶 饭 面条 苹果 香蕉 鸡蛋 牛奶 钱 卡 现金 票".split(),
-    "people": "家 人 男人 女人 孩子 爸爸 妈妈 哥哥 姐姐 弟弟 妹妹 房间 厨房 洗手间 门 窗户 桌子 椅子".split(),
-    "study": "学习 工作 下班 上班 学校 公司 医院 老师 学生 同事 书".split(),
-    "descriptions": "累 开心 热 冷 好吃 好喝 漂亮 贵 便宜 快 慢 远 近 忙 空 新 旧 大 小 多 少".split(),
+    "basics": "你好 谢谢 可以 不要 早上好 晚上好 再见 对不起 没关系 请 请问 没事 是 不是 有 没有 要 想 会 能 应该 怎么 哪里 什么时候 谁 哪个 几 很 也 都 还 就 但是 所以 如果 和 在 里 上 下 当然 一起 已经 还没有 正在 同意".split(),
+    "actions": "吃饭 喝水 等一下 知道 觉得 喜欢 不喜欢 回家 出去 进来 看 听 说 打开 关上 开始 结束 找 给 带 用 做 去 来 到 走 坐 住 睡觉 起床 洗澡 洗手 穿 拿 放 送 帮忙 问 回答 懂 明白 认识 记得 忘记 建议 检查 准备 希望 计划 决定 选择 参加 练习 介绍 解释 发现 改变 解决 试试 休息 运动 跑步 游泳 旅行 帮助".split(),
+    "time": "现在 时间 今天 明天 昨天 早上 中午 晚上 周末 生日 年 月 日 星期 分钟 小时 去年 前年 后年 早 晚".split(),
+    "places": "车站 地铁 公交车 出租车 机场 火车 飞机 路 左边 右边 前面 后面 旁边 公园 附近 地址 地图 护照 行李 预订 房子 公寓 银行 自行车 入口 出口 国家 城市 北京 上海".split(),
+    "food": "多少钱 买 卖 商店 超市 饭店 水 咖啡 茶 饭 面条 苹果 香蕉 鸡蛋 牛奶 钱 卡 现金 票 产品 菜单 点菜 服务员 付款 找钱 价格 颜色 红色 白色 黑色".split(),
+    "people": "家 人 男人 女人 孩子 爸爸 妈妈 哥哥 姐姐 弟弟 妹妹 房间 厨房 洗手间 门 窗户 桌子 椅子 教练".split(),
+    "study": "学习 工作 下班 上班 学校 公司 医院 老师 学生 同事 书 考试 作业 课堂 同学 课程 老板 会议 项目 邮件 文件 经理 办公室".split(),
+    "descriptions": "累 开心 热 冷 好吃 好喝 漂亮 贵 便宜 快 慢 远 近 忙 空 新 旧 大 小 多 少 重要 可能 不同 容易 困难 安全 小心 疼".split(),
     "grammar": "为什么 因为".split(),
-    "health": "天气 雨 太阳 药 身体 生病".split(),
-    "technology": "手机 电脑 电视 电影 音乐 电话 消息 照片".split(),
+    "health": "天气 雨 太阳 药 身体 生病 医生 预约 过敏".split(),
+    "technology": "手机 电脑 电视 电影 音乐 电话 消息 照片 新闻 报纸 语言 中文 英文".split(),
 }
 CATEGORY_BY_WORD = {
     word: category for category, words in CATEGORY_WORDS.items() for word in words
@@ -92,6 +92,9 @@ PINYIN_PHRASE_OVERRIDES = {
     "記得": "jì dé",
 }
 PINYIN_OVERRIDE_PHRASES = sorted(PINYIN_PHRASE_OVERRIDES, key=len, reverse=True)
+BATCH_LIST_PREFIX_PATTERN = re.compile(
+    r"^\s*(?:(?:[-*•‣◦▪‒–—])\s*|(?:\(?\d{1,3}\)?[.)、:])\s*)"
+)
 
 
 def to_sentence_pinyin(text):
@@ -183,8 +186,12 @@ def normalize_category(value):
     return value if value in CATEGORY_LABELS else "all"
 
 
+def normalize_entry_category(value):
+    return value if value in CATEGORY_LABELS else "everyday"
+
+
 def get_entry_category(entry):
-    return entry.get("category") or CATEGORY_BY_WORD.get(entry.get("word", ""), "everyday")
+    return normalize_entry_category(entry.get("category") or CATEGORY_BY_WORD.get(entry.get("word", "")))
 
 
 def filter_entries_by_category(entries, category):
@@ -471,6 +478,7 @@ def normalize_saved_ai_entry(result):
         "part_of_speech": normalize_part_of_speech(str(result.get("part_of_speech", "word"))),
         "explanation": str(result.get("explanation", "")).strip(),
         "examples": examples,
+        "category": normalize_entry_category(result.get("category")),
     }
     return entry if validate_ai_result(word, entry) else None
 
@@ -887,7 +895,7 @@ def auto_start_ollama():
 
 
 def search_entries(query):
-    normalized_query = query.strip().lower()
+    normalized_query = normalize_lookup_query(query).lower()
     if not normalized_query:
         return []
 
@@ -975,13 +983,17 @@ def split_batch_queries(text):
     queries = []
     seen = set()
     for raw_query in re.split(r"[\n,;，；]+", text):
-        query = raw_query.strip()
+        query = normalize_lookup_query(raw_query)
         query_key = normalize_query_key(query)
         if not query or query_key in seen:
             continue
         queries.append(query)
         seen.add(query_key)
     return queries
+
+
+def normalize_lookup_query(query):
+    return BATCH_LIST_PREFIX_PATTERN.sub("", str(query or "")).strip()
 
 
 def batch_search_entries(text, category="all"):
@@ -1127,7 +1139,7 @@ def validate_ai_result(query, result):
 def fetch_ai_explanation(query):
     system_prompt = (
         "You are a Mandarin tutor for English-speaking beginners. "
-        "Return JSON only with these keys: word, traditional, pinyin, english, part_of_speech, explanation, examples. "
+        "Return JSON only with these keys: word, traditional, pinyin, english, part_of_speech, category, explanation, examples. "
         "Do not add extra keys. "
         "Use concise beginner-friendly English. "
         "The word field must be the simplified Chinese form of the exact Mandarin word or phrase being explained, not a sentence. "
@@ -1135,6 +1147,7 @@ def fetch_ai_explanation(query):
         "If simplified and traditional are the same, use the same value for both fields. "
         "If the input itself is Chinese, the input must match either the simplified word field or the traditional field. "
         "Set part_of_speech to exactly one of: noun, verb, adjective, adverb, phrase, expression, question word, conjunction, modal verb, time word, pronoun, measure word, word. "
+        "Set category to exactly one of: basics, actions, time, places, food, people, study, descriptions, grammar, health, technology, everyday. "
         "Set examples to exactly 2 short Chinese sentence objects with keys text and translation. "
         "If the input is not a real Mandarin word or phrase, explain that clearly and return examples as an empty list."
     )
@@ -1201,6 +1214,7 @@ def fetch_ai_explanation(query):
             "pinyin": pinyin,
             "english": parsed.get("english", "").strip(),
             "part_of_speech": normalize_part_of_speech(parsed.get("part_of_speech", "word")),
+            "category": normalize_entry_category(parsed.get("category")),
             "explanation": parsed.get("explanation", "").strip() or "No explanation available.",
             "examples": examples,
         }
@@ -1418,7 +1432,7 @@ def home():
             students = list_students()
         elif form_type == "search":
             mode = "search"
-            query = request.form.get("query", "")
+            query = normalize_lookup_query(request.form.get("query", ""))
             results = filter_entries_by_category(search_entries(query), category)
             for entry in results:
                 log_progress_event(query, entry, "dictionary", "search", student_id)
@@ -1586,7 +1600,7 @@ def home():
 
 @app.get("/api/ai-explanation")
 def ai_explanation():
-    query = request.args.get("query", "")
+    query = normalize_lookup_query(request.args.get("query", ""))
     mode = request.args.get("mode", "search")
     student_id = parse_student_id(request.args.get("student_id"))
     if not is_meaningful_query(query):
@@ -1595,6 +1609,10 @@ def ai_explanation():
     result, error = get_ai_explanation(query)
     if error:
         return jsonify({"ok": False, "error": error}), 503
+
+    result = dict(result)
+    result["category"] = get_entry_category(result)
+    result["category_label"] = CATEGORY_LABELS[result["category"]]
 
     log_progress_event(query, result, "ai", mode if mode in {"search", "batch"} else "search", student_id)
     return jsonify({"ok": True, "result": result, "saved": is_vocabulary_saved(student_id, result["word"])})

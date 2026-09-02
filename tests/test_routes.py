@@ -45,6 +45,22 @@ def test_home_page_loads():
     assert b"Mandarin Learning Assistant" in response.data
 
 
+def test_learner_panel_precedes_mode_switch_and_search_guidance_is_mode_scoped():
+    client = mandarin_app.app.test_client()
+
+    search_response = client.get("/", query_string={"mode": "search"})
+    batch_response = client.get("/", query_string={"mode": "batch"})
+    quiz_response = client.get("/", query_string={"mode": "quiz"})
+
+    assert search_response.data.index(b"student-panel") < search_response.data.index(b"mode-switch")
+    assert search_response.data.index(b"mode-switch") < search_response.data.index(
+        b"Search by Chinese word, pinyin, or English meaning."
+    )
+    assert b"Search by Chinese word, pinyin, or English meaning." in search_response.data
+    assert b"Search by Chinese word, pinyin, or English meaning." in batch_response.data
+    assert b"Search by Chinese word, pinyin, or English meaning." not in quiz_response.data
+
+
 def test_first_use_profile_state_creates_a_selected_student(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
     client = mandarin_app.app.test_client()
@@ -81,6 +97,16 @@ def test_search_post_renders_result():
 
     assert response.status_code == 200
     assert "机场".encode("utf-8") in response.data
+
+
+def test_search_ignores_a_list_prefix():
+    client = mandarin_app.app.test_client()
+
+    response = client.post("/", data={"form_type": "search", "query": "- airport"})
+
+    assert response.status_code == 200
+    assert "机场".encode("utf-8") in response.data
+    assert mandarin_app.search_entries("• airport")[0]["word"] == "机场"
 
 
 def test_search_category_filters_results_and_renders_category_label():
@@ -154,6 +180,18 @@ def test_batch_search_post_renders_multiple_cards():
     assert "朋友".encode("utf-8") in response.data
     assert "学习".encode("utf-8") in response.data
     assert b"Batch Mode" in response.data
+
+
+def test_batch_search_ignores_common_list_prefixes():
+    queries = mandarin_app.split_batch_queries("- airport\n• friend\n3. xue xi\n— airport")
+    results, missing_queries, ai_queries = mandarin_app.batch_search_entries(
+        "- airport\n• friend\n3. xue xi"
+    )
+
+    assert queries == ["airport", "friend", "xue xi"]
+    assert [entry["word"] for entry in results] == ["机场", "朋友", "学习"]
+    assert missing_queries == []
+    assert ai_queries == []
 
 
 def test_batch_mode_restores_a_query_without_logging_duplicate_progress(monkeypatch, tmp_path):
@@ -275,6 +313,26 @@ def test_ai_endpoint_logs_progress(monkeypatch, tmp_path):
     assert summary["today_events"][0]["word"] == "狮子"
     assert summary["today_events"][0]["source"] == "ai"
     assert summary["today_events"][0]["mode"] == "batch"
+
+
+def test_ai_endpoint_returns_a_category_label(monkeypatch):
+    client = mandarin_app.app.test_client()
+    result = {
+        "word": "产品",
+        "traditional": "產品",
+        "pinyin": "chǎn pǐn",
+        "english": "product",
+        "part_of_speech": "noun",
+        "category": "food",
+        "explanation": "Something made or sold for people to use.",
+        "examples": [],
+    }
+
+    monkeypatch.setattr(mandarin_app, "get_ai_explanation", lambda query: (result, None))
+    response = client.get("/api/ai-explanation", query_string={"query": "產品"})
+
+    assert response.status_code == 200
+    assert response.get_json()["result"]["category_label"] == "Food & shopping"
 
 
 def test_progress_mode_renders_summary(monkeypatch, tmp_path):
