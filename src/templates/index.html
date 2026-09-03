@@ -83,13 +83,6 @@
                     <form method="post" class="batch-search-form" id="batch-search-form">
                         <input type="hidden" name="form_type" value="batch">
                         <input type="hidden" name="student_id" value="{{ selected_student.id if selected_student else '' }}">
-                        <label class="category-select-label" for="batch-category">Category</label>
-                        <select id="batch-category" name="category" class="category-select">
-                            <option value="all">All categories</option>
-                            {% for category_key, category_label in category_labels.items() %}
-                                <option value="{{ category_key }}" {% if category == category_key %}selected{% endif %}>{{ category_label }}</option>
-                            {% endfor %}
-                        </select>
                         <textarea
                             id="batch-search-input"
                             name="query"
@@ -102,13 +95,6 @@
                     <form method="post" class="search-form" id="search-form">
                         <input type="hidden" name="form_type" value="search">
                         <input type="hidden" name="student_id" value="{{ selected_student.id if selected_student else '' }}">
-                        <label class="category-select-label" for="search-category">Category</label>
-                        <select id="search-category" name="category" class="category-select">
-                            <option value="all">All categories</option>
-                            {% for category_key, category_label in category_labels.items() %}
-                                <option value="{{ category_key }}" {% if category == category_key %}selected{% endif %}>{{ category_label }}</option>
-                            {% endfor %}
-                        </select>
                         <input
                             id="search-input"
                             type="text"

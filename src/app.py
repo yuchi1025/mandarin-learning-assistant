@@ -78,6 +78,22 @@ CATEGORY_WORDS = {
 CATEGORY_BY_WORD = {
     word: category for category, words in CATEGORY_WORDS.items() for word in words
 }
+CATEGORY_BY_WORD.update({
+    word: category
+    for category, words in {
+        "basics": "答案 回复 通知 联系 邀请 庆祝 礼物 新年 假期".split(),
+        "actions": "唱歌 跳舞 画画 阅读 写 读 充电 租 搬家 打扫 修理 开车 停车 加油 过马路 锻炼 借 还钱 注册 登录".split(),
+        "time": "春天 夏天 秋天 冬天".split(),
+        "places": "楼 电梯 邻居 司机 摩托车 交通 堵车 绿灯 红灯".split(),
+        "food": "早餐 午饭 晚饭 水果 蔬菜 肉 鱼 鸡肉 牛肉 猪肉 汤 米饭 饺子 包子 甜 辣 咸 饿 饱 外卖 信用卡 工资 发票".split(),
+        "people": "客厅 卧室 阳台 垃圾 干净 脏 坏 空调 冰箱 洗衣机".split(),
+        "study": "故事 节目 游戏".split(),
+        "descriptions": "免费".split(),
+        "health": "诊所 护士 感冒 发烧 咳嗽 头疼 肚子 牙齿 眼睛 健康".split(),
+        "technology": "歌曲 视频 网络 网站 密码 电池 耳机".split(),
+    }.items()
+    for word in words
+})
 
 
 DICTIONARY_PATH = Path(__file__).resolve().parent.parent / "data" / "dictionary.json"
@@ -90,6 +106,7 @@ PINYIN_PHRASE_OVERRIDES = {
     "日期": "rì qí",
     "记得": "jì dé",
     "記得": "jì dé",
+    "歌曲": "gē qǔ",
 }
 PINYIN_OVERRIDE_PHRASES = sorted(PINYIN_PHRASE_OVERRIDES, key=len, reverse=True)
 BATCH_LIST_PREFIX_PATTERN = re.compile(
@@ -99,6 +116,14 @@ BATCH_LIST_PREFIX_PATTERN = re.compile(
 
 def to_sentence_pinyin(text):
     pinyin_parts = []
+    plain_text = []
+
+    def append_plain_text_pinyin():
+        if plain_text:
+            for character in plain_text:
+                pinyin_parts.extend(lazy_pinyin(character, style=Style.TONE))
+            plain_text.clear()
+
     index = 0
     while index < len(text):
         matched_phrase = next(
@@ -106,12 +131,15 @@ def to_sentence_pinyin(text):
             None,
         )
         if matched_phrase:
+            append_plain_text_pinyin()
             pinyin_parts.append(PINYIN_PHRASE_OVERRIDES[matched_phrase])
             index += len(matched_phrase)
             continue
 
-        pinyin_parts.extend(lazy_pinyin(text[index], style=Style.TONE))
+        plain_text.append(text[index])
         index += 1
+
+    append_plain_text_pinyin()
 
     pinyin_text = " ".join(pinyin_parts)
     return re.sub(r"\s+([,.!?;:，。！？；：])", r"\1", pinyin_text)

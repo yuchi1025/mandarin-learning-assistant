@@ -109,27 +109,15 @@ def test_search_ignores_a_list_prefix():
     assert mandarin_app.search_entries("• airport")[0]["word"] == "机场"
 
 
-def test_search_category_filters_results_and_renders_category_label():
+def test_search_result_renders_a_category_label_without_a_category_control():
     client = mandarin_app.app.test_client()
 
-    response = client.post(
-        "/", data={"form_type": "search", "query": "airport", "category": "places"}
-    )
+    response = client.post("/", data={"form_type": "search", "query": "airport"})
 
     assert response.status_code == 200
     assert "机场".encode("utf-8") in response.data
     assert b"Places &amp; travel" in response.data
-
-
-def test_search_category_does_not_return_words_from_another_category():
-    client = mandarin_app.app.test_client()
-
-    response = client.post(
-        "/", data={"form_type": "search", "query": "airport", "category": "food"}
-    )
-
-    assert response.status_code == 200
-    assert "机场".encode("utf-8") not in response.data
+    assert b'id="search-category"' not in response.data
 
 
 def test_category_filter_applies_to_quiz_pool():
@@ -180,6 +168,7 @@ def test_batch_search_post_renders_multiple_cards():
     assert "朋友".encode("utf-8") in response.data
     assert "学习".encode("utf-8") in response.data
     assert b"Batch Mode" in response.data
+    assert b'id="batch-category"' not in response.data
 
 
 def test_batch_search_ignores_common_list_prefixes():
@@ -1184,6 +1173,10 @@ def test_sentence_pinyin_uses_phrase_override_for_behavior():
 def test_sentence_pinyin_uses_phrase_override_for_date():
     assert mandarin_app.to_sentence_pinyin("日期") == "rì qí"
     assert mandarin_app.to_sentence_pinyin("这个日期很重要。") == "zhè gè rì qí hěn zhòng yào。"
+
+
+def test_sentence_pinyin_uses_phrase_pronunciation_for_polyphonic_characters():
+    assert mandarin_app.to_sentence_pinyin("歌曲") == "gē qǔ"
 
 
 def test_curated_ai_result_corrects_qiannian_meaning():

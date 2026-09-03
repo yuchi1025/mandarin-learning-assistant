@@ -20,7 +20,7 @@ def load_entries():
 def test_dictionary_is_valid():
     entries = load_entries()
 
-    assert validate_entries(entries, expected_count=300) == []
+    assert validate_entries(entries, expected_count=400) == []
 
 
 def test_dictionary_words_are_unique():
@@ -64,3 +64,4 @@ def test_dictionary_includes_new_daily_use_words():
     assert entries_by_word["建议"]["pinyin"] == "jiàn yì"
     assert entries_by_word["教练"]["english"] == "coach"
     assert entries_by_word["检查"]["english"] == "to check; inspection"
+    assert entries_by_word["歌曲"]["pinyin"] == "gē qǔ"

@@ -3598,5 +3598,1205 @@
       "这是过敏。 (This is allergy; allergic.)",
       "我想了解过敏。 (I want to learn about allergy; allergic.)"
     ]
+  },
+  {
+    "word": "歌曲",
+    "traditional": "歌曲",
+    "pinyin": "gē qǔ",
+    "english": "song",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning song.",
+    "examples": [
+      "这是歌曲。 (This is song.)",
+      "我需要歌曲。 (I need song.)"
+    ]
+  },
+  {
+    "word": "唱歌",
+    "traditional": "唱歌",
+    "pinyin": "chàng gē",
+    "english": "to sing",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to sing.",
+    "examples": [
+      "我想唱歌。 (I want to to sing.)",
+      "我们今天唱歌。 (We will to sing today.)"
+    ]
+  },
+  {
+    "word": "跳舞",
+    "traditional": "跳舞",
+    "pinyin": "tiào wǔ",
+    "english": "to dance",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to dance.",
+    "examples": [
+      "我想跳舞。 (I want to to dance.)",
+      "我们今天跳舞。 (We will to dance today.)"
+    ]
+  },
+  {
+    "word": "画画",
+    "traditional": "畫畫",
+    "pinyin": "huà huà",
+    "english": "to draw",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to draw.",
+    "examples": [
+      "我想画画。 (I want to to draw.)",
+      "我们今天画画。 (We will to draw today.)"
+    ]
+  },
+  {
+    "word": "阅读",
+    "traditional": "閱讀",
+    "pinyin": "yuè dú",
+    "english": "to read",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to read.",
+    "examples": [
+      "我想阅读。 (I want to to read.)",
+      "我们今天阅读。 (We will to read today.)"
+    ]
+  },
+  {
+    "word": "写",
+    "traditional": "寫",
+    "pinyin": "xiě",
+    "english": "to write",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to write.",
+    "examples": [
+      "我想写。 (I want to to write.)",
+      "我们今天写。 (We will to write today.)"
+    ]
+  },
+  {
+    "word": "读",
+    "traditional": "讀",
+    "pinyin": "dú",
+    "english": "to read aloud",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to read aloud.",
+    "examples": [
+      "我想读。 (I want to to read aloud.)",
+      "我们今天读。 (We will to read aloud today.)"
+    ]
+  },
+  {
+    "word": "答案",
+    "traditional": "答案",
+    "pinyin": "dá àn",
+    "english": "answer",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning answer.",
+    "examples": [
+      "这是答案。 (This is answer.)",
+      "我需要答案。 (I need answer.)"
+    ]
+  },
+  {
+    "word": "故事",
+    "traditional": "故事",
+    "pinyin": "gù shì",
+    "english": "story",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning story.",
+    "examples": [
+      "这是故事。 (This is story.)",
+      "我需要故事。 (I need story.)"
+    ]
+  },
+  {
+    "word": "节目",
+    "traditional": "節目",
+    "pinyin": "jié mù",
+    "english": "show; program",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning show; program.",
+    "examples": [
+      "这是节目。 (This is show; program.)",
+      "我需要节目。 (I need show; program.)"
+    ]
+  },
+  {
+    "word": "游戏",
+    "traditional": "遊戲",
+    "pinyin": "yóu xì",
+    "english": "game",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning game.",
+    "examples": [
+      "这是游戏。 (This is game.)",
+      "我需要游戏。 (I need game.)"
+    ]
+  },
+  {
+    "word": "视频",
+    "traditional": "視頻",
+    "pinyin": "shì pín",
+    "english": "video",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning video.",
+    "examples": [
+      "这是视频。 (This is video.)",
+      "我需要视频。 (I need video.)"
+    ]
+  },
+  {
+    "word": "网络",
+    "traditional": "網絡",
+    "pinyin": "wǎng luò",
+    "english": "internet; network",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning internet; network.",
+    "examples": [
+      "这是网络。 (This is internet; network.)",
+      "我需要网络。 (I need internet; network.)"
+    ]
+  },
+  {
+    "word": "网站",
+    "traditional": "網站",
+    "pinyin": "wǎng zhàn",
+    "english": "website",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning website.",
+    "examples": [
+      "这是网站。 (This is website.)",
+      "我需要网站。 (I need website.)"
+    ]
+  },
+  {
+    "word": "密码",
+    "traditional": "密碼",
+    "pinyin": "mì mǎ",
+    "english": "password",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning password.",
+    "examples": [
+      "这是密码。 (This is password.)",
+      "我需要密码。 (I need password.)"
+    ]
+  },
+  {
+    "word": "充电",
+    "traditional": "充電",
+    "pinyin": "chōng diàn",
+    "english": "to charge",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to charge.",
+    "examples": [
+      "我想充电。 (I want to to charge.)",
+      "我们今天充电。 (We will to charge today.)"
+    ]
+  },
+  {
+    "word": "电池",
+    "traditional": "電池",
+    "pinyin": "diàn chí",
+    "english": "battery",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning battery.",
+    "examples": [
+      "这是电池。 (This is battery.)",
+      "我需要电池。 (I need battery.)"
+    ]
+  },
+  {
+    "word": "耳机",
+    "traditional": "耳機",
+    "pinyin": "ěr jī",
+    "english": "headphones",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning headphones.",
+    "examples": [
+      "这是耳机。 (This is headphones.)",
+      "我需要耳机。 (I need headphones.)"
+    ]
+  },
+  {
+    "word": "空调",
+    "traditional": "空調",
+    "pinyin": "kōng tiáo",
+    "english": "air conditioner",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning air conditioner.",
+    "examples": [
+      "这是空调。 (This is air conditioner.)",
+      "我需要空调。 (I need air conditioner.)"
+    ]
+  },
+  {
+    "word": "冰箱",
+    "traditional": "冰箱",
+    "pinyin": "bīng xiāng",
+    "english": "refrigerator",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning refrigerator.",
+    "examples": [
+      "这是冰箱。 (This is refrigerator.)",
+      "我需要冰箱。 (I need refrigerator.)"
+    ]
+  },
+  {
+    "word": "洗衣机",
+    "traditional": "洗衣機",
+    "pinyin": "xǐ yī jī",
+    "english": "washing machine",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning washing machine.",
+    "examples": [
+      "这是洗衣机。 (This is washing machine.)",
+      "我需要洗衣机。 (I need washing machine.)"
+    ]
+  },
+  {
+    "word": "客厅",
+    "traditional": "客廳",
+    "pinyin": "kè tīng",
+    "english": "living room",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning living room.",
+    "examples": [
+      "这是客厅。 (This is living room.)",
+      "我需要客厅。 (I need living room.)"
+    ]
+  },
+  {
+    "word": "卧室",
+    "traditional": "臥室",
+    "pinyin": "wò shì",
+    "english": "bedroom",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning bedroom.",
+    "examples": [
+      "这是卧室。 (This is bedroom.)",
+      "我需要卧室。 (I need bedroom.)"
+    ]
+  },
+  {
+    "word": "阳台",
+    "traditional": "陽台",
+    "pinyin": "yáng tái",
+    "english": "balcony",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning balcony.",
+    "examples": [
+      "这是阳台。 (This is balcony.)",
+      "我需要阳台。 (I need balcony.)"
+    ]
+  },
+  {
+    "word": "楼",
+    "traditional": "樓",
+    "pinyin": "lóu",
+    "english": "building; floor",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning building; floor.",
+    "examples": [
+      "这是楼。 (This is building; floor.)",
+      "我需要楼。 (I need building; floor.)"
+    ]
+  },
+  {
+    "word": "电梯",
+    "traditional": "電梯",
+    "pinyin": "diàn tī",
+    "english": "elevator",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning elevator.",
+    "examples": [
+      "这是电梯。 (This is elevator.)",
+      "我需要电梯。 (I need elevator.)"
+    ]
+  },
+  {
+    "word": "邻居",
+    "traditional": "鄰居",
+    "pinyin": "lín jū",
+    "english": "neighbor",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning neighbor.",
+    "examples": [
+      "这是邻居。 (This is neighbor.)",
+      "我需要邻居。 (I need neighbor.)"
+    ]
+  },
+  {
+    "word": "租",
+    "traditional": "租",
+    "pinyin": "zū",
+    "english": "to rent",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to rent.",
+    "examples": [
+      "我想租。 (I want to to rent.)",
+      "我们今天租。 (We will to rent today.)"
+    ]
+  },
+  {
+    "word": "搬家",
+    "traditional": "搬家",
+    "pinyin": "bān jiā",
+    "english": "to move house",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to move house.",
+    "examples": [
+      "我想搬家。 (I want to to move house.)",
+      "我们今天搬家。 (We will to move house today.)"
+    ]
+  },
+  {
+    "word": "打扫",
+    "traditional": "打掃",
+    "pinyin": "dǎ sǎo",
+    "english": "to clean",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to clean.",
+    "examples": [
+      "我想打扫。 (I want to to clean.)",
+      "我们今天打扫。 (We will to clean today.)"
+    ]
+  },
+  {
+    "word": "垃圾",
+    "traditional": "垃圾",
+    "pinyin": "lā jī",
+    "english": "trash; garbage",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning trash; garbage.",
+    "examples": [
+      "这是垃圾。 (This is trash; garbage.)",
+      "我需要垃圾。 (I need trash; garbage.)"
+    ]
+  },
+  {
+    "word": "干净",
+    "traditional": "乾淨",
+    "pinyin": "gān jìng",
+    "english": "clean",
+    "part_of_speech": "adjective",
+    "explanation": "A common daily-use word meaning clean.",
+    "examples": [
+      "这个很干净。 (This is clean.)",
+      "我觉得它很干净。 (I think it is clean.)"
+    ]
+  },
+  {
+    "word": "脏",
+    "traditional": "髒",
+    "pinyin": "zàng",
+    "english": "dirty",
+    "part_of_speech": "adjective",
+    "explanation": "A common daily-use word meaning dirty.",
+    "examples": [
+      "这个很脏。 (This is dirty.)",
+      "我觉得它很脏。 (I think it is dirty.)"
+    ]
+  },
+  {
+    "word": "坏",
+    "traditional": "壞",
+    "pinyin": "huài",
+    "english": "bad; broken",
+    "part_of_speech": "adjective",
+    "explanation": "A common daily-use word meaning bad; broken.",
+    "examples": [
+      "这个很坏。 (This is bad; broken.)",
+      "我觉得它很坏。 (I think it is bad; broken.)"
+    ]
+  },
+  {
+    "word": "修理",
+    "traditional": "修理",
+    "pinyin": "xiū lǐ",
+    "english": "to repair",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to repair.",
+    "examples": [
+      "我想修理。 (I want to to repair.)",
+      "我们今天修理。 (We will to repair today.)"
+    ]
+  },
+  {
+    "word": "开车",
+    "traditional": "開車",
+    "pinyin": "kāi chē",
+    "english": "to drive",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to drive.",
+    "examples": [
+      "我想开车。 (I want to to drive.)",
+      "我们今天开车。 (We will to drive today.)"
+    ]
+  },
+  {
+    "word": "停车",
+    "traditional": "停車",
+    "pinyin": "tíng chē",
+    "english": "to park",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to park.",
+    "examples": [
+      "我想停车。 (I want to to park.)",
+      "我们今天停车。 (We will to park today.)"
+    ]
+  },
+  {
+    "word": "加油",
+    "traditional": "加油",
+    "pinyin": "jiā yóu",
+    "english": "to refuel; keep going",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to refuel; keep going.",
+    "examples": [
+      "我想加油。 (I want to to refuel; keep going.)",
+      "我们今天加油。 (We will to refuel; keep going today.)"
+    ]
+  },
+  {
+    "word": "堵车",
+    "traditional": "堵車",
+    "pinyin": "dǔ chē",
+    "english": "traffic jam",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning traffic jam.",
+    "examples": [
+      "这是堵车。 (This is traffic jam.)",
+      "我需要堵车。 (I need traffic jam.)"
+    ]
+  },
+  {
+    "word": "司机",
+    "traditional": "司機",
+    "pinyin": "sī jī",
+    "english": "driver",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning driver.",
+    "examples": [
+      "这是司机。 (This is driver.)",
+      "我需要司机。 (I need driver.)"
+    ]
+  },
+  {
+    "word": "摩托车",
+    "traditional": "摩托車",
+    "pinyin": "mó tuō chē",
+    "english": "motorcycle",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning motorcycle.",
+    "examples": [
+      "这是摩托车。 (This is motorcycle.)",
+      "我需要摩托车。 (I need motorcycle.)"
+    ]
+  },
+  {
+    "word": "交通",
+    "traditional": "交通",
+    "pinyin": "jiāo tōng",
+    "english": "traffic; transportation",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning traffic; transportation.",
+    "examples": [
+      "这是交通。 (This is traffic; transportation.)",
+      "我需要交通。 (I need traffic; transportation.)"
+    ]
+  },
+  {
+    "word": "过马路",
+    "traditional": "過馬路",
+    "pinyin": "guò mǎ lù",
+    "english": "to cross the road",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to cross the road.",
+    "examples": [
+      "我想过马路。 (I want to to cross the road.)",
+      "我们今天过马路。 (We will to cross the road today.)"
+    ]
+  },
+  {
+    "word": "绿灯",
+    "traditional": "綠燈",
+    "pinyin": "lǜ dēng",
+    "english": "green light",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning green light.",
+    "examples": [
+      "这是绿灯。 (This is green light.)",
+      "我需要绿灯。 (I need green light.)"
+    ]
+  },
+  {
+    "word": "红灯",
+    "traditional": "紅燈",
+    "pinyin": "hóng dēng",
+    "english": "red light",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning red light.",
+    "examples": [
+      "这是红灯。 (This is red light.)",
+      "我需要红灯。 (I need red light.)"
+    ]
+  },
+  {
+    "word": "诊所",
+    "traditional": "診所",
+    "pinyin": "zhěn suǒ",
+    "english": "clinic",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning clinic.",
+    "examples": [
+      "这是诊所。 (This is clinic.)",
+      "我需要诊所。 (I need clinic.)"
+    ]
+  },
+  {
+    "word": "护士",
+    "traditional": "護士",
+    "pinyin": "hù shì",
+    "english": "nurse",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning nurse.",
+    "examples": [
+      "这是护士。 (This is nurse.)",
+      "我需要护士。 (I need nurse.)"
+    ]
+  },
+  {
+    "word": "感冒",
+    "traditional": "感冒",
+    "pinyin": "gǎn mào",
+    "english": "cold; to catch a cold",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning cold; to catch a cold.",
+    "examples": [
+      "这是感冒。 (This is cold; to catch a cold.)",
+      "我需要感冒。 (I need cold; to catch a cold.)"
+    ]
+  },
+  {
+    "word": "发烧",
+    "traditional": "發燒",
+    "pinyin": "fā shāo",
+    "english": "to have a fever",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to have a fever.",
+    "examples": [
+      "我想发烧。 (I want to to have a fever.)",
+      "我们今天发烧。 (We will to have a fever today.)"
+    ]
+  },
+  {
+    "word": "咳嗽",
+    "traditional": "咳嗽",
+    "pinyin": "ké sòu",
+    "english": "to cough",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to cough.",
+    "examples": [
+      "我想咳嗽。 (I want to to cough.)",
+      "我们今天咳嗽。 (We will to cough today.)"
+    ]
+  },
+  {
+    "word": "头疼",
+    "traditional": "頭疼",
+    "pinyin": "tóu téng",
+    "english": "headache; to have a headache",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning headache; to have a headache.",
+    "examples": [
+      "这是头疼。 (This is headache; to have a headache.)",
+      "我需要头疼。 (I need headache; to have a headache.)"
+    ]
+  },
+  {
+    "word": "肚子",
+    "traditional": "肚子",
+    "pinyin": "dǔ zi",
+    "english": "stomach; belly",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning stomach; belly.",
+    "examples": [
+      "这是肚子。 (This is stomach; belly.)",
+      "我需要肚子。 (I need stomach; belly.)"
+    ]
+  },
+  {
+    "word": "牙齿",
+    "traditional": "牙齒",
+    "pinyin": "yá chǐ",
+    "english": "teeth",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning teeth.",
+    "examples": [
+      "这是牙齿。 (This is teeth.)",
+      "我需要牙齿。 (I need teeth.)"
+    ]
+  },
+  {
+    "word": "眼睛",
+    "traditional": "眼睛",
+    "pinyin": "yǎn jīng",
+    "english": "eyes",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning eyes.",
+    "examples": [
+      "这是眼睛。 (This is eyes.)",
+      "我需要眼睛。 (I need eyes.)"
+    ]
+  },
+  {
+    "word": "健康",
+    "traditional": "健康",
+    "pinyin": "jiàn kāng",
+    "english": "healthy; health",
+    "part_of_speech": "adjective",
+    "explanation": "A common daily-use word meaning healthy; health.",
+    "examples": [
+      "这个很健康。 (This is healthy; health.)",
+      "我觉得它很健康。 (I think it is healthy; health.)"
+    ]
+  },
+  {
+    "word": "锻炼",
+    "traditional": "鍛煉",
+    "pinyin": "duàn liàn",
+    "english": "to exercise",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to exercise.",
+    "examples": [
+      "我想锻炼。 (I want to to exercise.)",
+      "我们今天锻炼。 (We will to exercise today.)"
+    ]
+  },
+  {
+    "word": "早餐",
+    "traditional": "早餐",
+    "pinyin": "zǎo cān",
+    "english": "breakfast",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning breakfast.",
+    "examples": [
+      "这是早餐。 (This is breakfast.)",
+      "我需要早餐。 (I need breakfast.)"
+    ]
+  },
+  {
+    "word": "午饭",
+    "traditional": "午飯",
+    "pinyin": "wǔ fàn",
+    "english": "lunch",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning lunch.",
+    "examples": [
+      "这是午饭。 (This is lunch.)",
+      "我需要午饭。 (I need lunch.)"
+    ]
+  },
+  {
+    "word": "晚饭",
+    "traditional": "晚飯",
+    "pinyin": "wǎn fàn",
+    "english": "dinner",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning dinner.",
+    "examples": [
+      "这是晚饭。 (This is dinner.)",
+      "我需要晚饭。 (I need dinner.)"
+    ]
+  },
+  {
+    "word": "水果",
+    "traditional": "水果",
+    "pinyin": "shuǐ guǒ",
+    "english": "fruit",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning fruit.",
+    "examples": [
+      "这是水果。 (This is fruit.)",
+      "我需要水果。 (I need fruit.)"
+    ]
+  },
+  {
+    "word": "蔬菜",
+    "traditional": "蔬菜",
+    "pinyin": "shū cài",
+    "english": "vegetables",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning vegetables.",
+    "examples": [
+      "这是蔬菜。 (This is vegetables.)",
+      "我需要蔬菜。 (I need vegetables.)"
+    ]
+  },
+  {
+    "word": "肉",
+    "traditional": "肉",
+    "pinyin": "ròu",
+    "english": "meat",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning meat.",
+    "examples": [
+      "这是肉。 (This is meat.)",
+      "我需要肉。 (I need meat.)"
+    ]
+  },
+  {
+    "word": "鱼",
+    "traditional": "魚",
+    "pinyin": "yú",
+    "english": "fish",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning fish.",
+    "examples": [
+      "这是鱼。 (This is fish.)",
+      "我需要鱼。 (I need fish.)"
+    ]
+  },
+  {
+    "word": "鸡肉",
+    "traditional": "雞肉",
+    "pinyin": "jī ròu",
+    "english": "chicken meat",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning chicken meat.",
+    "examples": [
+      "这是鸡肉。 (This is chicken meat.)",
+      "我需要鸡肉。 (I need chicken meat.)"
+    ]
+  },
+  {
+    "word": "牛肉",
+    "traditional": "牛肉",
+    "pinyin": "niú ròu",
+    "english": "beef",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning beef.",
+    "examples": [
+      "这是牛肉。 (This is beef.)",
+      "我需要牛肉。 (I need beef.)"
+    ]
+  },
+  {
+    "word": "猪肉",
+    "traditional": "豬肉",
+    "pinyin": "zhū ròu",
+    "english": "pork",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning pork.",
+    "examples": [
+      "这是猪肉。 (This is pork.)",
+      "我需要猪肉。 (I need pork.)"
+    ]
+  },
+  {
+    "word": "汤",
+    "traditional": "湯",
+    "pinyin": "tāng",
+    "english": "soup",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning soup.",
+    "examples": [
+      "这是汤。 (This is soup.)",
+      "我需要汤。 (I need soup.)"
+    ]
+  },
+  {
+    "word": "米饭",
+    "traditional": "米飯",
+    "pinyin": "mǐ fàn",
+    "english": "cooked rice",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning cooked rice.",
+    "examples": [
+      "这是米饭。 (This is cooked rice.)",
+      "我需要米饭。 (I need cooked rice.)"
+    ]
+  },
+  {
+    "word": "饺子",
+    "traditional": "餃子",
+    "pinyin": "jiǎo zi",
+    "english": "dumplings",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning dumplings.",
+    "examples": [
+      "这是饺子。 (This is dumplings.)",
+      "我需要饺子。 (I need dumplings.)"
+    ]
+  },
+  {
+    "word": "包子",
+    "traditional": "包子",
+    "pinyin": "bāo zi",
+    "english": "steamed bun",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning steamed bun.",
+    "examples": [
+      "这是包子。 (This is steamed bun.)",
+      "我需要包子。 (I need steamed bun.)"
+    ]
+  },
+  {
+    "word": "甜",
+    "traditional": "甜",
+    "pinyin": "tián",
+    "english": "sweet",
+    "part_of_speech": "adjective",
+    "explanation": "A common daily-use word meaning sweet.",
+    "examples": [
+      "这个很甜。 (This is sweet.)",
+      "我觉得它很甜。 (I think it is sweet.)"
+    ]
+  },
+  {
+    "word": "辣",
+    "traditional": "辣",
+    "pinyin": "là",
+    "english": "spicy",
+    "part_of_speech": "adjective",
+    "explanation": "A common daily-use word meaning spicy.",
+    "examples": [
+      "这个很辣。 (This is spicy.)",
+      "我觉得它很辣。 (I think it is spicy.)"
+    ]
+  },
+  {
+    "word": "咸",
+    "traditional": "鹹",
+    "pinyin": "xián",
+    "english": "salty",
+    "part_of_speech": "adjective",
+    "explanation": "A common daily-use word meaning salty.",
+    "examples": [
+      "这个很咸。 (This is salty.)",
+      "我觉得它很咸。 (I think it is salty.)"
+    ]
+  },
+  {
+    "word": "饿",
+    "traditional": "餓",
+    "pinyin": "è",
+    "english": "hungry",
+    "part_of_speech": "adjective",
+    "explanation": "A common daily-use word meaning hungry.",
+    "examples": [
+      "这个很饿。 (This is hungry.)",
+      "我觉得它很饿。 (I think it is hungry.)"
+    ]
+  },
+  {
+    "word": "饱",
+    "traditional": "飽",
+    "pinyin": "bǎo",
+    "english": "full",
+    "part_of_speech": "adjective",
+    "explanation": "A common daily-use word meaning full.",
+    "examples": [
+      "这个很饱。 (This is full.)",
+      "我觉得它很饱。 (I think it is full.)"
+    ]
+  },
+  {
+    "word": "外卖",
+    "traditional": "外賣",
+    "pinyin": "wài mài",
+    "english": "food delivery",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning food delivery.",
+    "examples": [
+      "这是外卖。 (This is food delivery.)",
+      "我需要外卖。 (I need food delivery.)"
+    ]
+  },
+  {
+    "word": "信用卡",
+    "traditional": "信用卡",
+    "pinyin": "xìn yòng kǎ",
+    "english": "credit card",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning credit card.",
+    "examples": [
+      "这是信用卡。 (This is credit card.)",
+      "我需要信用卡。 (I need credit card.)"
+    ]
+  },
+  {
+    "word": "借",
+    "traditional": "借",
+    "pinyin": "jiè",
+    "english": "to borrow",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to borrow.",
+    "examples": [
+      "我想借。 (I want to to borrow.)",
+      "我们今天借。 (We will to borrow today.)"
+    ]
+  },
+  {
+    "word": "还钱",
+    "traditional": "還錢",
+    "pinyin": "huán qián",
+    "english": "to repay money",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to repay money.",
+    "examples": [
+      "我想还钱。 (I want to to repay money.)",
+      "我们今天还钱。 (We will to repay money today.)"
+    ]
+  },
+  {
+    "word": "工资",
+    "traditional": "工資",
+    "pinyin": "gōng zī",
+    "english": "salary; wages",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning salary; wages.",
+    "examples": [
+      "这是工资。 (This is salary; wages.)",
+      "我需要工资。 (I need salary; wages.)"
+    ]
+  },
+  {
+    "word": "发票",
+    "traditional": "發票",
+    "pinyin": "fā piào",
+    "english": "receipt; invoice",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning receipt; invoice.",
+    "examples": [
+      "这是发票。 (This is receipt; invoice.)",
+      "我需要发票。 (I need receipt; invoice.)"
+    ]
+  },
+  {
+    "word": "免费",
+    "traditional": "免費",
+    "pinyin": "miǎn fèi",
+    "english": "free of charge",
+    "part_of_speech": "adjective",
+    "explanation": "A common daily-use word meaning free of charge.",
+    "examples": [
+      "这个很免费。 (This is free of charge.)",
+      "我觉得它很免费。 (I think it is free of charge.)"
+    ]
+  },
+  {
+    "word": "注册",
+    "traditional": "註冊",
+    "pinyin": "zhù cè",
+    "english": "to register",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to register.",
+    "examples": [
+      "我想注册。 (I want to to register.)",
+      "我们今天注册。 (We will to register today.)"
+    ]
+  },
+  {
+    "word": "登录",
+    "traditional": "登錄",
+    "pinyin": "dēng lù",
+    "english": "to log in",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to log in.",
+    "examples": [
+      "我想登录。 (I want to to log in.)",
+      "我们今天登录。 (We will to log in today.)"
+    ]
+  },
+  {
+    "word": "通知",
+    "traditional": "通知",
+    "pinyin": "tōng zhī",
+    "english": "notice; to notify",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning notice; to notify.",
+    "examples": [
+      "这是通知。 (This is notice; to notify.)",
+      "我需要通知。 (I need notice; to notify.)"
+    ]
+  },
+  {
+    "word": "联系",
+    "traditional": "聯繫",
+    "pinyin": "lián xì",
+    "english": "to contact",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to contact.",
+    "examples": [
+      "我想联系。 (I want to to contact.)",
+      "我们今天联系。 (We will to contact today.)"
+    ]
+  },
+  {
+    "word": "回复",
+    "traditional": "回覆",
+    "pinyin": "huí fù",
+    "english": "to reply",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to reply.",
+    "examples": [
+      "我想回复。 (I want to to reply.)",
+      "我们今天回复。 (We will to reply today.)"
+    ]
+  },
+  {
+    "word": "邀请",
+    "traditional": "邀請",
+    "pinyin": "yāo qǐng",
+    "english": "to invite; invitation",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to invite; invitation.",
+    "examples": [
+      "我想邀请。 (I want to to invite; invitation.)",
+      "我们今天邀请。 (We will to invite; invitation today.)"
+    ]
+  },
+  {
+    "word": "庆祝",
+    "traditional": "慶祝",
+    "pinyin": "qìng zhù",
+    "english": "to celebrate",
+    "part_of_speech": "verb",
+    "explanation": "A common daily-use word meaning to celebrate.",
+    "examples": [
+      "我想庆祝。 (I want to to celebrate.)",
+      "我们今天庆祝。 (We will to celebrate today.)"
+    ]
+  },
+  {
+    "word": "礼物",
+    "traditional": "禮物",
+    "pinyin": "lǐ wù",
+    "english": "gift",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning gift.",
+    "examples": [
+      "这是礼物。 (This is gift.)",
+      "我需要礼物。 (I need gift.)"
+    ]
+  },
+  {
+    "word": "新年",
+    "traditional": "新年",
+    "pinyin": "xīn nián",
+    "english": "New Year",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning New Year.",
+    "examples": [
+      "这是新年。 (This is New Year.)",
+      "我需要新年。 (I need New Year.)"
+    ]
+  },
+  {
+    "word": "假期",
+    "traditional": "假期",
+    "pinyin": "jià qī",
+    "english": "holiday; vacation",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning holiday; vacation.",
+    "examples": [
+      "这是假期。 (This is holiday; vacation.)",
+      "我需要假期。 (I need holiday; vacation.)"
+    ]
+  },
+  {
+    "word": "春天",
+    "traditional": "春天",
+    "pinyin": "chūn tiān",
+    "english": "spring",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning spring.",
+    "examples": [
+      "这是春天。 (This is spring.)",
+      "我需要春天。 (I need spring.)"
+    ]
+  },
+  {
+    "word": "夏天",
+    "traditional": "夏天",
+    "pinyin": "xià tiān",
+    "english": "summer",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning summer.",
+    "examples": [
+      "这是夏天。 (This is summer.)",
+      "我需要夏天。 (I need summer.)"
+    ]
+  },
+  {
+    "word": "秋天",
+    "traditional": "秋天",
+    "pinyin": "qiū tiān",
+    "english": "autumn",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning autumn.",
+    "examples": [
+      "这是秋天。 (This is autumn.)",
+      "我需要秋天。 (I need autumn.)"
+    ]
+  },
+  {
+    "word": "冬天",
+    "traditional": "冬天",
+    "pinyin": "dōng tiān",
+    "english": "winter",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning winter.",
+    "examples": [
+      "这是冬天。 (This is winter.)",
+      "我需要冬天。 (I need winter.)"
+    ]
+  },
+  {
+    "word": "风",
+    "traditional": "風",
+    "pinyin": "fēng",
+    "english": "wind",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning wind.",
+    "examples": [
+      "这是风。 (This is wind.)",
+      "我需要风。 (I need wind.)"
+    ]
+  },
+  {
+    "word": "云",
+    "traditional": "雲",
+    "pinyin": "yún",
+    "english": "cloud",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning cloud.",
+    "examples": [
+      "这是云。 (This is cloud.)",
+      "我需要云。 (I need cloud.)"
+    ]
+  },
+  {
+    "word": "雪",
+    "traditional": "雪",
+    "pinyin": "xuě",
+    "english": "snow",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning snow.",
+    "examples": [
+      "这是雪。 (This is snow.)",
+      "我需要雪。 (I need snow.)"
+    ]
+  },
+  {
+    "word": "温度",
+    "traditional": "溫度",
+    "pinyin": "wēn dù",
+    "english": "temperature",
+    "part_of_speech": "noun",
+    "explanation": "A common daily-use word meaning temperature.",
+    "examples": [
+      "这是温度。 (This is temperature.)",
+      "我需要温度。 (I need temperature.)"
+    ]
   }
 ]
