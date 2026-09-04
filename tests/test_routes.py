@@ -59,6 +59,8 @@ def test_learner_panel_precedes_mode_switch_and_search_guidance_is_mode_scoped()
     assert b"Search by Chinese word, pinyin, or English meaning." in search_response.data
     assert b"Search by Chinese word, pinyin, or English meaning." in batch_response.data
     assert b"Search by Chinese word, pinyin, or English meaning." not in quiz_response.data
+    assert b'aria-label="Learning mode"' in quiz_response.data
+    assert b'aria-current="page"' in quiz_response.data
 
 
 def test_first_use_profile_state_creates_a_selected_student(monkeypatch, tmp_path):
@@ -86,7 +88,7 @@ def test_static_app_js_loads():
     assert b"function speakMandarin" in response.data
     assert b"if (item !== radio)" in response.data
     assert b"function bindAiSaveButton" in response.data
-    assert b"function bindListeningReveal" in response.data
+    assert b"function bindListeningReveal" not in response.data
     assert b"function restoreBatchMode" in response.data
 
 
@@ -546,6 +548,65 @@ def test_quiz_pools_use_the_selected_learners_persisted_vocabulary(monkeypatch, 
     assert [entry["word"] for entry in mandarin_app.get_quiz_pool("recent", ben["id"])] == ["朋友"]
     assert [entry["word"] for entry in mandarin_app.get_quiz_pool("saved", ben["id"])] == ["朋友"]
     assert [entry["word"] for entry in mandarin_app.get_quiz_pool("review", ben["id"])] == ["朋友"]
+    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("weak", alice["id"])] == ["机场"]
+    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("weak", ben["id"])] == ["朋友"]
+
+
+def test_weak_vocabulary_stats_use_first_attempts_and_exclude_perfect_words(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+
+    mandarin_app.record_quiz_attempt(student["id"], "机场", False, "airport-retry")
+    mandarin_app.record_quiz_attempt(student["id"], "机场", True, "airport-retry")
+    mandarin_app.record_quiz_attempt(student["id"], "机场", True, "airport-correct")
+    mandarin_app.record_quiz_attempt(student["id"], "朋友", False, "friend-wrong")
+    mandarin_app.record_quiz_attempt(student["id"], "学习", True, "study-perfect")
+
+    stats = mandarin_app.get_weak_vocabulary_stats(student["id"])
+
+    assert [item["word"] for item in stats] == ["朋友", "机场"]
+    assert stats[0]["correct"] == 0
+    assert stats[0]["incorrect"] == 1
+    assert stats[0]["attempts"] == 1
+    assert stats[0]["accuracy"] == 0
+    assert stats[1]["correct"] == 1
+    assert stats[1]["incorrect"] == 1
+    assert stats[1]["attempts"] == 2
+    assert stats[1]["accuracy"] == 50
+    assert "学习" not in {item["word"] for item in stats}
+
+
+def test_weak_vocabulary_stats_and_pool_are_isolated_by_learner(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    alice = mandarin_app.create_student("Alice")
+    ben = mandarin_app.create_student("Ben")
+
+    mandarin_app.record_quiz_attempt(alice["id"], "机场", False, "alice-airport")
+    mandarin_app.record_quiz_attempt(ben["id"], "朋友", False, "ben-friend")
+
+    assert [item["word"] for item in mandarin_app.get_weak_vocabulary_stats(alice["id"])] == ["机场"]
+    assert [item["word"] for item in mandarin_app.get_weak_vocabulary_stats(ben["id"])] == ["朋友"]
+    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("weak", alice["id"])] == ["机场"]
+    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("weak", ben["id"])] == ["朋友"]
+
+
+def test_progress_mode_shows_needs_practice_empty_state_and_practice_action(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    client = mandarin_app.app.test_client()
+
+    empty_response = client.get("/", query_string={"mode": "progress", "student_id": student["id"]})
+    mandarin_app.record_quiz_attempt(student["id"], "机场", False, "airport-wrong")
+    weak_response = client.get("/", query_string={"mode": "progress", "student_id": student["id"]})
+    weak_quiz_response = client.get(
+        "/", query_string={"mode": "quiz", "quiz_source": "weak", "student_id": student["id"]}
+    )
+
+    assert b"No weak words yet. Keep practising!" in empty_response.data
+    assert b"Needs Practice" in weak_response.data
+    assert b"Practice" in weak_response.data
+    assert "机场 / 機場".encode("utf-8") in weak_response.data
+    assert b"Needs Practice" in weak_quiz_response.data
 
 
 def test_quiz_source_empty_states_are_learner_specific(monkeypatch, tmp_path):
@@ -662,6 +723,7 @@ def test_listening_quiz_scores_and_reveals_after_a_correct_first_answer(monkeypa
     assert "xué xí".encode("utf-8") in response.data
     assert b"to study" in response.data
     assert b"advance_listening_quiz" in response.data
+    assert b"Next question" in response.data
 
 
 def test_listening_wrong_retry_preserves_mistake_and_source(monkeypatch, tmp_path):

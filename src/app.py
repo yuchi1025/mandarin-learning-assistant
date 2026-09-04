@@ -662,6 +662,63 @@ def get_review_mistake_entries(student_id):
     return [entries_by_word[word] for word in mistake_words if word in entries_by_word]
 
 
+def get_weak_vocabulary_stats(student_id, limit=8):
+    student_id = parse_student_id(student_id)
+    if student_id is None or get_student(student_id) is None:
+        return []
+
+    init_progress_db()
+    with get_progress_connection() as connection:
+        rows = [
+            row_to_dict(row)
+            for row in connection.execute(
+                """
+                SELECT
+                    vocabulary_word,
+                    COUNT(*) AS attempts,
+                    COALESCE(SUM(first_attempt_correct), 0) AS correct,
+                    SUM(CASE WHEN first_attempt_correct = 0 THEN 1 ELSE 0 END) AS incorrect
+                FROM quiz_attempts
+                WHERE student_id = ?
+                GROUP BY vocabulary_word
+                HAVING SUM(CASE WHEN first_attempt_correct = 0 THEN 1 ELSE 0 END) > 0
+                ORDER BY
+                    CAST(SUM(first_attempt_correct) AS REAL) / COUNT(*) ASC,
+                    COUNT(*) DESC,
+                    vocabulary_word ASC
+                LIMIT ?
+                """,
+                (student_id, limit),
+            )
+        ]
+
+    entries_by_word = {entry["word"]: entry for entry in get_quiz_entries()}
+    entries_by_word.update({entry["word"]: entry for entry in get_saved_vocabulary_entries(student_id)})
+    stats = []
+    for row in rows:
+        entry = entries_by_word.get(row["vocabulary_word"], {})
+        attempts = row["attempts"]
+        stats.append(
+            {
+                "word": row["vocabulary_word"],
+                "traditional": entry.get("traditional", traditionalize_known_simplified_text(row["vocabulary_word"])),
+                "pinyin": entry.get("pinyin", to_sentence_pinyin(row["vocabulary_word"])),
+                "correct": row["correct"],
+                "incorrect": row["incorrect"],
+                "attempts": attempts,
+                "accuracy": round((row["correct"] / attempts) * 100) if attempts else 0,
+            }
+        )
+    return stats
+
+
+def get_weak_vocabulary_entries(student_id):
+    weak_words = {item["word"] for item in get_weak_vocabulary_stats(student_id, limit=100)}
+    entries_by_word = {entry["word"]: entry for entry in get_quiz_entries()}
+    entries_by_word.update({entry["word"]: entry for entry in get_saved_vocabulary_entries(student_id)})
+    return [entries_by_word[word] for word in weak_words if word in entries_by_word]
+
+
 def get_recent_search_entries(student_id):
     student_id = parse_student_id(student_id)
     if student_id is None or get_student(student_id) is None:
@@ -719,6 +776,8 @@ def get_quiz_pool(source, student_id):
         return get_saved_vocabulary_entries(student_id)
     if source == "review":
         return get_review_mistake_entries(student_id)
+    if source == "weak":
+        return get_weak_vocabulary_entries(student_id)
     return get_quiz_entries()
 
 
@@ -734,6 +793,7 @@ def get_empty_progress_summary(selected_day=None):
         "daily_counts": [],
         "top_words": [],
         "quiz_stats": {"attempted": 0, "correct": 0, "accuracy": 0},
+        "weak_words": [],
     }
 
 
@@ -849,6 +909,7 @@ def get_progress_summary(student_id, selected_day=None):
         quiz_attempted = quiz_stats_row["attempted"]
         quiz_correct = quiz_stats_row["correct"]
 
+    weak_words = get_weak_vocabulary_stats(student_id)
     return {
         "total_searches": total_searches,
         "unique_words": unique_words,
@@ -864,6 +925,7 @@ def get_progress_summary(student_id, selected_day=None):
             "correct": quiz_correct,
             "accuracy": round((quiz_correct / quiz_attempted) * 100) if quiz_attempted else 0,
         },
+        "weak_words": weak_words,
     }
 
 def simplify_known_traditional_text(text):
@@ -1390,7 +1452,7 @@ def parse_quiz_score(value):
 
 
 def normalize_quiz_source(value):
-    return value if value in {"all", "recent", "saved", "review"} else "all"
+    return value if value in {"all", "recent", "saved", "review", "weak"} else "all"
 
 
 def normalize_quiz_type(value):

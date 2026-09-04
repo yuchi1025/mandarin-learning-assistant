@@ -6,7 +6,7 @@
     <title>Mandarin Learning Assistant</title>
     <link rel="icon" type="image/png" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3.2.0-title-large">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3.2.0-needs-practice">
 </head>
 <body>
     <main class="page">
@@ -52,23 +52,23 @@
             {% endif %}
         </section>
 
-        <nav class="mode-switch">
-            <a href="{{ url_for('home', mode='search', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'search' %}active{% endif %}">
+        <nav class="mode-switch" aria-label="Learning mode">
+            <a href="{{ url_for('home', mode='search', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'search' %}active{% endif %}" {% if mode == 'search' %}aria-current="page"{% endif %}>
                 Search Mode
             </a>
-            <a href="{{ url_for('home', mode='batch', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'batch' %}active{% endif %}">
+            <a href="{{ url_for('home', mode='batch', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'batch' %}active{% endif %}" {% if mode == 'batch' %}aria-current="page"{% endif %}>
                 Batch Mode
             </a>
-            <a href="{{ url_for('home', mode='convert', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'convert' %}active{% endif %}">
+            <a href="{{ url_for('home', mode='convert', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'convert' %}active{% endif %}" {% if mode == 'convert' %}aria-current="page"{% endif %}>
                 Convert Mode
             </a>
-            <a href="{{ url_for('home', mode='quiz', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'quiz' %}active{% endif %}">
+            <a href="{{ url_for('home', mode='quiz', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'quiz' %}active{% endif %}" {% if mode == 'quiz' %}aria-current="page"{% endif %}>
                 Quiz Mode
             </a>
-            <a href="{{ url_for('home', mode='progress', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'progress' %}active{% endif %}">
+            <a href="{{ url_for('home', mode='progress', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'progress' %}active{% endif %}" {% if mode == 'progress' %}aria-current="page"{% endif %}>
                 Progress Mode
             </a>
-            <a href="{{ url_for('home', mode='saved', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'saved' %}active{% endif %}">
+            <a href="{{ url_for('home', mode='saved', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'saved' %}active{% endif %}" {% if mode == 'saved' %}aria-current="page"{% endif %}>
                 Saved Vocabulary
             </a>
         </nav>
@@ -389,6 +389,12 @@
                 >
                     Review Mistakes
                 </a>
+                <a
+                    href="{{ url_for('home', mode='quiz', quiz_source='weak', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
+                    class="{% if quiz_source == 'weak' %}active{% endif %}"
+                >
+                    Needs Practice
+                </a>
             </nav>
 
             <nav class="quiz-type-switch" aria-label="Quiz type">
@@ -431,6 +437,8 @@
                     {% elif quiz_source == 'saved' %}
                         <h2>No saved words to practise</h2>
                         <p>Save vocabulary from a result card to build a practice list.</p>
+                    {% elif quiz_source == 'weak' %}
+                        <h2>No weak words yet. Keep practising!</h2>
                     {% else %}
                         <h2>No mistakes to review</h2>
                         <p>This learner has no first-attempt mistakes yet.</p>
@@ -443,6 +451,7 @@
                         {% if quiz_source == 'recent' %}Recent Searches
                         {% elif quiz_source == 'saved' %}Saved Words
                         {% elif quiz_source == 'review' %}Review Mistakes
+                        {% elif quiz_source == 'weak' %}Needs Practice
                         {% else %}All Words{% endif %}
                     </p>
                     <h2>What does this Mandarin word mean?</h2>
@@ -507,7 +516,7 @@
                     {% endfor %}
                     {% if listening_reveal %}
                         <input type="hidden" name="advance_listening_quiz" value="1">
-                        <p class="listening-continue">Next question</p>
+                        <button type="submit" class="listening-next-button">Next question</button>
                     {% else %}
                     <div class="quiz-options">
                         {% for choice in quiz.choices %}
@@ -578,6 +587,38 @@
                         <strong>{{ progress_summary.quiz_stats.accuracy }}%</strong>
                     </div>
                 </div>
+            </section>
+
+            <section class="progress-panel">
+                <div class="needs-practice-header">
+                    <h2>Needs Practice</h2>
+                    {% if progress_summary.weak_words %}
+                        <a
+                            class="practice-button"
+                            href="{{ url_for('home', mode='quiz', quiz_source='weak', student_id=selected_student.id) }}"
+                        >
+                            Practice
+                        </a>
+                    {% endif %}
+                </div>
+                {% if progress_summary.weak_words %}
+                    <div class="progress-list">
+                        {% for item in progress_summary.weak_words %}
+                            <div class="progress-row weak-word-row">
+                                <div>
+                                    <strong>{{ item.word | display_chinese_pair }}</strong>
+                                    <span class="progress-pinyin">{{ item.pinyin }}</span>
+                                </div>
+                                <span class="weak-word-stats">
+                                    {{ item.correct }} correct first · {{ item.incorrect }} incorrect first ·
+                                    {{ item.attempts }} scored · {{ item.accuracy }}%
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="progress-empty">No weak words yet. Keep practising!</p>
+                {% endif %}
             </section>
 
             <section class="progress-panel">
@@ -677,6 +718,6 @@
         {% endif %}
     </main>
 
-    <script src="{{ url_for('static', filename='app.js') }}?v=3.2.0"></script>
+    <script src="{{ url_for('static', filename='app.js') }}?v=3.2.0-listening-continue"></script>
 </body>
 </html>
