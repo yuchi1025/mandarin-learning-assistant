@@ -262,6 +262,14 @@ def test_batch_search_entries_routes_unknown_words_to_ai():
     assert ai_queries == ["notarealword"]
 
 
+def test_batch_search_treats_a_number_only_input_as_no_match():
+    results, missing_queries, ai_queries = mandarin_app.batch_search_entries("1")
+
+    assert results == []
+    assert missing_queries == ["1"]
+    assert ai_queries == []
+
+
 def test_batch_card_orders_follow_the_input_sequence():
     entry_orders, ai_orders = mandarin_app.get_batch_card_orders("airport\nnotarealword\nfriend")
 
@@ -273,6 +281,15 @@ def test_ai_endpoint_rejects_punctuation_only_query():
     client = mandarin_app.app.test_client()
 
     response = client.get("/api/ai-explanation", query_string={"query": "!!!"})
+
+    assert response.status_code == 400
+    assert response.get_json()["ok"] is False
+
+
+def test_ai_endpoint_rejects_number_only_query():
+    client = mandarin_app.app.test_client()
+
+    response = client.get("/api/ai-explanation", query_string={"query": "1"})
 
     assert response.status_code == 400
     assert response.get_json()["ok"] is False

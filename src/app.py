@@ -94,6 +94,23 @@ CATEGORY_BY_WORD.update({
     }.items()
     for word in words
 })
+CATEGORY_BY_WORD.update({
+    word: category
+    for category, words in {
+        "basics": "相信 认为 同样 特别 比 最 更 一点 一些 每 从 向 跟 被 让 虽然 可是 还是 或者 一边 一直".split(),
+        "actions": "爱 讨厌 担心 放心 理发 试穿 退货 交换 请假 加班".split(),
+        "time": "延误".split(),
+        "places": "邮局 出差 签证 海关 导游 旅馆 单程 往返 登机牌 航班 目的地".split(),
+        "food": "顾客 商场 市场 订单 尺码 折扣 质量 品牌 收银员 快递 包裹 洗衣店".split(),
+        "people": "亲戚 夫妻 丈夫 妻子 爷爷 奶奶 外公 外婆 儿子 女儿 理发店 锁 插座 灯 盘子 杯子 勺子 筷子 刀 叉子 毛巾 牙刷 肥皂 镜子 床".split(),
+        "study": "认真 正确 错误 面试 简历 客户 合同 培训 上司 任务 进度".split(),
+        "descriptions": "紧张 害怕 生气 难过 惊讶 无聊 有趣 好笑 奇怪".split(),
+        "health": "担心".split(),
+        "technology": "".split(),
+        "everyday": "".split(),
+    }.items()
+    for word in words
+})
 
 
 DICTIONARY_PATH = Path(__file__).resolve().parent.parent / "data" / "dictionary.json"
@@ -1081,7 +1098,7 @@ def is_meaningful_query(query):
         return False
 
     normalized_query_no_tones = remove_tone_marks(normalized_query)
-    return any(char.isalnum() or "\u4e00" <= char <= "\u9fff" for char in normalized_query_no_tones)
+    return any(char.isalpha() or "\u4e00" <= char <= "\u9fff" for char in normalized_query_no_tones)
 
 
 def normalize_query_key(query):
@@ -1243,7 +1260,7 @@ def fetch_ai_explanation(query):
             "english": parsed.get("english", "").strip(),
             "part_of_speech": normalize_part_of_speech(parsed.get("part_of_speech", "word")),
             "category": normalize_entry_category(parsed.get("category")),
-            "explanation": parsed.get("explanation", "").strip() or "No explanation available.",
+            "explanation": parsed.get("explanation", "").strip(),
             "examples": examples,
         }
 

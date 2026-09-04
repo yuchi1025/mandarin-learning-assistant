@@ -10,6 +10,7 @@
 - Added fixed topic categories for the built-in vocabulary without changing the canonical dictionary JSON schema. Learners can filter Search, Batch, Saved Vocabulary, and Quiz Mode by category.
 - Expanded the built-in dictionary from 200 to 300 daily-use words, including common work, travel, food, health, and conversation vocabulary.
 - Expanded the built-in dictionary to 400 daily-use words, adding high-frequency home, health, food, travel, technology, and communication vocabulary.
+- Expanded the built-in dictionary to 500 daily-use words, adding emotions, family, common grammar, shopping, workplace, travel, and household vocabulary.
 
 ## v0
 

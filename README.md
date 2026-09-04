@@ -243,7 +243,7 @@ Progress history and local student profiles are stored in `data/progress.db`. Th
 Validate the built-in dictionary after editing it:
 
 ```bash
-python3 scripts/validate_dictionary.py --expected-count 400
+python3 scripts/validate_dictionary.py --expected-count 500
 ```
 
 The script checks for invalid JSON, missing required fields, inconsistent field order, empty values, duplicate words, malformed examples, tone-marked dictionary pinyin, and the optional expected entry count.
@@ -354,7 +354,7 @@ Key folders and files:
 - `src/static/app.js` contains Vanilla JavaScript for audio, recent searches, async AI loading, and quiz interaction.
 - `tests/` contains pytest coverage for dictionary quality, consistent field order, tone-marked pinyin, search behavior, Flask routes, static JavaScript loading, and cleaned sentence-audio text.
 - `docs/VERSION_NOTES.md` records the project progress from v0 to v3.2.0.
-- `scripts/validate_dictionary.py` validates the 400-entry dictionary, required fields, consistent field order, duplicate words, examples, and tone-marked pinyin.
+- `scripts/validate_dictionary.py` validates the 500-entry dictionary, required fields, consistent field order, duplicate words, examples, and tone-marked pinyin.
 - `assets/logo/` contains the product banner, app icon, and favicon source.
 - `assets/screenshots/` contains Search Mode, Search Result, and Quiz Mode screenshots.
 - `assets/demo/` contains the MP4 demo with audio and the silent GIF preview.
