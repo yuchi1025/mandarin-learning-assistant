@@ -12,7 +12,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import after_this_request, Flask, jsonify, render_template, request, send_file, send_from_directory
 from opencc import OpenCC
@@ -368,6 +368,23 @@ def init_progress_db():
         connection.execute(
             "CREATE INDEX IF NOT EXISTS idx_saved_vocabulary_student_date ON saved_vocabulary (student_id, saved_at)"
         )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS review_schedules (
+                student_id INTEGER NOT NULL REFERENCES students(id),
+                vocabulary_word TEXT NOT NULL,
+                next_review_at TEXT NOT NULL,
+                review_interval_days INTEGER NOT NULL,
+                consecutive_correct INTEGER NOT NULL,
+                status TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                PRIMARY KEY (student_id, vocabulary_word)
+            )
+            """
+        )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_review_schedules_due ON review_schedules (student_id, next_review_at)"
+        )
 
 
 def row_to_dict(row):
@@ -461,13 +478,15 @@ def save_vocabulary(student_id, vocabulary_word):
 
     init_progress_db()
     with get_progress_connection() as connection:
-        connection.execute(
+        cursor = connection.execute(
             """
             INSERT OR IGNORE INTO saved_vocabulary (student_id, vocabulary_word, saved_at)
             VALUES (?, ?, ?)
             """,
             (student_id, word, datetime.now().isoformat(timespec="seconds")),
         )
+    if cursor.rowcount:
+        ensure_new_review_schedule(student_id, word)
     return True
 
 
@@ -545,7 +564,7 @@ def save_ai_vocabulary(student_id, result):
 
     init_progress_db()
     with get_progress_connection() as connection:
-        connection.execute(
+        cursor = connection.execute(
             """
             INSERT OR IGNORE INTO saved_vocabulary (student_id, vocabulary_word, saved_at, source, entry_json)
             VALUES (?, ?, ?, 'ai', ?)
@@ -557,6 +576,8 @@ def save_ai_vocabulary(student_id, result):
                 json.dumps(entry, ensure_ascii=True),
             ),
         )
+    if cursor.rowcount:
+        ensure_new_review_schedule(student_id, entry["word"])
     return entry
 
 
@@ -589,6 +610,87 @@ def log_progress_event(query, entry, source, mode, student_id=None):
         )
 
 
+def review_date_today():
+    return datetime.now().date()
+
+
+def ensure_new_review_schedule(student_id, vocabulary_word):
+    student_id = parse_student_id(student_id)
+    word = str(vocabulary_word or "").strip()
+    if student_id is None or not word or get_student(student_id) is None:
+        return
+
+    today = review_date_today()
+    init_progress_db()
+    with get_progress_connection() as connection:
+        connection.execute(
+            """
+            INSERT OR IGNORE INTO review_schedules (
+                student_id, vocabulary_word, next_review_at, review_interval_days,
+                consecutive_correct, status, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (student_id, word, today.isoformat(), 0, 0, "New", datetime.now().isoformat(timespec="seconds")),
+        )
+
+
+def update_review_schedule(student_id, vocabulary_word, first_attempt_correct):
+    student_id = parse_student_id(student_id)
+    word = str(vocabulary_word or "").strip()
+    if student_id is None or not word or get_student(student_id) is None:
+        return
+
+    today = review_date_today()
+    init_progress_db()
+    with get_progress_connection() as connection:
+        existing = connection.execute(
+            """
+            SELECT review_interval_days, consecutive_correct
+            FROM review_schedules
+            WHERE student_id = ? AND vocabulary_word = ?
+            """,
+            (student_id, word),
+        ).fetchone()
+        if first_attempt_correct:
+            consecutive_correct = (existing["consecutive_correct"] if existing else 0) + 1
+            if consecutive_correct == 1:
+                interval_days = 2
+            elif consecutive_correct == 2:
+                interval_days = 4
+            elif consecutive_correct == 3:
+                interval_days = 7
+            else:
+                interval_days = min(30, max(7, (existing["review_interval_days"] if existing else 7) * 2))
+            status = "Mastered" if consecutive_correct >= 4 else ("Review" if consecutive_correct >= 2 else "Learning")
+        else:
+            consecutive_correct = 0
+            interval_days = 1
+            status = "Learning"
+        connection.execute(
+            """
+            INSERT INTO review_schedules (
+                student_id, vocabulary_word, next_review_at, review_interval_days,
+                consecutive_correct, status, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(student_id, vocabulary_word) DO UPDATE SET
+                next_review_at = excluded.next_review_at,
+                review_interval_days = excluded.review_interval_days,
+                consecutive_correct = excluded.consecutive_correct,
+                status = excluded.status,
+                updated_at = excluded.updated_at
+            """,
+            (
+                student_id,
+                word,
+                (today + timedelta(days=interval_days)).isoformat(),
+                interval_days,
+                consecutive_correct,
+                status,
+                datetime.now().isoformat(timespec="seconds"),
+            ),
+        )
+
+
 def record_quiz_attempt(student_id, vocabulary_word, is_correct, interaction_key):
     student_id = parse_student_id(student_id)
     word = str(vocabulary_word or "").strip()
@@ -597,6 +699,7 @@ def record_quiz_attempt(student_id, vocabulary_word, is_correct, interaction_key
         return
 
     init_progress_db()
+    first_attempt_recorded = False
     with get_progress_connection() as connection:
         existing_attempt = connection.execute(
             "SELECT id FROM quiz_attempts WHERE student_id = ? AND interaction_key = ?",
@@ -629,6 +732,9 @@ def record_quiz_attempt(student_id, vocabulary_word, is_correct, interaction_key
                     attempt_key,
                 ),
             )
+            first_attempt_recorded = True
+    if first_attempt_recorded:
+        update_review_schedule(student_id, word, is_correct)
 
 
 def get_review_mistake_entries(student_id):
@@ -719,6 +825,36 @@ def get_weak_vocabulary_entries(student_id):
     return [entries_by_word[word] for word in weak_words if word in entries_by_word]
 
 
+def get_due_review_entries(student_id):
+    student_id = parse_student_id(student_id)
+    if student_id is None or get_student(student_id) is None:
+        return []
+
+    init_progress_db()
+    with get_progress_connection() as connection:
+        due_rows = [
+            row_to_dict(row)
+            for row in connection.execute(
+                """
+                SELECT vocabulary_word, next_review_at, status
+                FROM review_schedules
+                WHERE student_id = ? AND next_review_at <= ?
+                ORDER BY next_review_at ASC, vocabulary_word ASC
+                """,
+                (student_id, review_date_today().isoformat()),
+            )
+        ]
+
+    entries_by_word = {entry["word"]: entry for entry in get_quiz_entries()}
+    entries_by_word.update({entry["word"]: entry for entry in get_saved_vocabulary_entries(student_id)})
+    due_entries = []
+    for row in due_rows:
+        entry = entries_by_word.get(row["vocabulary_word"])
+        if entry:
+            due_entries.append({**entry, "next_review_at": row["next_review_at"], "review_status": row["status"]})
+    return due_entries
+
+
 def get_recent_search_entries(student_id):
     student_id = parse_student_id(student_id)
     if student_id is None or get_student(student_id) is None:
@@ -778,7 +914,27 @@ def get_quiz_pool(source, student_id):
         return get_review_mistake_entries(student_id)
     if source == "weak":
         return get_weak_vocabulary_entries(student_id)
+    if source == "today":
+        return get_due_review_entries(student_id)
     return get_quiz_entries()
+
+
+def get_quiz_pool_entry(student_id, vocabulary_word):
+    word = str(vocabulary_word or "").strip()
+    entries_by_word = {entry["word"]: entry for entry in get_quiz_entries()}
+    entries_by_word.update({entry["word"]: entry for entry in get_saved_vocabulary_entries(student_id)})
+    return entries_by_word.get(word)
+
+
+def keep_active_quiz_entry(student_id, quiz_pool, quiz_pool_words, question_word):
+    """Keep a submitted question available while a live source changes after scoring."""
+    if question_word not in set(quiz_pool_words):
+        return quiz_pool
+    if any(entry["word"] == question_word for entry in quiz_pool):
+        return quiz_pool
+
+    active_entry = get_quiz_pool_entry(student_id, question_word)
+    return quiz_pool + [active_entry] if active_entry else quiz_pool
 
 
 def get_empty_progress_summary(selected_day=None):
@@ -794,6 +950,7 @@ def get_empty_progress_summary(selected_day=None):
         "top_words": [],
         "quiz_stats": {"attempted": 0, "correct": 0, "accuracy": 0},
         "weak_words": [],
+        "due_reviews": [],
     }
 
 
@@ -910,6 +1067,7 @@ def get_progress_summary(student_id, selected_day=None):
         quiz_correct = quiz_stats_row["correct"]
 
     weak_words = get_weak_vocabulary_stats(student_id)
+    due_reviews = get_due_review_entries(student_id)
     return {
         "total_searches": total_searches,
         "unique_words": unique_words,
@@ -926,6 +1084,7 @@ def get_progress_summary(student_id, selected_day=None):
             "accuracy": round((quiz_correct / quiz_attempted) * 100) if quiz_attempted else 0,
         },
         "weak_words": weak_words,
+        "due_reviews": due_reviews,
     }
 
 def simplify_known_traditional_text(text):
@@ -1452,7 +1611,7 @@ def parse_quiz_score(value):
 
 
 def normalize_quiz_source(value):
-    return value if value in {"all", "recent", "saved", "review", "weak"} else "all"
+    return value if value in {"all", "recent", "saved", "review", "weak", "today"} else "all"
 
 
 def normalize_quiz_type(value):
@@ -1587,6 +1746,7 @@ def home():
             quiz_pool = filter_entries_by_category(get_quiz_pool(quiz_source, student_id), category)
             if quiz_source != "all":
                 quiz_pool = [entry for entry in quiz_pool if entry["word"] in set(quiz_pool_words)]
+                quiz_pool = keep_active_quiz_entry(student_id, quiz_pool, quiz_pool_words, question_word)
             quiz_score = {
                 "correct": parse_quiz_score(request.form.get("score_correct")),
                 "attempted": parse_quiz_score(request.form.get("score_attempted")),

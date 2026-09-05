@@ -7,6 +7,7 @@
 - Added a backward-safe SQLite migration: previously global progress is preserved and assigned to an `Existing progress` profile rather than being discarded.
 - Added Quiz Mode scoring and Mandarin question audio, plus consistent paired Simplified and Traditional Chinese display in Quiz Mode.
 - Added a learner-specific Review Mistakes quiz source. It derives words missed on the first answer from each learner's latest quiz result, keeps the full attempt history, and removes a word from the current review session once it is answered correctly.
+- Added learner-specific spaced-repetition review scheduling. Saved words begin due today; first-answer misses are due tomorrow; correct first answers advance through 2, 4, 7, and then gradually longer intervals. Review Today reuses the existing Meaning and Listening quiz flows.
 - Added fixed topic categories for the built-in vocabulary without changing the canonical dictionary JSON schema. Learners can filter Search, Batch, Saved Vocabulary, and Quiz Mode by category.
 - Expanded the built-in dictionary from 200 to 300 daily-use words, including common work, travel, food, health, and conversation vocabulary.
 - Expanded the built-in dictionary to 400 daily-use words, adding high-frequency home, health, food, travel, technology, and communication vocabulary.

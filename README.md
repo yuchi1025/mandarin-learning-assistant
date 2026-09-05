@@ -26,6 +26,7 @@ Current version: `v3.2.0`
   - Added local AI fallback so unknown valid words can show a structured explanation instead of only returning “not found.”
   - Added Quiz Mode so lookup can turn into active recall practice with immediate feedback.
   - Added a learner-specific Review Mistakes quiz source for revisiting words missed on their first answer while preserving quiz history.
+  - Added simple spaced-repetition scheduling: saved vocabulary starts due today, while each learner's first-answer quiz performance schedules later reviews independently.
   - Added Progress Mode so searched words are stored locally and can be reviewed by day.
   - Added local student profiles so multiple learners can share one app installation while keeping progress separate.
   - Added topic categories across Search, Batch, Saved Vocabulary, and Quiz Mode so learners can focus practice on one vocabulary area.
@@ -51,6 +52,7 @@ From the learner's perspective:
 13. Switch to Quiz Mode, choose a wrong answer, then choose the correct answer.
 13. Continue to the next quiz and choose a correct answer directly.
 14. Select Review Mistakes to practise that learner's unresolved quiz answers.
+15. Open Progress Mode and use Review Today to practise vocabulary scheduled for that learner.
 
 Screenshots:
 

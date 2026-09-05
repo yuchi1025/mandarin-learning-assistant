@@ -552,6 +552,140 @@ def test_quiz_pools_use_the_selected_learners_persisted_vocabulary(monkeypatch, 
     assert [entry["word"] for entry in mandarin_app.get_quiz_pool("weak", ben["id"])] == ["朋友"]
 
 
+def test_saved_vocabulary_starts_as_a_due_new_review(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+
+    mandarin_app.save_vocabulary(student["id"], "机场")
+
+    with mandarin_app.get_progress_connection() as connection:
+        schedule = mandarin_app.row_to_dict(connection.execute(
+            "SELECT next_review_at, review_interval_days, consecutive_correct, status "
+            "FROM review_schedules WHERE student_id = ? AND vocabulary_word = ?",
+            (student["id"], "机场"),
+        ).fetchone())
+
+    assert schedule == {
+        "next_review_at": mandarin_app.review_date_today().isoformat(),
+        "review_interval_days": 0,
+        "consecutive_correct": 0,
+        "status": "New",
+    }
+    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("today", student["id"])] == ["机场"]
+
+
+def test_review_schedule_uses_first_attempts_and_grows_then_resets(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    today = mandarin_app.review_date_today()
+
+    mandarin_app.record_quiz_attempt(student["id"], "机场", False, "airport-retry")
+    mandarin_app.record_quiz_attempt(student["id"], "机场", True, "airport-retry")
+
+    with mandarin_app.get_progress_connection() as connection:
+        schedule = mandarin_app.row_to_dict(connection.execute(
+            "SELECT next_review_at, review_interval_days, consecutive_correct, status "
+            "FROM review_schedules WHERE student_id = ? AND vocabulary_word = ?",
+            (student["id"], "机场"),
+        ).fetchone())
+    assert schedule == {
+        "next_review_at": (today + mandarin_app.timedelta(days=1)).isoformat(),
+        "review_interval_days": 1,
+        "consecutive_correct": 0,
+        "status": "Learning",
+    }
+
+    for attempt_key, interval, streak, status in [
+        ("airport-correct-1", 2, 1, "Learning"),
+        ("airport-correct-2", 4, 2, "Review"),
+        ("airport-correct-3", 7, 3, "Review"),
+        ("airport-correct-4", 14, 4, "Mastered"),
+    ]:
+        mandarin_app.record_quiz_attempt(student["id"], "机场", True, attempt_key)
+        with mandarin_app.get_progress_connection() as connection:
+            schedule = mandarin_app.row_to_dict(connection.execute(
+                "SELECT next_review_at, review_interval_days, consecutive_correct, status "
+                "FROM review_schedules WHERE student_id = ? AND vocabulary_word = ?",
+                (student["id"], "机场"),
+            ).fetchone())
+        assert schedule == {
+            "next_review_at": (today + mandarin_app.timedelta(days=interval)).isoformat(),
+            "review_interval_days": interval,
+            "consecutive_correct": streak,
+            "status": status,
+        }
+
+    mandarin_app.record_quiz_attempt(student["id"], "机场", False, "airport-later-mistake")
+    with mandarin_app.get_progress_connection() as connection:
+        reset_schedule = mandarin_app.row_to_dict(connection.execute(
+            "SELECT review_interval_days, consecutive_correct, status "
+            "FROM review_schedules WHERE student_id = ? AND vocabulary_word = ?",
+            (student["id"], "机场"),
+        ).fetchone())
+    assert reset_schedule == {"review_interval_days": 1, "consecutive_correct": 0, "status": "Learning"}
+
+
+def test_review_today_pool_is_due_only_and_isolated_by_student(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    alice = mandarin_app.create_student("Alice")
+    ben = mandarin_app.create_student("Ben")
+
+    mandarin_app.save_vocabulary(alice["id"], "机场")
+    mandarin_app.save_vocabulary(alice["id"], "朋友")
+    mandarin_app.save_vocabulary(ben["id"], "学习")
+    mandarin_app.record_quiz_attempt(alice["id"], "机场", True, "airport-completed")
+
+    assert [entry["word"] for entry in mandarin_app.get_due_review_entries(alice["id"])] == ["朋友"]
+    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("today", alice["id"])] == ["朋友"]
+    assert [entry["word"] for entry in mandarin_app.get_due_review_entries(ben["id"])] == ["学习"]
+
+
+def test_review_today_progress_state_and_retry_keep_the_active_question(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    mandarin_app.save_vocabulary(student["id"], "机场")
+    client = mandarin_app.app.test_client()
+    base_data = {
+        "form_type": "quiz",
+        "student_id": student["id"],
+        "quiz_source": "today",
+        "question_word": "机场",
+        "quiz_attempt_key": "today-retry",
+        "quiz_pool_word": "机场",
+        "choice": ["airport", "friend"],
+    }
+
+    progress_response = client.get("/", query_string={"mode": "progress", "student_id": student["id"]})
+    wrong_response = client.post("/", data={**base_data, "selected_answer": "friend"})
+    retry_response = client.post(
+        "/",
+        data={
+            **base_data,
+            "selected_answer": "friend",
+            "score_attempted": "1",
+            "question_counted": "1",
+        },
+    )
+    client.post(
+        "/",
+        data={
+            **base_data,
+            "selected_answer": "airport",
+            "score_attempted": "1",
+            "question_counted": "1",
+        },
+    )
+    completed_response = client.get(
+        "/", query_string={"mode": "progress", "student_id": student["id"]}
+    )
+
+    assert b"Review Today" in progress_response.data
+    assert b"1 words due" in progress_response.data
+    assert b"Score: 0 / 1" in wrong_response.data
+    assert "机场 / 機場".encode("utf-8") in retry_response.data
+    assert b"You\'re all caught up for today." in completed_response.data
+
+
 def test_weak_vocabulary_stats_use_first_attempts_and_exclude_perfect_words(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
     student = mandarin_app.create_student("Alice")

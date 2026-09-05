@@ -735,6 +735,11 @@ h1 {
     text-align: right;
 }
 
+.review-due-count {
+    margin: -6px 0 14px;
+    color: #6a5b4d;
+}
+
 .progress-row {
     display: flex;
     justify-content: space-between;

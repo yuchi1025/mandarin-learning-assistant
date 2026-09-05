@@ -6,7 +6,7 @@
     <title>Mandarin Learning Assistant</title>
     <link rel="icon" type="image/png" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3.2.0-needs-practice">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3.2.0-spaced-review">
 </head>
 <body>
     <main class="page">
@@ -395,6 +395,12 @@
                 >
                     Needs Practice
                 </a>
+                <a
+                    href="{{ url_for('home', mode='quiz', quiz_source='today', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
+                    class="{% if quiz_source == 'today' %}active{% endif %}"
+                >
+                    Review Today
+                </a>
             </nav>
 
             <nav class="quiz-type-switch" aria-label="Quiz type">
@@ -439,6 +445,8 @@
                         <p>Save vocabulary from a result card to build a practice list.</p>
                     {% elif quiz_source == 'weak' %}
                         <h2>No weak words yet. Keep practising!</h2>
+                    {% elif quiz_source == 'today' %}
+                        <h2>You're all caught up for today.</h2>
                     {% else %}
                         <h2>No mistakes to review</h2>
                         <p>This learner has no first-attempt mistakes yet.</p>
@@ -452,6 +460,7 @@
                         {% elif quiz_source == 'saved' %}Saved Words
                         {% elif quiz_source == 'review' %}Review Mistakes
                         {% elif quiz_source == 'weak' %}Needs Practice
+                        {% elif quiz_source == 'today' %}Review Today
                         {% else %}All Words{% endif %}
                     </p>
                     <h2>What does this Mandarin word mean?</h2>
@@ -618,6 +627,36 @@
                     </div>
                 {% else %}
                     <p class="progress-empty">No weak words yet. Keep practising!</p>
+                {% endif %}
+            </section>
+
+            <section class="progress-panel">
+                <div class="needs-practice-header">
+                    <h2>Review Today</h2>
+                    {% if progress_summary.due_reviews %}
+                        <a
+                            class="practice-button"
+                            href="{{ url_for('home', mode='quiz', quiz_source='today', student_id=selected_student.id) }}"
+                        >
+                            Start Review
+                        </a>
+                    {% endif %}
+                </div>
+                {% if progress_summary.due_reviews %}
+                    <p class="review-due-count">{{ progress_summary.due_reviews | length }} words due</p>
+                    <div class="progress-list">
+                        {% for item in progress_summary.due_reviews %}
+                            <div class="progress-row weak-word-row">
+                                <div>
+                                    <strong>{{ item.word | display_chinese_pair }}</strong>
+                                    <span class="progress-pinyin">{{ item.pinyin }}</span>
+                                </div>
+                                <span class="weak-word-stats">Due {{ item.next_review_at }} · {{ item.review_status }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="progress-empty">You're all caught up for today.</p>
                 {% endif %}
             </section>
 
