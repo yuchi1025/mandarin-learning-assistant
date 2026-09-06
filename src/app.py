@@ -385,6 +385,22 @@ def init_progress_db():
         connection.execute(
             "CREATE INDEX IF NOT EXISTS idx_review_schedules_due ON review_schedules (student_id, next_review_at)"
         )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS sentence_practice_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER NOT NULL REFERENCES students(id),
+                target_word TEXT NOT NULL,
+                original_sentence TEXT NOT NULL,
+                target_used INTEGER CHECK (target_used IN (0, 1)),
+                created_at TEXT NOT NULL
+            )
+            """
+        )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_sentence_practice_student_date "
+            "ON sentence_practice_events (student_id, created_at)"
+        )
 
 
 def row_to_dict(row):
@@ -608,6 +624,32 @@ def log_progress_event(query, entry, source, mode, student_id=None):
                 student_id,
             ),
         )
+
+
+def log_sentence_practice_event(student_id, target_word, original_sentence, target_used=None):
+    student_id = parse_student_id(student_id)
+    word = str(target_word or "").strip()
+    sentence = str(original_sentence or "").strip()
+    if student_id is None or not word or not sentence or get_student(student_id) is None:
+        return False
+
+    init_progress_db()
+    with get_progress_connection() as connection:
+        connection.execute(
+            """
+            INSERT INTO sentence_practice_events (
+                student_id, target_word, original_sentence, target_used, created_at
+            ) VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                student_id,
+                word,
+                sentence,
+                None if target_used is None else int(bool(target_used)),
+                datetime.now().isoformat(timespec="seconds"),
+            ),
+        )
+    return True
 
 
 def review_date_today():
@@ -917,6 +959,22 @@ def get_quiz_pool(source, student_id):
     if source == "today":
         return get_due_review_entries(student_id)
     return get_quiz_entries()
+
+
+def normalize_sentence_source(value):
+    return value if value in {"saved", "today", "weak", "recent"} else "saved"
+
+
+def get_sentence_practice_pool(source, student_id):
+    return get_quiz_pool(normalize_sentence_source(source), student_id)
+
+
+def choose_sentence_target(source, student_id, requested_word=None):
+    pool = get_sentence_practice_pool(source, student_id)
+    requested_word = str(requested_word or "").strip()
+    if requested_word:
+        return next((entry for entry in pool if entry["word"] == requested_word), None)
+    return random.choice(pool) if pool else None
 
 
 def get_quiz_pool_entry(student_id, vocabulary_word):
@@ -1402,6 +1460,35 @@ def validate_ai_result(query, result):
     return True
 
 
+def request_ollama_json(system_prompt, user_prompt):
+    payload = {
+        "model": OLLAMA_MODEL,
+        "stream": False,
+        "format": "json",
+        "keep_alive": OLLAMA_KEEP_ALIVE,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+    }
+    http_request = urllib.request.Request(
+        OLLAMA_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(http_request, timeout=OLLAMA_TIMEOUT) as response:
+            response_data = json.loads(response.read().decode("utf-8"))
+    except (OSError, TimeoutError, socket.timeout, urllib.error.URLError, json.JSONDecodeError) as exc:
+        return None, f"AI is unavailable right now. Start Ollama and load `{OLLAMA_MODEL}`. ({exc})"
+
+    try:
+        return json.loads(response_data["message"]["content"]), None
+    except (KeyError, TypeError, json.JSONDecodeError):
+        return None, "AI is unavailable right now because the local model returned an invalid response."
+
+
 def fetch_ai_explanation(query):
     system_prompt = (
         "You are a Mandarin tutor for English-speaking beginners. "
@@ -1431,35 +1518,9 @@ def fetch_ai_explanation(query):
             f"{retry_instruction}"
             "Return valid JSON only."
         )
-        payload = {
-            "model": OLLAMA_MODEL,
-            "stream": False,
-            "format": "json",
-            "keep_alive": OLLAMA_KEEP_ALIVE,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-        }
-        request_data = json.dumps(payload).encode("utf-8")
-        http_request = urllib.request.Request(
-            OLLAMA_URL,
-            data=request_data,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-
-        try:
-            with urllib.request.urlopen(http_request, timeout=OLLAMA_TIMEOUT) as response:
-                response_data = json.loads(response.read().decode("utf-8"))
-        except (OSError, TimeoutError, socket.timeout, urllib.error.URLError, json.JSONDecodeError) as exc:
-            return None, f"AI explanation is unavailable right now. Start Ollama and load `{OLLAMA_MODEL}`. ({exc})"
-
-        try:
-            content = response_data["message"]["content"]
-            parsed = json.loads(content)
-        except (KeyError, TypeError, json.JSONDecodeError):
-            return None, "AI explanation is unavailable right now because the local model returned an invalid response."
+        parsed, error = request_ollama_json(system_prompt, user_prompt)
+        if error:
+            return None, error.replace("AI is", "AI explanation is", 1)
 
         examples = []
         for example in parsed.get("examples", [])[:2]:
@@ -1489,6 +1550,94 @@ def fetch_ai_explanation(query):
             return ai_result, None
 
     return None, "AI explanation is unavailable right now because the local model returned a low-quality result."
+
+
+def normalize_sentence_target_used(value):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int) and value in {0, 1}:
+        return bool(value)
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in {"true", "yes", "1"}:
+            return True
+        if normalized in {"false", "no", "0"}:
+            return False
+    return None
+
+
+def normalize_sentence_for_comparison(text):
+    simplified = simplify_known_traditional_text(str(text or ""))
+    return re.sub(r"[\s,，.。!?！？;；:：]+", "", simplified)
+
+
+def normalize_sentence_feedback(target_word, original_sentence, feedback):
+    if not isinstance(feedback, dict) or not str(original_sentence or "").strip():
+        return None
+    target_used = normalize_sentence_target_used(feedback.get("target_used"))
+    if target_used is None:
+        return None
+    for key in ("grammar", "naturalness", "suggested_sentence", "explanation"):
+        if not isinstance(feedback.get(key), str) or not feedback[key].strip():
+            return None
+    suggested_sentence = feedback["suggested_sentence"].strip()
+    if not contains_chinese(suggested_sentence):
+        return None
+    suggestion_matches_original = (
+        normalize_sentence_for_comparison(suggested_sentence)
+        == normalize_sentence_for_comparison(original_sentence)
+    )
+    return {
+        "target_used": target_used,
+        "grammar": feedback["grammar"].strip(),
+        "naturalness": feedback["naturalness"].strip(),
+        "suggested_sentence": suggested_sentence,
+        "suggestion_matches_original": suggestion_matches_original,
+        "explanation": feedback["explanation"].strip(),
+    }
+
+
+def fetch_sentence_feedback(target_entry, original_sentence):
+    target_word = str(target_entry.get("word", "")).strip()
+    sentence = str(original_sentence or "").strip()
+    if not target_word or not sentence:
+        return None, "Write a sentence before checking it."
+
+    system_prompt = (
+        "You are a constructive Mandarin tutor for English-speaking beginners. "
+        "Return JSON only with these keys: target_used, grammar, naturalness, suggested_sentence, explanation. "
+        "Do not add extra keys. target_used must be a JSON boolean. "
+        "grammar, naturalness, and explanation must be short, kind, beginner-friendly English. "
+        "suggested_sentence must be a complete natural Mandarin sentence using the target word. "
+        "Do not call a sentence wrong just because another phrasing is more natural. "
+        "When the learner's sentence is acceptable, say so. Do not describe punctuation, Simplified/Traditional conversion, "
+        "or identical wording as an improvement. In that case, repeat the learner's wording in suggested_sentence. "
+        'Use this exact JSON shape: {"target_used":true,"grammar":"...","naturalness":"...",'
+        '"suggested_sentence":"...","explanation":"..."}.'
+    )
+    for attempt in range(2):
+        repair_instruction = ""
+        if attempt:
+            repair_instruction = (
+                "Your previous response was invalid. Return JSON only, with exactly target_used, grammar, naturalness, "
+                "suggested_sentence, and explanation. target_used must be true or false, not an explanation. "
+                "Every other field must be a non-empty string, and suggested_sentence must be Chinese. "
+            )
+        user_prompt = (
+            f"Target word (Simplified): {target_word}\n"
+            f"Target word (Traditional): {target_entry.get('traditional', target_word)}\n"
+            f"Target meaning: {target_entry.get('english', '')}\n"
+            f"Learner sentence: {sentence}\n"
+            f"{repair_instruction}Return valid JSON only."
+        )
+        feedback, error = request_ollama_json(system_prompt, user_prompt)
+        if error:
+            return None, error.replace("AI is", "Sentence feedback is", 1)
+        normalized_feedback = normalize_sentence_feedback(target_word, sentence, feedback)
+        if normalized_feedback:
+            return normalized_feedback, None
+
+    return None, "Sentence feedback is unavailable right now because the local model returned a low-quality result."
 
 
 def get_ai_explanation(query):
@@ -1659,6 +1808,15 @@ def home():
     conversion_text = ""
     converted_simplified = ""
     converted_traditional = ""
+    sentence_source = normalize_sentence_source(request.form.get("sentence_source") or request.args.get("sentence_source"))
+    sentence_target = choose_sentence_target(
+        sentence_source,
+        student_id,
+        request.form.get("target_word") or request.args.get("target_word"),
+    )
+    sentence_text = ""
+    sentence_feedback = None
+    sentence_error = None
     if request.method == "GET" and mode == "batch":
         query = request.args.get("batch_query", "")
         if query:
@@ -1716,6 +1874,25 @@ def home():
             conversion_text = request.form.get("text", "")
             converted_simplified = simplify_known_traditional_text(conversion_text)
             converted_traditional = traditionalize_known_simplified_text(conversion_text)
+        elif form_type == "sentence-practice":
+            mode = "sentence"
+            sentence_source = normalize_sentence_source(request.form.get("sentence_source"))
+            sentence_target = choose_sentence_target(
+                sentence_source, student_id, request.form.get("target_word")
+            )
+            sentence_text = request.form.get("sentence", "")
+            if sentence_target is None:
+                sentence_error = "This vocabulary source has no words to practise yet."
+            elif not sentence_text.strip():
+                sentence_error = "Write a sentence before checking it."
+            else:
+                sentence_feedback, sentence_error = fetch_sentence_feedback(sentence_target, sentence_text)
+                log_sentence_practice_event(
+                    student_id,
+                    sentence_target["word"],
+                    sentence_text,
+                    sentence_feedback["target_used"] if sentence_feedback else None,
+                )
         elif form_type == "saved-vocabulary":
             mode = request.form.get("return_mode", "saved")
             vocabulary_word = request.form.get("vocabulary_word", "")
@@ -1860,6 +2037,11 @@ def home():
         progress_summary=progress_summary,
         saved_entries=saved_entries,
         saved_words=saved_words,
+        sentence_source=sentence_source,
+        sentence_target=sentence_target,
+        sentence_text=sentence_text,
+        sentence_feedback=sentence_feedback,
+        sentence_error=sentence_error,
         category=category,
         category_labels=CATEGORY_LABELS,
     )

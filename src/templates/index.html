@@ -6,7 +6,7 @@
     <title>Mandarin Learning Assistant</title>
     <link rel="icon" type="image/png" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3.2.0-spaced-review">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3.2.0-sentence-practice">
 </head>
 <body>
     <main class="page">
@@ -64,6 +64,9 @@
             </a>
             <a href="{{ url_for('home', mode='quiz', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'quiz' %}active{% endif %}" {% if mode == 'quiz' %}aria-current="page"{% endif %}>
                 Quiz Mode
+            </a>
+            <a href="{{ url_for('home', mode='sentence', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'sentence' %}active{% endif %}" {% if mode == 'sentence' %}aria-current="page"{% endif %}>
+                Sentence Practice
             </a>
             <a href="{{ url_for('home', mode='progress', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'progress' %}active{% endif %}" {% if mode == 'progress' %}aria-current="page"{% endif %}>
                 Progress Mode
@@ -361,6 +364,126 @@
                     </article>
                 </section>
             {% endif %}
+        {% endif %}
+
+        {% if mode == 'sentence' %}
+            <nav class="quiz-source-switch" aria-label="Sentence practice source">
+                <a
+                    href="{{ url_for('home', mode='sentence', sentence_source='saved', student_id=selected_student.id if selected_student else None) }}"
+                    class="{% if sentence_source == 'saved' %}active{% endif %}"
+                >
+                    Saved Words
+                </a>
+                <a
+                    href="{{ url_for('home', mode='sentence', sentence_source='today', student_id=selected_student.id if selected_student else None) }}"
+                    class="{% if sentence_source == 'today' %}active{% endif %}"
+                >
+                    Review Today
+                </a>
+                <a
+                    href="{{ url_for('home', mode='sentence', sentence_source='weak', student_id=selected_student.id if selected_student else None) }}"
+                    class="{% if sentence_source == 'weak' %}active{% endif %}"
+                >
+                    Needs Practice
+                </a>
+                <a
+                    href="{{ url_for('home', mode='sentence', sentence_source='recent', student_id=selected_student.id if selected_student else None) }}"
+                    class="{% if sentence_source == 'recent' %}active{% endif %}"
+                >
+                    Recent Searches
+                </a>
+            </nav>
+
+            {% if not selected_student %}
+                <section class="empty-state sentence-practice-empty">
+                    <h2>Choose a learner first</h2>
+                    <p>Select a learner to practise that learner's vocabulary.</p>
+                </section>
+            {% elif not sentence_target %}
+                <section class="empty-state sentence-practice-empty">
+                    <h2>No vocabulary to practise yet</h2>
+                    {% if sentence_source == 'saved' %}
+                        <p>Save vocabulary from a result card to start sentence practice.</p>
+                    {% elif sentence_source == 'today' %}
+                        <p>You're all caught up for today.</p>
+                    {% elif sentence_source == 'weak' %}
+                        <p>No weak words yet. Complete a few quizzes first.</p>
+                    {% else %}
+                        <p>Search for a few vocabulary words first, then return here.</p>
+                    {% endif %}
+                </section>
+            {% else %}
+                <section class="sentence-practice-panel">
+                    <div class="sentence-practice-header">
+                        <div>
+                            <p class="eyebrow">{{ sentence_source.replace('_', ' ').title() }}</p>
+                            <h2>{{ sentence_target.word | display_chinese_pair }}</h2>
+                            <p class="sentence-practice-pinyin">{{ sentence_target.pinyin }}</p>
+                            <p class="sentence-practice-meaning">{{ sentence_target.english }}</p>
+                        </div>
+                        <button
+                            type="button"
+                            class="audio-button"
+                            data-speak="{{ sentence_target.word }}"
+                            aria-label="Play pronunciation for {{ sentence_target.word }}"
+                            title="Play pronunciation"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon">
+                                <path d="M3 10v4h4l5 4V6L7 10H3z"></path>
+                                <path d="M16 8a5 5 0 0 1 0 8"></path>
+                                <path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="sentence-practice-prompt">Write a Mandarin sentence using this word.</p>
+                    <form method="post" class="sentence-practice-form">
+                        <input type="hidden" name="form_type" value="sentence-practice">
+                        <input type="hidden" name="student_id" value="{{ selected_student.id }}">
+                        <input type="hidden" name="sentence_source" value="{{ sentence_source }}">
+                        <input type="hidden" name="target_word" value="{{ sentence_target.word }}">
+                        <label for="sentence-input">Your sentence</label>
+                        <textarea id="sentence-input" name="sentence" required>{{ sentence_text }}</textarea>
+                        <button type="submit">Check sentence</button>
+                    </form>
+                    <form method="get" class="sentence-next-form">
+                        <input type="hidden" name="mode" value="sentence">
+                        <input type="hidden" name="student_id" value="{{ selected_student.id }}">
+                        <input type="hidden" name="sentence_source" value="{{ sentence_source }}">
+                        <button type="submit" class="copy-button">Another word</button>
+                    </form>
+                </section>
+
+                {% if sentence_error %}
+                    <section class="sentence-feedback sentence-feedback-error">
+                        <p>{{ sentence_error }}</p>
+                    </section>
+                {% endif %}
+                {% if sentence_feedback %}
+                    <section class="sentence-feedback">
+                        <h2>Sentence Feedback</h2>
+                        <div class="sentence-feedback-block">
+                            <strong>Your sentence</strong>
+                            <p>{{ sentence_text }}</p>
+                        </div>
+                        <p><strong>Target word:</strong> {% if sentence_feedback.target_used %}Used appropriately{% else %}Try using the target word more clearly{% endif %}</p>
+                        <p><strong>Grammar:</strong> {{ sentence_feedback.grammar }}</p>
+                        <p><strong>Naturalness:</strong> {{ sentence_feedback.naturalness }}</p>
+                        {% if sentence_feedback.suggestion_matches_original %}
+                            <div class="sentence-feedback-block sentence-suggestion">
+                                <strong>Suggested improvement</strong>
+                                <p>No wording change is needed.</p>
+                            </div>
+                        {% else %}
+                            <div class="sentence-feedback-block sentence-suggestion">
+                                <strong>Suggested improvement</strong>
+                                <p>{{ sentence_feedback.suggested_sentence | display_chinese_pair }}</p>
+                            </div>
+                        {% endif %}
+                        <p><strong>Why:</strong> {{ sentence_feedback.explanation }}</p>
+                    </section>
+                {% endif %}
+            {% endif %}
+            <p class="audio-status" id="audio-status" hidden></p>
         {% endif %}
 
         {% if mode == 'quiz' %}

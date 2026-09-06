@@ -686,6 +686,152 @@ def test_review_today_progress_state_and_retry_keep_the_active_question(monkeypa
     assert b"You\'re all caught up for today." in completed_response.data
 
 
+def test_sentence_practice_pools_are_learner_scoped(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    alice = mandarin_app.create_student("Alice")
+    ben = mandarin_app.create_student("Ben")
+    airport = mandarin_app.DICTIONARY_ENTRIES_BY_WORD["机场"]
+    friend = mandarin_app.DICTIONARY_ENTRIES_BY_WORD["朋友"]
+
+    mandarin_app.save_vocabulary(alice["id"], "机场")
+    mandarin_app.save_vocabulary(ben["id"], "朋友")
+    mandarin_app.log_progress_event("airport", airport, "dictionary", "search", alice["id"])
+    mandarin_app.log_progress_event("friend", friend, "dictionary", "search", ben["id"])
+    assert [entry["word"] for entry in mandarin_app.get_sentence_practice_pool("today", ben["id"])] == ["朋友"]
+    mandarin_app.record_quiz_attempt(alice["id"], "机场", False, "alice-wrong")
+    mandarin_app.record_quiz_attempt(ben["id"], "朋友", False, "ben-wrong")
+
+    assert [entry["word"] for entry in mandarin_app.get_sentence_practice_pool("saved", alice["id"])] == ["机场"]
+    assert [entry["word"] for entry in mandarin_app.get_sentence_practice_pool("recent", alice["id"])] == ["机场"]
+    assert [entry["word"] for entry in mandarin_app.get_sentence_practice_pool("weak", alice["id"])] == ["机场"]
+
+
+def test_sentence_practice_empty_source_and_missing_sentence_are_safe(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    client = mandarin_app.app.test_client()
+
+    empty_response = client.get(
+        "/", query_string={"mode": "sentence", "sentence_source": "saved", "student_id": student["id"]}
+    )
+    mandarin_app.save_vocabulary(student["id"], "机场")
+    missing_response = client.post(
+        "/",
+        data={
+            "form_type": "sentence-practice",
+            "student_id": student["id"],
+            "sentence_source": "saved",
+            "target_word": "机场",
+            "sentence": "   ",
+        },
+    )
+
+    assert b"No vocabulary to practise yet" in empty_response.data
+    assert b"Write a sentence before checking it." in missing_response.data
+    with mandarin_app.get_progress_connection() as connection:
+        assert connection.execute("SELECT COUNT(*) AS count FROM sentence_practice_events").fetchone()["count"] == 0
+
+
+def test_sentence_practice_passes_the_selected_word_and_persists_feedback(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    mandarin_app.save_vocabulary(student["id"], "机场")
+    captured = {}
+
+    def fake_feedback(target_entry, original_sentence):
+        captured["word"] = target_entry["word"]
+        captured["sentence"] = original_sentence
+        return {
+            "target_used": True,
+            "grammar": "Good grammar.",
+            "naturalness": "Natural for a beginner.",
+            "suggested_sentence": "我明天去机场。",
+            "explanation": "This uses the target word as a place.",
+        }, None
+
+    monkeypatch.setattr(mandarin_app, "fetch_sentence_feedback", fake_feedback)
+    client = mandarin_app.app.test_client()
+    response = client.post(
+        "/",
+        data={
+            "form_type": "sentence-practice",
+            "student_id": student["id"],
+            "sentence_source": "saved",
+            "target_word": "机场",
+            "sentence": "我去机场。",
+        },
+    )
+
+    with mandarin_app.get_progress_connection() as connection:
+        event = mandarin_app.row_to_dict(connection.execute(
+            "SELECT student_id, target_word, original_sentence, target_used FROM sentence_practice_events"
+        ).fetchone())
+
+    assert captured == {"word": "机场", "sentence": "我去机场。"}
+    assert event == {
+        "student_id": student["id"],
+        "target_word": "机场",
+        "original_sentence": "我去机场。",
+        "target_used": 1,
+    }
+    assert "Your sentence" in response.get_data(as_text=True)
+    assert "我去机场。" in response.get_data(as_text=True)
+    assert "我明天去机场。 / 我明天去機場。" in response.get_data(as_text=True)
+
+
+def test_sentence_feedback_rejects_invalid_ai_output(monkeypatch):
+    target = mandarin_app.DICTIONARY_ENTRIES_BY_WORD["机场"]
+    monkeypatch.setattr(
+        mandarin_app,
+        "request_ollama_json",
+        lambda system_prompt, user_prompt: ({"target_used": "yes"}, None),
+    )
+
+    feedback, error = mandarin_app.fetch_sentence_feedback(target, "我去机场。")
+
+    assert feedback is None
+    assert "low-quality result" in error
+
+
+def test_sentence_feedback_normalizes_an_unambiguous_boolean_from_ollama(monkeypatch):
+    target = mandarin_app.DICTIONARY_ENTRIES_BY_WORD["机场"]
+    monkeypatch.setattr(
+        mandarin_app,
+        "request_ollama_json",
+        lambda system_prompt, user_prompt: (
+            {
+                "target_used": "yes",
+                "grammar": "Good grammar.",
+                "naturalness": "Natural.",
+                "suggested_sentence": "我明天去机场。",
+                "explanation": "The target word names the destination.",
+            },
+            None,
+        ),
+    )
+
+    feedback, error = mandarin_app.fetch_sentence_feedback(target, "我去机场。")
+
+    assert error is None
+    assert feedback["target_used"] is True
+
+
+def test_sentence_feedback_does_not_present_script_or_punctuation_as_an_improvement():
+    feedback = mandarin_app.normalize_sentence_feedback(
+        "产品",
+        "我喜歡這個產品",
+        {
+            "target_used": True,
+            "grammar": "Good grammar.",
+            "naturalness": "Natural.",
+            "suggested_sentence": "我喜欢这个产品。",
+            "explanation": "The sentence uses the target word correctly.",
+        },
+    )
+
+    assert feedback["suggestion_matches_original"] is True
+
+
 def test_weak_vocabulary_stats_use_first_attempts_and_exclude_perfect_words(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
     student = mandarin_app.create_student("Alice")

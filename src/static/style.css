@@ -402,6 +402,126 @@ h1 {
     margin-bottom: 24px;
 }
 
+.sentence-practice-panel,
+.sentence-feedback {
+    padding: 22px;
+    margin-bottom: 18px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--panel);
+    box-shadow: 0 10px 30px rgba(43, 33, 24, 0.08);
+}
+
+.sentence-practice-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.sentence-practice-header h2,
+.sentence-feedback h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.sentence-practice-header .eyebrow {
+    margin-top: 0;
+}
+
+.sentence-practice-pinyin {
+    margin: 8px 0 0;
+    color: var(--accent);
+    font-size: 1.12rem;
+    font-weight: bold;
+}
+
+.sentence-practice-meaning {
+    margin: 6px 0 0;
+    color: #6a5b4d;
+}
+
+.sentence-practice-prompt {
+    margin: 20px 0 14px;
+    font-size: 1.08rem;
+    font-weight: bold;
+}
+
+.sentence-practice-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sentence-practice-form label,
+.sentence-feedback-block strong {
+    font-weight: bold;
+}
+
+.sentence-practice-form textarea {
+    min-height: 120px;
+    resize: vertical;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--ink);
+    font: inherit;
+    line-height: 1.6;
+    padding: 12px 14px;
+}
+
+.sentence-practice-form button {
+    align-self: flex-start;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    padding: 10px 14px;
+}
+
+.sentence-next-form {
+    margin-top: 12px;
+}
+
+.sentence-feedback h2 {
+    margin-bottom: 16px;
+}
+
+.sentence-feedback p {
+    line-height: 1.6;
+}
+
+.sentence-feedback-block {
+    margin: 14px 0;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+}
+
+.sentence-feedback-block p {
+    margin: 6px 0 0;
+    overflow-wrap: anywhere;
+}
+
+.sentence-suggestion {
+    border-color: #d7c0a5;
+    background: #fff7ed;
+}
+
+.sentence-feedback-error {
+    border-color: #efb19d;
+    background: #fff1ec;
+}
+
+.sentence-feedback-error p {
+    margin: 0;
+}
+
 .search-form,
 .batch-search-form,
 .convert-form {
