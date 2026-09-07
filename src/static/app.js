@@ -445,6 +445,25 @@ function bindQuizOptions() {
     });
 }
 
+function bindConversationForm() {
+    const form = document.getElementById("conversation-form");
+    if (!form) {
+        return;
+    }
+
+    form.addEventListener("submit", function () {
+        const button = form.querySelector('button[type="submit"]');
+        const loading = document.getElementById("conversation-feedback-loading");
+        if (button) {
+            button.disabled = true;
+        }
+        if (loading) {
+            loading.hidden = false;
+        }
+        form.setAttribute("aria-busy", "true");
+    });
+}
+
 function bindCopyButtons() {
     document.querySelectorAll("[data-copy-target]").forEach(function (button) {
         button.addEventListener("click", function () {
@@ -558,6 +577,7 @@ window.addEventListener("load", function () {
     focusSearchInput();
     bindAudioButtons();
     bindQuizOptions();
+    bindConversationForm();
     bindCopyButtons();
     rememberSelectedStudent();
     restoreBatchMode();

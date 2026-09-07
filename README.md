@@ -28,6 +28,7 @@ Current version: `v3.2.0`
   - Added a learner-specific Review Mistakes quiz source for revisiting words missed on their first answer while preserving quiz history.
   - Added simple spaced-repetition scheduling: saved vocabulary starts due today, while each learner's first-answer quiz performance schedules later reviews independently.
   - Added Sentence Practice so learners can write a Mandarin sentence from a saved, due, weak, or recently searched word and receive validated local-AI feedback.
+  - Added Daily Conversation for learner-scoped, multi-turn daily-life Mandarin writing practice with structured local-AI feedback and follow-up questions.
   - Added Progress Mode so searched words are stored locally and can be reviewed by day.
   - Added local student profiles so multiple learners can share one app installation while keeping progress separate.
   - Added topic categories across Search, Batch, Saved Vocabulary, and Quiz Mode so learners can focus practice on one vocabulary area.
@@ -55,6 +56,7 @@ From the learner's perspective:
 14. Select Review Mistakes to practise that learner's unresolved quiz answers.
 15. Open Progress Mode and use Review Today to practise vocabulary scheduled for that learner.
 16. Open Sentence Practice, choose a vocabulary source, write a Mandarin sentence, and review the original sentence alongside constructive AI feedback and a suggested improvement.
+17. Open Daily Conversation, answer a guided daily-life prompt in Mandarin, and continue with the generated follow-up question.
 
 Screenshots:
 

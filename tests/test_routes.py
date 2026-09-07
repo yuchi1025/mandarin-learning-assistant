@@ -832,6 +832,215 @@ def test_sentence_feedback_does_not_present_script_or_punctuation_as_an_improvem
     assert feedback["suggestion_matches_original"] is True
 
 
+def test_conversation_turns_are_isolated_by_learner(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    alice = mandarin_app.create_student("Alice")
+    ben = mandarin_app.create_student("Ben")
+
+    mandarin_app.log_conversation_turn(alice["id"], "alice-session", "今天做了什么？", "我学习中文。", "我今天学习中文。")
+    mandarin_app.log_conversation_turn(ben["id"], "ben-session", "晚餐吃了什么？", "我吃面条。", "我晚餐吃了面条。")
+
+    alice_turns = mandarin_app.get_conversation_turns(alice["id"], "alice-session")
+
+    assert len(alice_turns) == 1
+    assert alice_turns[0]["prompt"] == "今天做了什么？"
+    assert alice_turns[0]["learner_answer"] == "我学习中文。"
+    assert alice_turns[0]["improved_answer"] == "我今天学习中文。"
+    assert mandarin_app.get_conversation_turns(alice["id"], "ben-session") == []
+
+
+def test_conversation_history_cleans_legacy_generated_pinyin(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    mandarin_app.log_conversation_turn(
+        student["id"],
+        "legacy-session",
+        "你喜欢吃早餐吗？(Nǐ xǐhuan chī zǎocān ma?)",
+        "喜欢",
+        "我喜欢吃早餐。 (Wǒ xǐhuan chī zǎocān.)",
+    )
+
+    turn = mandarin_app.get_conversation_turns(student["id"], "legacy-session")[0]
+
+    assert turn["prompt"] == "你喜欢吃早餐吗？"
+    assert turn["learner_answer"] == "喜欢"
+    assert turn["improved_answer"] == "我喜欢吃早餐。"
+
+
+def test_conversation_rejects_an_empty_answer_without_persisting(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    client = mandarin_app.app.test_client()
+
+    response = client.post(
+        "/",
+        data={
+            "form_type": "conversation",
+            "student_id": student["id"],
+            "conversation_id": "empty-session",
+            "conversation_prompt": "今天做了什么？",
+            "conversation_prompt_english": "What did you do today?",
+            "conversation_answer": "   ",
+        },
+    )
+
+    assert b"Write an answer before checking it." in response.data
+    assert mandarin_app.get_conversation_turns(student["id"], "empty-session") == []
+
+
+def test_conversation_feedback_renders_and_persists_the_current_turn(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    captured = {}
+
+    def fake_feedback(prompt, learner_answer, vocabulary_hint, previous_turns):
+        captured.update(
+            prompt=prompt,
+            learner_answer=learner_answer,
+            vocabulary_hint=vocabulary_hint,
+            previous_turns=previous_turns,
+        )
+        return {
+            "understandable": True,
+            "grammar": "Good grammar.",
+            "naturalness": "Natural for a beginner.",
+            "improved_answer": "我今天学习中文。",
+            "explanation": "Adding 今天 makes the time clear.",
+            "useful_expression": "今天学习中文",
+            "follow_up": "你学习了多久？",
+            "follow_up_english": "How long did you study?",
+            "improvement_matches_original": False,
+        }, None
+
+    monkeypatch.setattr(mandarin_app, "fetch_conversation_feedback", fake_feedback)
+    client = mandarin_app.app.test_client()
+    response = client.post(
+        "/",
+        data={
+            "form_type": "conversation",
+            "student_id": student["id"],
+            "conversation_id": "study-session",
+            "conversation_prompt": "今天做了什么？",
+            "conversation_prompt_english": "What did you do today?",
+            "conversation_answer": "我学习中文。",
+        },
+    )
+
+    turns = mandarin_app.get_conversation_turns(student["id"], "study-session")
+    next_response = client.get(
+        "/",
+        query_string={
+            "mode": "conversation",
+            "student_id": student["id"],
+            "conversation_id": "study-session",
+            "conversation_prompt": "你学习了多久？",
+            "conversation_prompt_english": "How long did you study?",
+        },
+    )
+    response_text = response.get_data(as_text=True)
+
+    assert captured["prompt"] == "今天做了什么？"
+    assert captured["learner_answer"] == "我学习中文。"
+    assert captured["previous_turns"] == []
+    assert turns[0]["learner_answer"] == "我学习中文。"
+    assert turns[0]["improved_answer"] == "我今天学习中文。"
+    assert "我今天学习中文。 / 我今天學習中文。" in response_text
+    assert "你学习了多久？ / 你學習了多久？" in response_text
+    assert "jīn tiān zuò le shén me" in response_text
+    assert 'data-speak="今天做了什么？"' in response_text
+    assert 'data-speak="我今天学习中文。"' in response_text
+    assert 'data-speak="你学习了多久？"' in response_text
+    assert "Next question" in response_text
+    assert b"Conversation so far" in next_response.data
+    assert "我学习中文。" in next_response.get_data(as_text=True)
+
+
+def test_conversation_feedback_rejects_malformed_ai_output(monkeypatch):
+    monkeypatch.setattr(
+        mandarin_app,
+        "request_ollama_json",
+        lambda system_prompt, user_prompt: ({"understandable": "maybe"}, None),
+    )
+
+    feedback, error = mandarin_app.fetch_conversation_feedback("今天做了什么？", "我学习中文。")
+
+    assert feedback is None
+    assert "low-quality result" in error
+
+
+def test_conversation_feedback_does_not_send_an_unrelated_vocabulary_hint(monkeypatch):
+    captured = {}
+
+    def fake_request(system_prompt, user_prompt):
+        captured["system"] = system_prompt
+        captured["user"] = user_prompt
+        return {
+            "understandable": True,
+            "grammar": "Your answer is understandable.",
+            "naturalness": "A full sentence is even clearer.",
+            "improved_answer": "我喜欢喝奶茶。",
+            "explanation": "奶茶 means milk tea.",
+            "useful_expression": "喝奶茶",
+            "useful_expression_english": "to drink milk tea",
+            "follow_up": "你常常喝奶茶吗？",
+            "follow_up_english": "Do you often drink milk tea?",
+        }, None
+
+    monkeypatch.setattr(mandarin_app, "request_ollama_json", fake_request)
+
+    feedback, error = mandarin_app.fetch_conversation_feedback(
+        "你喜欢喝什么？", "奶茶", "咖啡 (coffee)"
+    )
+
+    assert error is None
+    assert feedback["improved_answer"] == "我喜欢喝奶茶。"
+    assert "咖啡" not in captured["user"]
+    assert "Optional vocabulary" not in captured["user"]
+    assert "Never say the learner used" in captured["system"]
+
+
+def test_conversation_feedback_normalizes_a_mixed_format_useful_expression():
+    feedback = mandarin_app.normalize_conversation_feedback(
+        "我七点起床。",
+        {
+            "understandable": True,
+            "grammar": "Good grammar.",
+            "naturalness": "Natural.",
+            "improved_answer": "我七点起床。",
+            "explanation": "This gives a clear time.",
+            "useful_expression": "起床 (qǐ chuáng) - to wake up",
+            "useful_expression_english": "to wake up",
+            "follow_up": "你几点睡觉？",
+            "follow_up_english": "What time do you go to bed?",
+        },
+    )
+
+    assert feedback["useful_expression"] == "起床"
+    assert feedback["useful_expression_pinyin"] == "qǐ chuáng"
+    assert feedback["useful_expression_english"] == "to wake up"
+
+
+def test_conversation_feedback_cleans_embedded_pinyin_and_corrects_common_drink_verbs():
+    feedback = mandarin_app.normalize_conversation_feedback(
+        "咖啡",
+        {
+            "understandable": True,
+            "grammar": "Use 喝 with coffee.",
+            "naturalness": "This is natural after the verb change.",
+            "improved_answer": "我喜欢吃咖啡。 (Wǒ xǐhuan chī kāfēi.)",
+            "explanation": "Coffee is a drink.",
+            "useful_expression": "喝咖啡",
+            "useful_expression_english": "to drink coffee",
+            "follow_up": "你喜欢吃早餐吗？(Nǐ xǐhuan chī zǎocān ma?)",
+            "follow_up_english": "Do you like eating breakfast?",
+        },
+    )
+
+    assert feedback["improved_answer"] == "我喜欢喝咖啡。"
+    assert feedback["follow_up"] == "你喜欢吃早餐吗？"
+    assert feedback["follow_up_pinyin"] == "nǐ xǐ huān chī zǎo cān ma？"
+
+
 def test_weak_vocabulary_stats_use_first_attempts_and_exclude_perfect_words(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
     student = mandarin_app.create_student("Alice")

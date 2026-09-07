@@ -6,7 +6,7 @@
     <title>Mandarin Learning Assistant</title>
     <link rel="icon" type="image/png" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('asset_file', filename='logo/icon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3.2.0-sentence-practice">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3.2.0-conversation-polish">
 </head>
 <body>
     <main class="page">
@@ -67,6 +67,9 @@
             </a>
             <a href="{{ url_for('home', mode='sentence', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'sentence' %}active{% endif %}" {% if mode == 'sentence' %}aria-current="page"{% endif %}>
                 Sentence Practice
+            </a>
+            <a href="{{ url_for('home', mode='conversation', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'conversation' %}active{% endif %}" {% if mode == 'conversation' %}aria-current="page"{% endif %}>
+                Daily Conversation
             </a>
             <a href="{{ url_for('home', mode='progress', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'progress' %}active{% endif %}" {% if mode == 'progress' %}aria-current="page"{% endif %}>
                 Progress Mode
@@ -486,6 +489,156 @@
             <p class="audio-status" id="audio-status" hidden></p>
         {% endif %}
 
+        {% if mode == 'conversation' %}
+            {% if not selected_student %}
+                <section class="empty-state conversation-empty-state">
+                    <h2>Choose a learner first</h2>
+                    <p>Select a learner to keep conversation practice separate.</p>
+                </section>
+            {% else %}
+                <section class="conversation-panel">
+                    <div class="conversation-panel-header">
+                        <div>
+                            <p class="eyebrow">Daily Conversation</p>
+                            <h2>{{ conversation_prompt | display_chinese_pair }}</h2>
+                            <div class="conversation-pronunciation">
+                                <span>{{ conversation_prompt_pinyin }}</span>
+                                <button
+                                    type="button"
+                                    class="audio-button inline-audio-button"
+                                    data-speak="{{ conversation_prompt }}"
+                                    aria-label="Play prompt pronunciation"
+                                    title="Play prompt pronunciation"
+                                >
+                                    <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon">
+                                        <path d="M3 10v4h4l5 4V6L7 10H3z"></path>
+                                        <path d="M16 8a5 5 0 0 1 0 8"></path>
+                                        <path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <p>{{ conversation_prompt_english }}</p>
+                        </div>
+                        <a
+                            class="copy-button"
+                            href="{{ url_for('home', mode='conversation', student_id=selected_student.id) }}"
+                        >
+                            Start new conversation
+                        </a>
+                    </div>
+                    <form method="post" class="conversation-form" id="conversation-form">
+                        <input type="hidden" name="form_type" value="conversation">
+                        <input type="hidden" name="student_id" value="{{ selected_student.id }}">
+                        <input type="hidden" name="conversation_id" value="{{ conversation_id }}">
+                        <input type="hidden" name="conversation_prompt" value="{{ conversation_prompt }}">
+                        <input type="hidden" name="conversation_prompt_english" value="{{ conversation_prompt_english }}">
+                        <label for="conversation-answer">Your answer</label>
+                        <textarea id="conversation-answer" name="conversation_answer" required>{{ conversation_answer }}</textarea>
+                        <button type="submit">Check answer</button>
+                        <p class="conversation-loading" id="conversation-feedback-loading" role="status" hidden>Generating feedback...</p>
+                    </form>
+                </section>
+
+                {% if conversation_error %}
+                    <section class="conversation-feedback conversation-feedback-error">
+                        <p>{{ conversation_error }}</p>
+                    </section>
+                {% endif %}
+
+                {% if conversation_feedback %}
+                    <section class="conversation-feedback">
+                        <h2>Conversation Feedback</h2>
+                        <div class="conversation-feedback-block">
+                            <strong>Your answer</strong>
+                            <p>{{ conversation_answer }}</p>
+                        </div>
+                        <p><strong>Understandable:</strong> {% if conversation_feedback.understandable %}Yes{% else %}Not yet. Try the suggestion below.{% endif %}</p>
+                        <p><strong>Grammar:</strong> {{ conversation_feedback.grammar }}</p>
+                        <p><strong>Naturalness:</strong> {{ conversation_feedback.naturalness }}</p>
+                        {% if conversation_feedback.improvement_matches_original %}
+                            <div class="conversation-feedback-block conversation-improvement">
+                                <strong>Improved version</strong>
+                                <p>No wording change is needed.</p>
+                            </div>
+                        {% else %}
+                            <div class="conversation-feedback-block conversation-improvement">
+                                <strong>Improved version</strong>
+                                <p class="conversation-generated-chinese">
+                                    {{ conversation_feedback.improved_answer | display_chinese_pair }}
+                                    <button type="button" class="audio-button inline-audio-button" data-speak="{{ conversation_feedback.improved_answer }}" aria-label="Play improved answer pronunciation" title="Play improved answer pronunciation">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon">
+                                            <path d="M3 10v4h4l5 4V6L7 10H3z"></path>
+                                            <path d="M16 8a5 5 0 0 1 0 8"></path>
+                                            <path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"></path>
+                                        </svg>
+                                    </button>
+                                </p>
+                                <span class="conversation-generated-pinyin">{{ conversation_feedback.improved_answer_pinyin }}</span>
+                            </div>
+                        {% endif %}
+                        <p><strong>Why:</strong> {{ conversation_feedback.explanation }}</p>
+                        <div class="conversation-useful-expression">
+                            <strong>Useful expression</strong>
+                            <p class="conversation-generated-chinese">
+                                {{ conversation_feedback.useful_expression | display_chinese_pair }}
+                                {% if conversation_feedback.useful_expression_is_chinese %}
+                                    <button type="button" class="audio-button inline-audio-button" data-speak="{{ conversation_feedback.useful_expression }}" aria-label="Play useful expression pronunciation" title="Play useful expression pronunciation">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon">
+                                            <path d="M3 10v4h4l5 4V6L7 10H3z"></path>
+                                            <path d="M16 8a5 0 0 1 0 8"></path>
+                                            <path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"></path>
+                                        </svg>
+                                    </button>
+                                {% endif %}
+                            </p>
+                            {% if conversation_feedback.useful_expression_is_chinese %}
+                                <span class="conversation-generated-pinyin">{{ conversation_feedback.useful_expression_pinyin }}</span>
+                            {% endif %}
+                            <span class="conversation-expression-english">{{ conversation_feedback.useful_expression_english }}</span>
+                        </div>
+                        <div class="conversation-follow-up">
+                            <strong>Follow-up question</strong>
+                            <p class="conversation-generated-chinese">
+                                {{ conversation_feedback.follow_up | display_chinese_pair }}
+                                <button type="button" class="audio-button inline-audio-button" data-speak="{{ conversation_feedback.follow_up }}" aria-label="Play follow-up pronunciation" title="Play follow-up pronunciation">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon">
+                                        <path d="M3 10v4h4l5 4V6L7 10H3z"></path>
+                                        <path d="M16 8a5 5 0 0 1 0 8"></path>
+                                        <path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"></path>
+                                    </svg>
+                                </button>
+                            </p>
+                            <span class="conversation-generated-pinyin">{{ conversation_feedback.follow_up_pinyin }}</span>
+                            <span>{{ conversation_feedback.follow_up_english }}</span>
+                        </div>
+                        <form method="get" class="conversation-next-form">
+                            <input type="hidden" name="mode" value="conversation">
+                            <input type="hidden" name="student_id" value="{{ selected_student.id }}">
+                            <input type="hidden" name="conversation_id" value="{{ conversation_id }}">
+                            <input type="hidden" name="conversation_prompt" value="{{ conversation_feedback.follow_up }}">
+                            <input type="hidden" name="conversation_prompt_english" value="{{ conversation_feedback.follow_up_english }}">
+                            <button type="submit">Next question</button>
+                        </form>
+                    </section>
+                {% endif %}
+
+                {% if conversation_turns %}
+                    <section class="conversation-history">
+                        <h2>Conversation so far</h2>
+                        {% for turn in conversation_turns %}
+                            <article class="conversation-history-turn">
+                                <strong>{{ turn.prompt | display_chinese_pair }}</strong>
+                                <p><span>Your answer:</span> {{ turn.learner_answer }}</p>
+                                {% if turn.improved_answer and not turn.improvement_matches_original %}
+                                    <p><span>Improved version:</span> {{ turn.improved_answer | display_chinese_pair }}</p>
+                                {% endif %}
+                            </article>
+                        {% endfor %}
+                    </section>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+
         {% if mode == 'quiz' %}
             <nav class="quiz-source-switch" aria-label="Quiz source">
                 <a
@@ -880,6 +1033,6 @@
         {% endif %}
     </main>
 
-    <script src="{{ url_for('static', filename='app.js') }}?v=3.2.0-listening-continue"></script>
+    <script src="{{ url_for('static', filename='app.js') }}?v=3.2.0-conversation-polish"></script>
 </body>
 </html>

@@ -129,6 +129,13 @@ PINYIN_OVERRIDE_PHRASES = sorted(PINYIN_PHRASE_OVERRIDES, key=len, reverse=True)
 BATCH_LIST_PREFIX_PATTERN = re.compile(
     r"^\s*(?:(?:[-*•‣◦▪‒–—])\s*|(?:\(?\d{1,3}\)?[.)、:])\s*)"
 )
+DAILY_CONVERSATION_PROMPTS = [
+    ("今天做了什么？", "What did you do today?"),
+    ("今天几点起床？", "What time did you get up today?"),
+    ("今天工作或者上课怎么样？", "How was work or class today?"),
+    ("晚餐吃了什么？", "What did you eat for dinner?"),
+    ("周末有什么计划？", "What plans do you have for the weekend?"),
+]
 
 
 def to_sentence_pinyin(text):
@@ -401,6 +408,23 @@ def init_progress_db():
             "CREATE INDEX IF NOT EXISTS idx_sentence_practice_student_date "
             "ON sentence_practice_events (student_id, created_at)"
         )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS conversation_turns (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER NOT NULL REFERENCES students(id),
+                conversation_id TEXT NOT NULL,
+                prompt TEXT NOT NULL,
+                learner_answer TEXT NOT NULL,
+                improved_answer TEXT,
+                created_at TEXT NOT NULL
+            )
+            """
+        )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_conversation_turns_student_session "
+            "ON conversation_turns (student_id, conversation_id, id)"
+        )
 
 
 def row_to_dict(row):
@@ -474,7 +498,6 @@ def get_saved_vocabulary_entries(student_id):
                 (student_id,),
             )
         ]
-
     entries = []
     for saved_word in saved_words:
         if saved_word["source"] == "dictionary":
@@ -650,6 +673,80 @@ def log_sentence_practice_event(student_id, target_word, original_sentence, targ
             ),
         )
     return True
+
+
+def get_conversation_turns(student_id, conversation_id):
+    student_id = parse_student_id(student_id)
+    session_id = str(conversation_id or "").strip()
+    if student_id is None or not session_id or get_student(student_id) is None:
+        return []
+
+    init_progress_db()
+    with get_progress_connection() as connection:
+        turns = [
+            row_to_dict(row)
+            for row in connection.execute(
+                """
+                SELECT prompt, learner_answer, improved_answer, created_at
+                FROM conversation_turns
+                WHERE student_id = ? AND conversation_id = ?
+                ORDER BY id ASC
+                """,
+                (student_id, session_id),
+            )
+        ]
+    for turn in turns:
+        turn["prompt"] = clean_generated_mandarin_sentence(turn["prompt"])
+        if turn["improved_answer"]:
+            turn["improved_answer"] = apply_common_mandarin_verb_corrections(
+                clean_generated_mandarin_sentence(turn["improved_answer"])
+            )
+        turn["improvement_matches_original"] = (
+            normalize_sentence_for_comparison(turn["improved_answer"])
+            == normalize_sentence_for_comparison(turn["learner_answer"])
+        ) if turn["improved_answer"] else False
+    return turns
+
+
+def log_conversation_turn(student_id, conversation_id, prompt, learner_answer, improved_answer=None):
+    student_id = parse_student_id(student_id)
+    session_id = str(conversation_id or "").strip()
+    prompt = str(prompt or "").strip()
+    answer = str(learner_answer or "").strip()
+    if student_id is None or not session_id or not prompt or not answer or get_student(student_id) is None:
+        return False
+
+    init_progress_db()
+    with get_progress_connection() as connection:
+        connection.execute(
+            """
+            INSERT INTO conversation_turns (
+                student_id, conversation_id, prompt, learner_answer, improved_answer, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                student_id,
+                session_id,
+                prompt,
+                answer,
+                str(improved_answer or "").strip() or None,
+                datetime.now().isoformat(timespec="seconds"),
+            ),
+        )
+    return True
+
+
+def get_daily_conversation_prompt():
+    return random.choice(DAILY_CONVERSATION_PROMPTS)
+
+
+def get_conversation_vocabulary_hint(student_id):
+    for source in ("today", "weak", "saved"):
+        entries = get_quiz_pool(source, student_id)
+        if entries:
+            entry = entries[0]
+            return f"{entry['word']} ({entry['english']})"
+    return ""
 
 
 def review_date_today():
@@ -1571,6 +1668,28 @@ def normalize_sentence_for_comparison(text):
     return re.sub(r"[\s,，.。!?！？;；:：]+", "", simplified)
 
 
+def normalize_mandarin_expression(text):
+    match = re.search(r"[\u4e00-\u9fff]+", str(text or ""))
+    return match.group(0) if match else ""
+
+
+def clean_generated_mandarin_sentence(text):
+    without_annotations = re.sub(r"[（(][^（）()]*[)）]", "", str(text or ""))
+    cleaned = "".join(
+        character
+        for character in without_annotations
+        if "\u4e00" <= character <= "\u9fff" or character.isdigit() or character in "，。！？；：、"
+    )
+    return re.sub(r"([。！？]){2,}", r"\1", cleaned).strip()
+
+
+def apply_common_mandarin_verb_corrections(text):
+    corrected = str(text or "")
+    for beverage in ("咖啡", "茶", "水", "牛奶", "果汁", "汤"):
+        corrected = corrected.replace(f"吃{beverage}", f"喝{beverage}")
+    return corrected
+
+
 def normalize_sentence_feedback(target_word, original_sentence, feedback):
     if not isinstance(feedback, dict) or not str(original_sentence or "").strip():
         return None
@@ -1638,6 +1757,105 @@ def fetch_sentence_feedback(target_entry, original_sentence):
             return normalized_feedback, None
 
     return None, "Sentence feedback is unavailable right now because the local model returned a low-quality result."
+
+
+def normalize_conversation_feedback(learner_answer, feedback):
+    if not isinstance(feedback, dict) or not str(learner_answer or "").strip():
+        return None
+    understandable = normalize_sentence_target_used(feedback.get("understandable"))
+    if understandable is None:
+        return None
+    for key in (
+        "grammar",
+        "naturalness",
+        "improved_answer",
+        "explanation",
+        "useful_expression",
+        "useful_expression_english",
+        "follow_up",
+        "follow_up_english",
+    ):
+        if not isinstance(feedback.get(key), str) or not feedback[key].strip():
+            return None
+    improved_answer = apply_common_mandarin_verb_corrections(
+        clean_generated_mandarin_sentence(feedback["improved_answer"])
+    )
+    follow_up = clean_generated_mandarin_sentence(feedback["follow_up"])
+    useful_expression = normalize_mandarin_expression(feedback["useful_expression"])
+    if not contains_chinese(improved_answer) or not contains_chinese(follow_up) or not useful_expression:
+        return None
+    return {
+        "understandable": understandable,
+        "grammar": feedback["grammar"].strip(),
+        "naturalness": feedback["naturalness"].strip(),
+        "improved_answer": improved_answer,
+        "improved_answer_pinyin": to_sentence_pinyin(improved_answer),
+        "explanation": feedback["explanation"].strip(),
+        "useful_expression": useful_expression,
+        "useful_expression_english": feedback["useful_expression_english"].strip(),
+        "useful_expression_is_chinese": True,
+        "useful_expression_pinyin": to_sentence_pinyin(useful_expression),
+        "follow_up": follow_up,
+        "follow_up_pinyin": to_sentence_pinyin(follow_up),
+        "follow_up_english": feedback["follow_up_english"].strip(),
+        "improvement_matches_original": (
+            normalize_sentence_for_comparison(improved_answer)
+            == normalize_sentence_for_comparison(learner_answer)
+        ),
+    }
+
+
+def fetch_conversation_feedback(prompt, learner_answer, vocabulary_hint="", previous_turns=None):
+    prompt = str(prompt or "").strip()
+    answer = str(learner_answer or "").strip()
+    if not prompt or not answer:
+        return None, "Write an answer before checking it."
+
+    history = previous_turns or []
+    history_text = "\n".join(
+        f"Prompt: {turn['prompt']}\nLearner: {turn['learner_answer']}"
+        for turn in history[-3:]
+    ) or "No previous turns."
+    system_prompt = (
+        "You are a supportive Mandarin conversation tutor for English-speaking beginners. "
+        "Return JSON only with these keys: understandable, grammar, naturalness, improved_answer, explanation, "
+        "useful_expression, useful_expression_english, follow_up, follow_up_english. Do not add extra keys. "
+        "understandable must be a JSON boolean. All other values must be short non-empty strings. "
+        "grammar, naturalness, and explanation must be constructive beginner-friendly English. "
+        "Base every statement only on the current Mandarin prompt and the learner answer. "
+        "Never say the learner used, liked, or mentioned a concrete word that is absent from the learner answer. "
+        "A short relevant answer, such as a food or drink name, is understandable; gently offer a full sentence without calling it wrong. "
+        "Do not over-correct an understandable, natural learner answer. Do not treat punctuation or Simplified/Traditional "
+        "conversion as an error. improved_answer and follow_up must be Mandarin Chinese. "
+        "useful_expression must be a Mandarin word or short phrase only, with no pinyin, English, or translation. "
+        "useful_expression_english must be its short English meaning. "
+        "follow_up must be one short, relevant beginner-friendly daily-life question. follow_up_english must translate it. "
+        'Use this exact JSON shape: {"understandable":true,"grammar":"...","naturalness":"...",'
+        '"improved_answer":"...","explanation":"...","useful_expression":"...","useful_expression_english":"...",'
+        '"follow_up":"...","follow_up_english":"..."}.'
+    )
+    for attempt in range(2):
+        repair_instruction = ""
+        if attempt:
+            repair_instruction = (
+                "Your previous response was invalid. Return JSON only with exactly the required keys. "
+                "understandable must be true or false; every other field must be a non-empty string; "
+                "improved_answer, useful_expression, and follow_up must contain only Mandarin Chinese. "
+            )
+        user_prompt = (
+            f"Current Mandarin prompt: {prompt}\n"
+            f"Learner answer: {answer}\n"
+            f"Previous turns:\n{history_text}\n"
+            f"{repair_instruction}Return valid JSON only."
+        )
+        feedback, error = request_ollama_json(system_prompt, user_prompt)
+        if error:
+            return None, error.replace("AI is", "Conversation feedback is", 1)
+        normalized_feedback = normalize_conversation_feedback(answer, feedback)
+        if normalized_feedback:
+            return normalized_feedback, None
+
+    return None, "Conversation feedback is unavailable right now because the local model returned a low-quality result."
 
 
 def get_ai_explanation(query):
@@ -1817,6 +2035,22 @@ def home():
     sentence_text = ""
     sentence_feedback = None
     sentence_error = None
+    conversation_id = request.form.get("conversation_id") or request.args.get("conversation_id") or uuid.uuid4().hex
+    default_conversation_prompt, default_conversation_prompt_english = get_daily_conversation_prompt()
+    conversation_prompt = clean_generated_mandarin_sentence(
+        request.form.get("conversation_prompt")
+        or request.args.get("conversation_prompt")
+        or default_conversation_prompt
+    )
+    conversation_prompt_english = (
+        request.form.get("conversation_prompt_english")
+        or request.args.get("conversation_prompt_english")
+        or default_conversation_prompt_english
+    )
+    conversation_answer = ""
+    conversation_feedback = None
+    conversation_error = None
+    conversation_turns = get_conversation_turns(student_id, conversation_id)
     if request.method == "GET" and mode == "batch":
         query = request.args.get("batch_query", "")
         if query:
@@ -1892,6 +2126,31 @@ def home():
                     sentence_target["word"],
                     sentence_text,
                     sentence_feedback["target_used"] if sentence_feedback else None,
+                )
+        elif form_type == "conversation":
+            mode = "conversation"
+            conversation_id = request.form.get("conversation_id") or uuid.uuid4().hex
+            conversation_prompt = clean_generated_mandarin_sentence(request.form.get("conversation_prompt", ""))
+            conversation_prompt_english = request.form.get("conversation_prompt_english", "")
+            conversation_answer = request.form.get("conversation_answer", "")
+            conversation_turns = get_conversation_turns(student_id, conversation_id)
+            if not conversation_answer.strip():
+                conversation_error = "Write an answer before checking it."
+            elif not conversation_prompt.strip():
+                conversation_error = "Choose a new conversation prompt and try again."
+            else:
+                conversation_feedback, conversation_error = fetch_conversation_feedback(
+                    conversation_prompt,
+                    conversation_answer,
+                    "",
+                    conversation_turns,
+                )
+                log_conversation_turn(
+                    student_id,
+                    conversation_id,
+                    conversation_prompt,
+                    conversation_answer,
+                    conversation_feedback["improved_answer"] if conversation_feedback else None,
                 )
         elif form_type == "saved-vocabulary":
             mode = request.form.get("return_mode", "saved")
@@ -2006,6 +2265,8 @@ def home():
     if mode == "progress":
         progress_summary = get_progress_summary(student_id, progress_day)
 
+    conversation_prompt_pinyin = to_sentence_pinyin(conversation_prompt)
+
     saved_entries = filter_entries_by_category(get_saved_vocabulary_entries(student_id), category) if mode == "saved" else []
     saved_words = {entry["word"] for entry in get_saved_vocabulary_entries(student_id)}
 
@@ -2042,6 +2303,14 @@ def home():
         sentence_text=sentence_text,
         sentence_feedback=sentence_feedback,
         sentence_error=sentence_error,
+        conversation_id=conversation_id,
+        conversation_prompt=conversation_prompt,
+        conversation_prompt_english=conversation_prompt_english,
+        conversation_prompt_pinyin=conversation_prompt_pinyin,
+        conversation_answer=conversation_answer,
+        conversation_feedback=conversation_feedback,
+        conversation_error=conversation_error,
+        conversation_turns=conversation_turns,
         category=category,
         category_labels=CATEGORY_LABELS,
     )
