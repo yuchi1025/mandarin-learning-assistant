@@ -746,6 +746,7 @@ def test_sentence_practice_passes_the_selected_word_and_persists_feedback(monkey
             "grammar": "Good grammar.",
             "naturalness": "Natural for a beginner.",
             "suggested_sentence": "我明天去机场。",
+            "suggested_sentence_pinyin": "wǒ míng tiān qù jī chǎng。",
             "explanation": "This uses the target word as a place.",
         }, None
 
@@ -777,6 +778,8 @@ def test_sentence_practice_passes_the_selected_word_and_persists_feedback(monkey
     assert "Your sentence" in response.get_data(as_text=True)
     assert "我去机场。" in response.get_data(as_text=True)
     assert "我明天去机场。 / 我明天去機場。" in response.get_data(as_text=True)
+    assert "wǒ míng tiān qù jī chǎng。" in response.get_data(as_text=True)
+    assert "Checking sentence..." in response.get_data(as_text=True)
 
 
 def test_sentence_feedback_rejects_invalid_ai_output(monkeypatch):
@@ -830,6 +833,7 @@ def test_sentence_feedback_does_not_present_script_or_punctuation_as_an_improvem
     )
 
     assert feedback["suggestion_matches_original"] is True
+    assert feedback["suggested_sentence_pinyin"] == "wǒ xǐ huān zhè gè chǎn pǐn。"
 
 
 def test_conversation_turns_are_isolated_by_learner(monkeypatch, tmp_path):
@@ -951,6 +955,7 @@ def test_conversation_feedback_renders_and_persists_the_current_turn(monkeypatch
     assert 'data-speak="我今天学习中文。"' in response_text
     assert 'data-speak="你学习了多久？"' in response_text
     assert "Next question" in response_text
+    assert "wǒ xué xí zhōng wén。" in response_text
     assert b"Conversation so far" in next_response.data
     assert "我学习中文。" in next_response.get_data(as_text=True)
 
@@ -1508,6 +1513,15 @@ def test_display_chinese_pair_normalizes_both_script_inputs():
     assert mandarin_app.display_chinese_pair("機場") == "机场 / 機場"
 
 
+def test_display_chinese_pair_uses_taiwan_traditional_vocabulary():
+    assert mandarin_app.display_chinese_pair("软件") == "软件 / 軟體"
+
+
+def test_display_pinyin_pair_shows_taiwan_lexical_pronunciation():
+    assert mandarin_app.display_pinyin_pair("ruǎn jiàn", "软件", "軟體") == "ruǎn jiàn / ruǎn tǐ"
+    assert mandarin_app.display_pinyin_pair("jī chǎng", "机场", "機場") == "jī chǎng"
+
+
 def test_quiz_feedback_displays_both_chinese_scripts(monkeypatch):
     quiz = {
         "word": "学习",
@@ -1732,6 +1746,12 @@ def test_sentence_pinyin_uses_phrase_override_for_jide():
     assert mandarin_app.to_sentence_pinyin("我不記得他的名字。") == "wǒ bú jì dé tā de míng zì。"
 
 
+def test_sentence_pinyin_uses_tone_sandhi_for_bu_gou():
+    assert mandarin_app.to_sentence_pinyin("不够") == "bú gòu"
+    assert mandarin_app.to_sentence_pinyin("不夠") == "bú gòu"
+    assert mandarin_app.to_sentence_pinyin("钱不够。") == "qián bú gòu。"
+
+
 def test_sentence_pinyin_uses_phrase_override_for_behavior():
     assert mandarin_app.to_sentence_pinyin("行为") == "xíng wéi"
     assert mandarin_app.to_sentence_pinyin("行為") == "xíng wéi"
@@ -1741,6 +1761,11 @@ def test_sentence_pinyin_uses_phrase_override_for_behavior():
 def test_sentence_pinyin_uses_phrase_override_for_date():
     assert mandarin_app.to_sentence_pinyin("日期") == "rì qí"
     assert mandarin_app.to_sentence_pinyin("这个日期很重要。") == "zhè gè rì qí hěn zhòng yào。"
+
+
+def test_sentence_pinyin_uses_taiwan_reading_for_week_and_weekdays():
+    assert mandarin_app.to_sentence_pinyin("星期") == "xīng qí"
+    assert mandarin_app.to_sentence_pinyin("今天星期三。") == "jīn tiān xīng qí sān。"
 
 
 def test_sentence_pinyin_uses_phrase_pronunciation_for_polyphonic_characters():

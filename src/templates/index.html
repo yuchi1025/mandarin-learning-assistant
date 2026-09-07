@@ -210,7 +210,7 @@
                                 <span class="part-of-speech">{{ item.part_of_speech }}</span>
                                 <span class="word-category">{{ category_labels.get(item.category, category_labels['everyday']) }}</span>
                             </div>
-                            <span>{{ item.pinyin }}</span>
+                            <span>{{ item.pinyin | display_pinyin_pair(item.word, item.traditional) }}</span>
                         </div>
                     </div>
                     <p><strong>Meaning:</strong> {{ item.english }}</p>
@@ -273,7 +273,7 @@
                         <article class="saved-vocabulary-row">
                             <div class="saved-vocabulary-word">
                                 <strong>{{ item.word | display_chinese_pair }}</strong>
-                                <span>{{ item.pinyin }}</span>
+                                <span>{{ item.pinyin | display_pinyin_pair(item.word, item.traditional) }}</span>
                             </div>
                             <span class="saved-vocabulary-meaning">{{ item.english }}</span>
                             <span class="word-category">{{ category_labels.get(item.category, category_labels['everyday']) }}</span>
@@ -439,7 +439,7 @@
                         </button>
                     </div>
                     <p class="sentence-practice-prompt">Write a Mandarin sentence using this word.</p>
-                    <form method="post" class="sentence-practice-form">
+                    <form method="post" class="sentence-practice-form" id="sentence-practice-form">
                         <input type="hidden" name="form_type" value="sentence-practice">
                         <input type="hidden" name="student_id" value="{{ selected_student.id }}">
                         <input type="hidden" name="sentence_source" value="{{ sentence_source }}">
@@ -447,6 +447,7 @@
                         <label for="sentence-input">Your sentence</label>
                         <textarea id="sentence-input" name="sentence" required>{{ sentence_text }}</textarea>
                         <button type="submit">Check sentence</button>
+                        <p class="sentence-loading" id="sentence-feedback-loading" role="status" hidden>Checking sentence...</p>
                     </form>
                     <form method="get" class="sentence-next-form">
                         <input type="hidden" name="mode" value="sentence">
@@ -480,6 +481,7 @@
                             <div class="sentence-feedback-block sentence-suggestion">
                                 <strong>Suggested improvement</strong>
                                 <p>{{ sentence_feedback.suggested_sentence | display_chinese_pair }}</p>
+                                <span class="sentence-suggestion-pinyin">{{ sentence_feedback.suggested_sentence_pinyin }}</span>
                             </div>
                         {% endif %}
                         <p><strong>Why:</strong> {{ sentence_feedback.explanation }}</p>
@@ -551,6 +553,9 @@
                         <div class="conversation-feedback-block">
                             <strong>Your answer</strong>
                             <p>{{ conversation_answer }}</p>
+                            {% if conversation_answer_pinyin %}
+                                <span class="conversation-generated-pinyin">{{ conversation_answer_pinyin }}</span>
+                            {% endif %}
                         </div>
                         <p><strong>Understandable:</strong> {% if conversation_feedback.understandable %}Yes{% else %}Not yet. Try the suggestion below.{% endif %}</p>
                         <p><strong>Grammar:</strong> {{ conversation_feedback.grammar }}</p>
@@ -573,6 +578,7 @@
                                         </svg>
                                     </button>
                                 </p>
+                                {# One pronunciation line covers both script forms when their reading is the same. #}
                                 <span class="conversation-generated-pinyin">{{ conversation_feedback.improved_answer_pinyin }}</span>
                             </div>
                         {% endif %}

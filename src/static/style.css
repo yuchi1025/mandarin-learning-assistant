@@ -513,6 +513,12 @@ h1 {
     background: #fff7ed;
 }
 
+.sentence-suggestion-pinyin {
+    color: var(--accent);
+    font-size: 1.02rem;
+    font-weight: 600;
+}
+
 .sentence-feedback-error {
     border-color: #efb19d;
     background: #fff1ec;
@@ -628,7 +634,8 @@ h1 {
     opacity: 0.75;
 }
 
-.conversation-loading {
+.conversation-loading,
+.sentence-loading {
     margin: 0;
     color: #6a5b4d;
     font-weight: bold;

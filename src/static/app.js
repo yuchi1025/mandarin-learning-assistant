@@ -200,7 +200,7 @@ function renderAiResult(card, item, isSaved) {
     const saveControl = studentId
         ? `<button type="button" class="saved-toggle ai-save-button" data-saved="${isSaved ? "true" : "false"}">${isSaved ? "Unsave" : "Save"}</button>`
         : `<button type="button" class="saved-toggle" disabled title="Choose a learner first">Save</button>`;
-    const pinyinLine = item.pinyin ? `<span>${escapeHtml(item.pinyin)}</span>` : "";
+    const pinyinLine = item.pinyin ? `<span>${escapeHtml(item.display_pinyin || item.pinyin)}</span>` : "";
     const traditionalLine = item.traditional && item.traditional !== item.word
         ? `<span class="traditional-word">${escapeHtml(item.traditional)}</span>`
         : "";
@@ -445,15 +445,15 @@ function bindQuizOptions() {
     });
 }
 
-function bindConversationForm() {
-    const form = document.getElementById("conversation-form");
+function bindFeedbackForm(formId, loadingId) {
+    const form = document.getElementById(formId);
     if (!form) {
         return;
     }
 
     form.addEventListener("submit", function () {
         const button = form.querySelector('button[type="submit"]');
-        const loading = document.getElementById("conversation-feedback-loading");
+        const loading = document.getElementById(loadingId);
         if (button) {
             button.disabled = true;
         }
@@ -577,7 +577,8 @@ window.addEventListener("load", function () {
     focusSearchInput();
     bindAudioButtons();
     bindQuizOptions();
-    bindConversationForm();
+    bindFeedbackForm("sentence-practice-form", "sentence-feedback-loading");
+    bindFeedbackForm("conversation-form", "conversation-feedback-loading");
     bindCopyButtons();
     rememberSelectedStudent();
     restoreBatchMode();

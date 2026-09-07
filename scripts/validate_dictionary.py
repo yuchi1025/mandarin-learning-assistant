@@ -19,6 +19,8 @@ REQUIRED_FIELDS = [
 ]
 PINYIN_WORD_OVERRIDES = {
     "记得": "jì dé",
+    "日期": "rì qí",
+    "星期": "xīng qí",
 }
 
 

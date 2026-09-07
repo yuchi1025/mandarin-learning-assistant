@@ -32,7 +32,8 @@ TTS_COMMAND = os.getenv("TTS_COMMAND", "/usr/bin/say")
 AI_EXPLANATION_CACHE = {}
 OLLAMA_START_ATTEMPTED = False
 TO_SIMPLIFIED = OpenCC("t2s")
-TO_TRADITIONAL = OpenCC("s2t")
+# Use Taiwan Traditional vocabulary for learner-facing paired-script displays.
+TO_TRADITIONAL = OpenCC("s2twp")
 VALID_PARTS_OF_SPEECH = {
     "noun",
     "verb",
@@ -118,9 +119,20 @@ PROGRESS_DB_PATH = Path(os.getenv("PROGRESS_DB_PATH", Path(__file__).resolve().p
 PINYIN_PHRASE_OVERRIDES = {
     "不记得": "bú jì dé",
     "不記得": "bú jì dé",
+    "不够": "bú gòu",
+    "不夠": "bú gòu",
     "行为": "xíng wéi",
     "行為": "xíng wéi",
     "日期": "rì qí",
+    "星期一": "xīng qí yī",
+    "星期二": "xīng qí èr",
+    "星期三": "xīng qí sān",
+    "星期四": "xīng qí sì",
+    "星期五": "xīng qí wǔ",
+    "星期六": "xīng qí liù",
+    "星期日": "xīng qí rì",
+    "星期天": "xīng qí tiān",
+    "星期": "xīng qí",
     "记得": "jì dé",
     "記得": "jì dé",
     "歌曲": "gē qǔ",
@@ -1257,6 +1269,17 @@ def display_chinese_pair(text):
     return simplified if simplified == traditional else f"{simplified} / {traditional}"
 
 
+@app.template_filter("display_pinyin_pair")
+def display_pinyin_pair(pinyin, word, traditional=None):
+    primary = str(pinyin or "").strip()
+    traditional_word = str(traditional or "").strip()
+    if not traditional_word or traditional_word == str(word or "").strip() or not contains_chinese(traditional_word):
+        return primary
+
+    traditional_pinyin = to_sentence_pinyin(traditional_word)
+    return primary if not traditional_pinyin or traditional_pinyin == primary else f"{primary} / {traditional_pinyin}"
+
+
 def clean_ai_word_form(text):
     cleaned = re.sub(r"\([^)]*\)", "", text).strip()
     if not contains_chinese(cleaned):
@@ -1636,6 +1659,7 @@ def fetch_ai_explanation(query):
             "word": word,
             "traditional": traditional,
             "pinyin": pinyin,
+            "display_pinyin": display_pinyin_pair(pinyin, word, traditional),
             "english": parsed.get("english", "").strip(),
             "part_of_speech": normalize_part_of_speech(parsed.get("part_of_speech", "word")),
             "category": normalize_entry_category(parsed.get("category")),
@@ -1711,6 +1735,7 @@ def normalize_sentence_feedback(target_word, original_sentence, feedback):
         "grammar": feedback["grammar"].strip(),
         "naturalness": feedback["naturalness"].strip(),
         "suggested_sentence": suggested_sentence,
+        "suggested_sentence_pinyin": to_sentence_pinyin(suggested_sentence),
         "suggestion_matches_original": suggestion_matches_original,
         "explanation": feedback["explanation"].strip(),
     }
@@ -2266,6 +2291,7 @@ def home():
         progress_summary = get_progress_summary(student_id, progress_day)
 
     conversation_prompt_pinyin = to_sentence_pinyin(conversation_prompt)
+    conversation_answer_pinyin = to_sentence_pinyin(conversation_answer) if contains_chinese(conversation_answer) else ""
 
     saved_entries = filter_entries_by_category(get_saved_vocabulary_entries(student_id), category) if mode == "saved" else []
     saved_words = {entry["word"] for entry in get_saved_vocabulary_entries(student_id)}
@@ -2308,6 +2334,7 @@ def home():
         conversation_prompt_english=conversation_prompt_english,
         conversation_prompt_pinyin=conversation_prompt_pinyin,
         conversation_answer=conversation_answer,
+        conversation_answer_pinyin=conversation_answer_pinyin,
         conversation_feedback=conversation_feedback,
         conversation_error=conversation_error,
         conversation_turns=conversation_turns,
