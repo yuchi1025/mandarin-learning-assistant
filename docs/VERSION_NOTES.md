@@ -8,7 +8,9 @@
 - Added Quiz Mode scoring and Mandarin question audio, plus consistent paired Simplified and Traditional Chinese display in Quiz Mode.
 - Added a learner-specific Review Mistakes quiz source. It derives words missed on the first answer from each learner's latest quiz result, keeps the full attempt history, and removes a word from the current review session once it is answered correctly.
 - Added learner-specific spaced-repetition review scheduling. Saved words begin due today; first-answer misses are due tomorrow; correct first answers advance through 2, 4, 7, and then gradually longer intervals. Review Today reuses the existing Meaning and Listening quiz flows.
-- Added Sentence Practice with learner-scoped vocabulary sources (saved, due, weak, and recent), persisted original sentences, and validated Ollama feedback that keeps learner input separate from suggested improvements.
+- Added Needs Practice as read-only learner-specific accuracy analytics, while Review Mistakes remains the focused mistake-review quiz source.
+- Added Sentence Practice with learner-scoped vocabulary sources (saved, due, latest lesson, and recent), persisted original sentences, and validated Ollama feedback that keeps learner input separate from suggested improvements.
+- Added learner-scoped Lesson Notes with editable dates, titles, notes, and built-in dictionary vocabulary. Latest lesson vocabulary can be reused in Meaning Quiz, Listening Quiz, and Sentence Practice.
 - Added Daily Conversation with learner-scoped, persisted multi-turn sessions, curated daily-life prompts, validated Ollama feedback, and beginner-friendly Mandarin follow-up questions.
 - Added fixed topic categories for the built-in vocabulary without changing the canonical dictionary JSON schema. Learners can filter Search, Batch, Saved Vocabulary, and Quiz Mode by category.
 - Expanded the built-in dictionary from 200 to 300 daily-use words, including common work, travel, food, health, and conversation vocabulary.

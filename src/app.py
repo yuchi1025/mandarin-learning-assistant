@@ -12,7 +12,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import uuid
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from flask import after_this_request, Flask, jsonify, render_template, request, send_file, send_from_directory
 from opencc import OpenCC
@@ -437,6 +437,32 @@ def init_progress_db():
             "CREATE INDEX IF NOT EXISTS idx_conversation_turns_student_session "
             "ON conversation_turns (student_id, conversation_id, id)"
         )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS lessons (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER NOT NULL REFERENCES students(id),
+                lesson_date TEXT NOT NULL,
+                title TEXT NOT NULL DEFAULT '',
+                notes TEXT NOT NULL DEFAULT '',
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+            """
+        )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_lessons_student_date "
+            "ON lessons (student_id, lesson_date DESC, id DESC)"
+        )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS lesson_vocabulary (
+                lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+                vocabulary_word TEXT NOT NULL,
+                PRIMARY KEY (lesson_id, vocabulary_word)
+            )
+            """
+        )
 
 
 def row_to_dict(row):
@@ -489,6 +515,138 @@ def create_student(name):
             (cleaned_name, datetime.now().isoformat(timespec="seconds")),
         )
         return {"id": cursor.lastrowid, "name": cleaned_name}
+
+
+def normalize_lesson_date(value):
+    try:
+        return date.fromisoformat(str(value or "")).isoformat()
+    except ValueError:
+        return None
+
+
+def get_lessons(student_id, limit=None):
+    student_id = parse_student_id(student_id)
+    if student_id is None or get_student(student_id) is None:
+        return []
+
+    init_progress_db()
+    query = """
+        SELECT lessons.id, lessons.lesson_date, lessons.title, lessons.notes,
+               lessons.created_at, lessons.updated_at, COUNT(lesson_vocabulary.vocabulary_word) AS vocabulary_count
+        FROM lessons
+        LEFT JOIN lesson_vocabulary ON lesson_vocabulary.lesson_id = lessons.id
+        WHERE lessons.student_id = ?
+        GROUP BY lessons.id
+        ORDER BY lessons.lesson_date DESC, lessons.id DESC
+    """
+    parameters = [student_id]
+    if limit is not None:
+        query += " LIMIT ?"
+        parameters.append(max(0, int(limit)))
+    with get_progress_connection() as connection:
+        return [row_to_dict(row) for row in connection.execute(query, parameters)]
+
+
+def get_lesson(student_id, lesson_id):
+    student_id = parse_student_id(student_id)
+    try:
+        lesson_id = int(lesson_id)
+    except (TypeError, ValueError):
+        return None
+    if student_id is None or lesson_id <= 0 or get_student(student_id) is None:
+        return None
+
+    init_progress_db()
+    with get_progress_connection() as connection:
+        return row_to_dict(connection.execute(
+            """
+            SELECT id, lesson_date, title, notes, created_at, updated_at
+            FROM lessons WHERE id = ? AND student_id = ?
+            """,
+            (lesson_id, student_id),
+        ).fetchone())
+
+
+def create_lesson(student_id, lesson_date, title="", notes=""):
+    student_id = parse_student_id(student_id)
+    normalized_date = normalize_lesson_date(lesson_date)
+    if student_id is None or normalized_date is None or get_student(student_id) is None:
+        return None
+
+    now = datetime.now().isoformat(timespec="seconds")
+    with get_progress_connection() as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO lessons (student_id, lesson_date, title, notes, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (student_id, normalized_date, str(title or "").strip(), str(notes or "").strip(), now, now),
+        )
+    return get_lesson(student_id, cursor.lastrowid)
+
+
+def update_lesson(student_id, lesson_id, lesson_date, title="", notes=""):
+    lesson = get_lesson(student_id, lesson_id)
+    normalized_date = normalize_lesson_date(lesson_date)
+    if lesson is None or normalized_date is None:
+        return False
+
+    with get_progress_connection() as connection:
+        connection.execute(
+            """
+            UPDATE lessons SET lesson_date = ?, title = ?, notes = ?, updated_at = ?
+            WHERE id = ? AND student_id = ?
+            """,
+            (normalized_date, str(title or "").strip(), str(notes or "").strip(),
+             datetime.now().isoformat(timespec="seconds"), lesson["id"], parse_student_id(student_id)),
+        )
+    return True
+
+
+def get_lesson_vocabulary_entries(student_id, lesson_id):
+    lesson = get_lesson(student_id, lesson_id)
+    if lesson is None:
+        return []
+
+    with get_progress_connection() as connection:
+        words = [row["vocabulary_word"] for row in connection.execute(
+            "SELECT vocabulary_word FROM lesson_vocabulary WHERE lesson_id = ? ORDER BY vocabulary_word",
+            (lesson["id"],),
+        )]
+    return [DICTIONARY_ENTRIES_BY_WORD[word] for word in words if word in DICTIONARY_ENTRIES_BY_WORD]
+
+
+def add_lesson_vocabulary(student_id, lesson_id, vocabulary_word):
+    lesson = get_lesson(student_id, lesson_id)
+    word = str(vocabulary_word or "").strip()
+    if lesson is None:
+        return "Choose a valid lesson first."
+    if word not in DICTIONARY_ENTRIES_BY_WORD:
+        return "Lesson vocabulary must be an existing built-in dictionary word."
+
+    with get_progress_connection() as connection:
+        cursor = connection.execute(
+            "INSERT OR IGNORE INTO lesson_vocabulary (lesson_id, vocabulary_word) VALUES (?, ?)",
+            (lesson["id"], word),
+        )
+    return None if cursor.rowcount else "This word is already in the lesson."
+
+
+def remove_lesson_vocabulary(student_id, lesson_id, vocabulary_word):
+    lesson = get_lesson(student_id, lesson_id)
+    if lesson is None:
+        return False
+    with get_progress_connection() as connection:
+        connection.execute(
+            "DELETE FROM lesson_vocabulary WHERE lesson_id = ? AND vocabulary_word = ?",
+            (lesson["id"], str(vocabulary_word or "").strip()),
+        )
+    return True
+
+
+def get_latest_lesson_entries(student_id):
+    lessons = get_lessons(student_id, limit=1)
+    return get_lesson_vocabulary_entries(student_id, lessons[0]["id"]) if lessons else []
 
 
 def get_saved_vocabulary_entries(student_id):
@@ -753,7 +911,7 @@ def get_daily_conversation_prompt():
 
 
 def get_conversation_vocabulary_hint(student_id):
-    for source in ("today", "weak", "saved"):
+    for source in ("today", "saved"):
         entries = get_quiz_pool(source, student_id)
         if entries:
             entry = entries[0]
@@ -1063,15 +1221,15 @@ def get_quiz_pool(source, student_id):
         return get_saved_vocabulary_entries(student_id)
     if source == "review":
         return get_review_mistake_entries(student_id)
-    if source == "weak":
-        return get_weak_vocabulary_entries(student_id)
     if source == "today":
         return get_due_review_entries(student_id)
+    if source == "lesson":
+        return get_latest_lesson_entries(student_id)
     return get_quiz_entries()
 
 
 def normalize_sentence_source(value):
-    return value if value in {"saved", "today", "weak", "recent"} else "saved"
+    return value if value in {"saved", "today", "recent", "lesson"} else "saved"
 
 
 def get_sentence_practice_pool(source, student_id):
@@ -1118,6 +1276,7 @@ def get_empty_progress_summary(selected_day=None):
         "quiz_stats": {"attempted": 0, "correct": 0, "accuracy": 0},
         "weak_words": [],
         "due_reviews": [],
+        "recent_lessons": [],
     }
 
 
@@ -1235,6 +1394,7 @@ def get_progress_summary(student_id, selected_day=None):
 
     weak_words = get_weak_vocabulary_stats(student_id)
     due_reviews = get_due_review_entries(student_id)
+    recent_lessons = get_lessons(student_id, limit=3)
     return {
         "total_searches": total_searches,
         "unique_words": unique_words,
@@ -1252,6 +1412,7 @@ def get_progress_summary(student_id, selected_day=None):
         },
         "weak_words": weak_words,
         "due_reviews": due_reviews,
+        "recent_lessons": recent_lessons,
     }
 
 def simplify_known_traditional_text(text):
@@ -2003,7 +2164,7 @@ def parse_quiz_score(value):
 
 
 def normalize_quiz_source(value):
-    return value if value in {"all", "recent", "saved", "review", "weak", "today"} else "all"
+    return value if value in {"all", "recent", "saved", "review", "today", "lesson"} else "all"
 
 
 def normalize_quiz_type(value):
@@ -2060,6 +2221,12 @@ def home():
     sentence_text = ""
     sentence_feedback = None
     sentence_error = None
+    lesson_id = request.form.get("lesson_id") or request.args.get("lesson_id")
+    lessons = get_lessons(student_id)
+    selected_lesson = get_lesson(student_id, lesson_id)
+    lesson_vocabulary = get_lesson_vocabulary_entries(student_id, lesson_id)
+    lesson_message = ""
+    lesson_error = ""
     conversation_id = request.form.get("conversation_id") or request.args.get("conversation_id") or uuid.uuid4().hex
     default_conversation_prompt, default_conversation_prompt_english = get_daily_conversation_prompt()
     conversation_prompt = clean_generated_mandarin_sentence(
@@ -2152,6 +2319,58 @@ def home():
                     sentence_text,
                     sentence_feedback["target_used"] if sentence_feedback else None,
                 )
+        elif form_type == "lesson-create":
+            mode = "lessons"
+            if student_id is None:
+                lesson_error = "Choose a learner before creating a lesson."
+            else:
+                selected_lesson = create_lesson(
+                    student_id,
+                    request.form.get("lesson_date"),
+                    request.form.get("title"),
+                    request.form.get("notes"),
+                )
+                if selected_lesson is None:
+                    lesson_error = "Enter a valid lesson date."
+                else:
+                    lesson_id = selected_lesson["id"]
+                    lesson_message = "Lesson created. Add vocabulary below."
+                    lessons = get_lessons(student_id)
+                    lesson_vocabulary = []
+        elif form_type == "lesson-update":
+            mode = "lessons"
+            lesson_id = request.form.get("lesson_id")
+            if update_lesson(
+                student_id,
+                lesson_id,
+                request.form.get("lesson_date"),
+                request.form.get("title"),
+                request.form.get("notes"),
+            ):
+                lesson_message = "Lesson updated."
+            else:
+                lesson_error = "Enter a valid lesson date."
+            selected_lesson = get_lesson(student_id, lesson_id)
+            lesson_vocabulary = get_lesson_vocabulary_entries(student_id, lesson_id)
+            lessons = get_lessons(student_id)
+        elif form_type == "lesson-vocabulary-add":
+            mode = "lessons"
+            lesson_id = request.form.get("lesson_id")
+            lesson_error = add_lesson_vocabulary(student_id, lesson_id, request.form.get("vocabulary_word")) or ""
+            lesson_message = "Vocabulary added." if not lesson_error else ""
+            selected_lesson = get_lesson(student_id, lesson_id)
+            lesson_vocabulary = get_lesson_vocabulary_entries(student_id, lesson_id)
+            lessons = get_lessons(student_id)
+        elif form_type == "lesson-vocabulary-remove":
+            mode = "lessons"
+            lesson_id = request.form.get("lesson_id")
+            if remove_lesson_vocabulary(student_id, lesson_id, request.form.get("vocabulary_word")):
+                lesson_message = "Vocabulary removed from this lesson."
+            else:
+                lesson_error = "Choose a valid lesson first."
+            selected_lesson = get_lesson(student_id, lesson_id)
+            lesson_vocabulary = get_lesson_vocabulary_entries(student_id, lesson_id)
+            lessons = get_lessons(student_id)
         elif form_type == "conversation":
             mode = "conversation"
             conversation_id = request.form.get("conversation_id") or uuid.uuid4().hex
@@ -2329,6 +2548,12 @@ def home():
         sentence_text=sentence_text,
         sentence_feedback=sentence_feedback,
         sentence_error=sentence_error,
+        lessons=lessons,
+        selected_lesson=selected_lesson,
+        lesson_vocabulary=lesson_vocabulary,
+        lesson_message=lesson_message,
+        lesson_error=lesson_error,
+        today_date=date.today().isoformat(),
         conversation_id=conversation_id,
         conversation_prompt=conversation_prompt,
         conversation_prompt_english=conversation_prompt_english,

@@ -77,6 +77,9 @@
             <a href="{{ url_for('home', mode='saved', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'saved' %}active{% endif %}" {% if mode == 'saved' %}aria-current="page"{% endif %}>
                 Saved Vocabulary
             </a>
+            <a href="{{ url_for('home', mode='lessons', student_id=selected_student.id if selected_student else None) }}" class="{% if mode == 'lessons' %}active{% endif %}" {% if mode == 'lessons' %}aria-current="page"{% endif %}>
+                Lesson Notes
+            </a>
         </nav>
 
         {% if mode == 'search' or mode == 'batch' %}
@@ -333,6 +336,115 @@
             <p class="audio-status" id="audio-status" hidden></p>
         {% endif %}
 
+        {% if mode == 'lessons' %}
+            {% if not selected_student %}
+                <section class="empty-state">
+                    <h2>Choose a learner first</h2>
+                    <p>Select a learner to keep lesson notes and vocabulary separate.</p>
+                </section>
+            {% else %}
+                <section class="lesson-panel">
+                    <h2>New Lesson</h2>
+                    <form method="post" class="lesson-form">
+                        <input type="hidden" name="form_type" value="lesson-create">
+                        <input type="hidden" name="student_id" value="{{ selected_student.id }}">
+                        <label for="lesson-date">Lesson date</label>
+                        <input id="lesson-date" name="lesson_date" type="date" value="{{ today_date }}" required>
+                        <label for="lesson-title">Title <span class="field-optional">optional</span></label>
+                        <input id="lesson-title" name="title" type="text" maxlength="120" placeholder="For example: Ordering food">
+                        <label for="lesson-notes">Notes</label>
+                        <textarea id="lesson-notes" name="notes" placeholder="What did you cover in this lesson?"></textarea>
+                        <button type="submit">Create lesson</button>
+                    </form>
+                </section>
+
+                {% if lesson_error %}<p class="lesson-message lesson-error">{{ lesson_error }}</p>{% endif %}
+                {% if lesson_message %}<p class="lesson-message">{{ lesson_message }}</p>{% endif %}
+
+                {% if selected_lesson %}
+                    <section class="lesson-panel">
+                        <div class="lesson-panel-header">
+                            <h2>{{ selected_lesson.title or 'Untitled lesson' }}</h2>
+                            <span>{{ selected_lesson.lesson_date }}</span>
+                        </div>
+                        <form method="post" class="lesson-form">
+                            <input type="hidden" name="form_type" value="lesson-update">
+                            <input type="hidden" name="student_id" value="{{ selected_student.id }}">
+                            <input type="hidden" name="lesson_id" value="{{ selected_lesson.id }}">
+                            <label for="edit-lesson-date">Lesson date</label>
+                            <input id="edit-lesson-date" name="lesson_date" type="date" value="{{ selected_lesson.lesson_date }}" required>
+                            <label for="edit-lesson-title">Title <span class="field-optional">optional</span></label>
+                            <input id="edit-lesson-title" name="title" type="text" maxlength="120" value="{{ selected_lesson.title }}">
+                            <label for="edit-lesson-notes">Notes</label>
+                            <textarea id="edit-lesson-notes" name="notes">{{ selected_lesson.notes }}</textarea>
+                            <button type="submit">Save lesson</button>
+                        </form>
+
+                        <div class="lesson-vocabulary-header">
+                            <h3>Lesson Vocabulary</h3>
+                            {% if lesson_vocabulary %}
+                                <div class="lesson-practice-actions">
+                                    <a class="practice-button" href="{{ url_for('home', mode='quiz', quiz_source='lesson', student_id=selected_student.id) }}">Quiz this lesson</a>
+                                    <a class="practice-button" href="{{ url_for('home', mode='sentence', sentence_source='lesson', student_id=selected_student.id) }}">Sentence practice</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <form method="post" class="lesson-vocabulary-form">
+                            <input type="hidden" name="form_type" value="lesson-vocabulary-add">
+                            <input type="hidden" name="student_id" value="{{ selected_student.id }}">
+                            <input type="hidden" name="lesson_id" value="{{ selected_lesson.id }}">
+                            <label for="lesson-vocabulary-word">Add built-in dictionary word</label>
+                            <input id="lesson-vocabulary-word" name="vocabulary_word" type="text" placeholder="For example: 学校" required>
+                            <button type="submit">Add word</button>
+                        </form>
+                        {% if lesson_vocabulary %}
+                            <div class="lesson-vocabulary-list">
+                                {% for item in lesson_vocabulary %}
+                                    <article class="lesson-vocabulary-row">
+                                        <div>
+                                            <strong>{{ item.word | display_chinese_pair }}</strong>
+                                            <span>{{ item.pinyin | display_pinyin_pair(item.word, item.traditional) }}</span>
+                                            <span>{{ item.english }}</span>
+                                        </div>
+                                        <div class="lesson-vocabulary-actions">
+                                            <button type="button" class="audio-button inline-audio-button" data-speak="{{ item.word }}" aria-label="Play pronunciation for {{ item.word }}" title="Play pronunciation">
+                                                <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon"><path d="M3 10v4h4l5 4V6L7 10H3z"></path><path d="M16 8a5 5 0 0 1 0 8"></path><path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"></path></svg>
+                                            </button>
+                                            <form method="post">
+                                                <input type="hidden" name="form_type" value="lesson-vocabulary-remove">
+                                                <input type="hidden" name="student_id" value="{{ selected_student.id }}">
+                                                <input type="hidden" name="lesson_id" value="{{ selected_lesson.id }}">
+                                                <input type="hidden" name="vocabulary_word" value="{{ item.word }}">
+                                                <button type="submit" class="copy-button">Remove</button>
+                                            </form>
+                                        </div>
+                                    </article>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="progress-empty">No vocabulary added to this lesson yet.</p>
+                        {% endif %}
+                    </section>
+                {% endif %}
+
+                <section class="lesson-panel">
+                    <h2>Previous Lessons</h2>
+                    {% if lessons %}
+                        <div class="lesson-list">
+                            {% for lesson in lessons %}
+                                <a class="lesson-list-row {% if selected_lesson and lesson.id == selected_lesson.id %}selected{% endif %}" href="{{ url_for('home', mode='lessons', lesson_id=lesson.id, student_id=selected_student.id) }}">
+                                    <strong>{{ lesson.lesson_date }} · {{ lesson.title or 'Untitled lesson' }}</strong>
+                                    <span>{{ lesson.vocabulary_count }} vocabulary words</span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="progress-empty">No lesson notes yet.</p>
+                    {% endif %}
+                </section>
+            {% endif %}
+        {% endif %}
+
         {% if mode == 'convert' %}
             <section class="convert-panel">
                 <form method="post" class="convert-form">
@@ -384,16 +496,16 @@
                     Review Today
                 </a>
                 <a
-                    href="{{ url_for('home', mode='sentence', sentence_source='weak', student_id=selected_student.id if selected_student else None) }}"
-                    class="{% if sentence_source == 'weak' %}active{% endif %}"
-                >
-                    Needs Practice
-                </a>
-                <a
                     href="{{ url_for('home', mode='sentence', sentence_source='recent', student_id=selected_student.id if selected_student else None) }}"
                     class="{% if sentence_source == 'recent' %}active{% endif %}"
                 >
                     Recent Searches
+                </a>
+                <a
+                    href="{{ url_for('home', mode='sentence', sentence_source='lesson', student_id=selected_student.id if selected_student else None) }}"
+                    class="{% if sentence_source == 'lesson' %}active{% endif %}"
+                >
+                    Latest Lesson
                 </a>
             </nav>
 
@@ -409,8 +521,8 @@
                         <p>Save vocabulary from a result card to start sentence practice.</p>
                     {% elif sentence_source == 'today' %}
                         <p>You're all caught up for today.</p>
-                    {% elif sentence_source == 'weak' %}
-                        <p>No weak words yet. Complete a few quizzes first.</p>
+                    {% elif sentence_source == 'lesson' %}
+                        <p>Add built-in vocabulary to the latest lesson first.</p>
                     {% else %}
                         <p>Search for a few vocabulary words first, then return here.</p>
                     {% endif %}
@@ -672,16 +784,16 @@
                     Review Mistakes
                 </a>
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source='weak', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
-                    class="{% if quiz_source == 'weak' %}active{% endif %}"
-                >
-                    Needs Practice
-                </a>
-                <a
                     href="{{ url_for('home', mode='quiz', quiz_source='today', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
                     class="{% if quiz_source == 'today' %}active{% endif %}"
                 >
                     Review Today
+                </a>
+                <a
+                    href="{{ url_for('home', mode='quiz', quiz_source='lesson', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
+                    class="{% if quiz_source == 'lesson' %}active{% endif %}"
+                >
+                    Latest Lesson
                 </a>
             </nav>
 
@@ -725,10 +837,11 @@
                     {% elif quiz_source == 'saved' %}
                         <h2>No saved words to practise</h2>
                         <p>Save vocabulary from a result card to build a practice list.</p>
-                    {% elif quiz_source == 'weak' %}
-                        <h2>No weak words yet. Keep practising!</h2>
                     {% elif quiz_source == 'today' %}
                         <h2>You're all caught up for today.</h2>
+                    {% elif quiz_source == 'lesson' %}
+                        <h2>No latest-lesson vocabulary to practise</h2>
+                        <p>Create a lesson and add built-in vocabulary first.</p>
                     {% else %}
                         <h2>No mistakes to review</h2>
                         <p>This learner has no first-attempt mistakes yet.</p>
@@ -741,8 +854,8 @@
                         {% if quiz_source == 'recent' %}Recent Searches
                         {% elif quiz_source == 'saved' %}Saved Words
                         {% elif quiz_source == 'review' %}Review Mistakes
-                        {% elif quiz_source == 'weak' %}Needs Practice
                         {% elif quiz_source == 'today' %}Review Today
+                        {% elif quiz_source == 'lesson' %}Latest Lesson
                         {% else %}All Words{% endif %}
                     </p>
                     <h2>What does this Mandarin word mean?</h2>
@@ -882,15 +995,26 @@
 
             <section class="progress-panel">
                 <div class="needs-practice-header">
+                    <h2>Recent Lessons</h2>
+                    <a class="practice-button" href="{{ url_for('home', mode='lessons', student_id=selected_student.id) }}">Lesson Notes</a>
+                </div>
+                {% if progress_summary.recent_lessons %}
+                    <div class="progress-list">
+                        {% for lesson in progress_summary.recent_lessons %}
+                            <a class="progress-row progress-day-link" href="{{ url_for('home', mode='lessons', lesson_id=lesson.id, student_id=selected_student.id) }}">
+                                <strong>{{ lesson.lesson_date }} · {{ lesson.title or 'Untitled lesson' }}</strong>
+                                <span>{{ lesson.vocabulary_count }} vocabulary words</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="progress-empty">No lesson notes yet.</p>
+                {% endif %}
+            </section>
+
+            <section class="progress-panel">
+                <div class="needs-practice-header">
                     <h2>Needs Practice</h2>
-                    {% if progress_summary.weak_words %}
-                        <a
-                            class="practice-button"
-                            href="{{ url_for('home', mode='quiz', quiz_source='weak', student_id=selected_student.id) }}"
-                        >
-                            Practice
-                        </a>
-                    {% endif %}
                 </div>
                 {% if progress_summary.weak_words %}
                     <div class="progress-list">

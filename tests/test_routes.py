@@ -548,8 +548,8 @@ def test_quiz_pools_use_the_selected_learners_persisted_vocabulary(monkeypatch, 
     assert [entry["word"] for entry in mandarin_app.get_quiz_pool("recent", ben["id"])] == ["朋友"]
     assert [entry["word"] for entry in mandarin_app.get_quiz_pool("saved", ben["id"])] == ["朋友"]
     assert [entry["word"] for entry in mandarin_app.get_quiz_pool("review", ben["id"])] == ["朋友"]
-    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("weak", alice["id"])] == ["机场"]
-    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("weak", ben["id"])] == ["朋友"]
+    assert [entry["word"] for entry in mandarin_app.get_weak_vocabulary_entries(alice["id"])] == ["机场"]
+    assert [entry["word"] for entry in mandarin_app.get_weak_vocabulary_entries(ben["id"])] == ["朋友"]
 
 
 def test_saved_vocabulary_starts_as_a_due_new_review(monkeypatch, tmp_path):
@@ -703,7 +703,7 @@ def test_sentence_practice_pools_are_learner_scoped(monkeypatch, tmp_path):
 
     assert [entry["word"] for entry in mandarin_app.get_sentence_practice_pool("saved", alice["id"])] == ["机场"]
     assert [entry["word"] for entry in mandarin_app.get_sentence_practice_pool("recent", alice["id"])] == ["机场"]
-    assert [entry["word"] for entry in mandarin_app.get_sentence_practice_pool("weak", alice["id"])] == ["机场"]
+    assert [entry["word"] for entry in mandarin_app.get_weak_vocabulary_entries(alice["id"])] == ["机场"]
 
 
 def test_sentence_practice_empty_source_and_missing_sentence_are_safe(monkeypatch, tmp_path):
@@ -1070,7 +1070,7 @@ def test_weak_vocabulary_stats_use_first_attempts_and_exclude_perfect_words(monk
     assert "学习" not in {item["word"] for item in stats}
 
 
-def test_weak_vocabulary_stats_and_pool_are_isolated_by_learner(monkeypatch, tmp_path):
+def test_weak_vocabulary_stats_are_isolated_by_learner(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
     alice = mandarin_app.create_student("Alice")
     ben = mandarin_app.create_student("Ben")
@@ -1080,11 +1080,11 @@ def test_weak_vocabulary_stats_and_pool_are_isolated_by_learner(monkeypatch, tmp
 
     assert [item["word"] for item in mandarin_app.get_weak_vocabulary_stats(alice["id"])] == ["机场"]
     assert [item["word"] for item in mandarin_app.get_weak_vocabulary_stats(ben["id"])] == ["朋友"]
-    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("weak", alice["id"])] == ["机场"]
-    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("weak", ben["id"])] == ["朋友"]
+    assert [entry["word"] for entry in mandarin_app.get_weak_vocabulary_entries(alice["id"])] == ["机场"]
+    assert [entry["word"] for entry in mandarin_app.get_weak_vocabulary_entries(ben["id"])] == ["朋友"]
 
 
-def test_progress_mode_shows_needs_practice_empty_state_and_practice_action(monkeypatch, tmp_path):
+def test_progress_mode_shows_needs_practice_as_read_only_analytics(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
     student = mandarin_app.create_student("Alice")
     client = mandarin_app.app.test_client()
@@ -1092,15 +1092,10 @@ def test_progress_mode_shows_needs_practice_empty_state_and_practice_action(monk
     empty_response = client.get("/", query_string={"mode": "progress", "student_id": student["id"]})
     mandarin_app.record_quiz_attempt(student["id"], "机场", False, "airport-wrong")
     weak_response = client.get("/", query_string={"mode": "progress", "student_id": student["id"]})
-    weak_quiz_response = client.get(
-        "/", query_string={"mode": "quiz", "quiz_source": "weak", "student_id": student["id"]}
-    )
-
     assert b"No weak words yet. Keep practising!" in empty_response.data
     assert b"Needs Practice" in weak_response.data
-    assert b"Practice" in weak_response.data
     assert "机场 / 機場".encode("utf-8") in weak_response.data
-    assert b"Needs Practice" in weak_quiz_response.data
+    assert b'quiz_source=weak' not in weak_response.data
 
 
 def test_quiz_source_empty_states_are_learner_specific(monkeypatch, tmp_path):
@@ -2080,3 +2075,113 @@ def test_speak_endpoint_starts_local_speech(monkeypatch):
     assert response.status_code == 200
     assert response.get_json()["ok"] is True
     assert started_commands == [[mandarin_app.TTS_COMMAND, "-v", mandarin_app.TTS_VOICE, "你好"]]
+
+
+def test_lessons_are_created_edited_and_isolated_by_learner(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    alice = mandarin_app.create_student("Alice")
+    ben = mandarin_app.create_student("Ben")
+
+    lesson = mandarin_app.create_lesson(alice["id"], "2026-09-08", "Food", "Practised ordering food.")
+
+    assert lesson["title"] == "Food"
+    assert mandarin_app.update_lesson(alice["id"], lesson["id"], "2026-09-09", "Cafe", "Practised drinks.")
+    assert mandarin_app.get_lesson(alice["id"], lesson["id"])["title"] == "Cafe"
+    assert mandarin_app.get_lesson(ben["id"], lesson["id"]) is None
+    assert mandarin_app.get_lessons(ben["id"]) == []
+
+
+def test_lesson_vocabulary_persists_rejects_duplicates_and_invalid_words(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-08")
+
+    assert mandarin_app.add_lesson_vocabulary(student["id"], lesson["id"], "学校") is None
+    assert mandarin_app.add_lesson_vocabulary(student["id"], lesson["id"], "学校") == "This word is already in the lesson."
+    assert mandarin_app.add_lesson_vocabulary(student["id"], lesson["id"], "不存在") == (
+        "Lesson vocabulary must be an existing built-in dictionary word."
+    )
+    assert [entry["word"] for entry in mandarin_app.get_lesson_vocabulary_entries(student["id"], lesson["id"])] == ["学校"]
+
+
+def test_removing_lesson_vocabulary_does_not_remove_dictionary_data(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-08")
+    mandarin_app.add_lesson_vocabulary(student["id"], lesson["id"], "学校")
+
+    assert mandarin_app.remove_lesson_vocabulary(student["id"], lesson["id"], "学校")
+    assert mandarin_app.get_lesson_vocabulary_entries(student["id"], lesson["id"]) == []
+    assert mandarin_app.DICTIONARY_ENTRIES_BY_WORD["学校"]["english"] == "school"
+
+
+def test_latest_lesson_pool_is_learner_scoped_and_works_for_quiz_types(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    alice = mandarin_app.create_student("Alice")
+    ben = mandarin_app.create_student("Ben")
+    alice_lesson = mandarin_app.create_lesson(alice["id"], "2026-09-08")
+    ben_lesson = mandarin_app.create_lesson(ben["id"], "2026-09-08")
+    mandarin_app.add_lesson_vocabulary(alice["id"], alice_lesson["id"], "学校")
+    mandarin_app.add_lesson_vocabulary(ben["id"], ben_lesson["id"], "机场")
+
+    alice_pool = mandarin_app.get_quiz_pool("lesson", alice["id"])
+    quiz = mandarin_app.build_quiz(pool_entries=alice_pool)
+    client = mandarin_app.app.test_client()
+    listening_response = client.get(
+        "/", query_string={"mode": "quiz", "quiz_source": "lesson", "quiz_type": "listening", "student_id": alice["id"]}
+    )
+
+    assert [entry["word"] for entry in alice_pool] == ["学校"]
+    assert [entry["word"] for entry in mandarin_app.get_quiz_pool("lesson", ben["id"])] == ["机场"]
+    assert quiz["word"] == "学校"
+    assert b"Latest Lesson" in listening_response.data
+    assert 'data-speak="学校"'.encode("utf-8") in listening_response.data
+    assert b'class="quiz-word"' not in listening_response.data
+
+
+def test_sentence_practice_can_select_latest_lesson_vocabulary(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-08")
+    mandarin_app.add_lesson_vocabulary(student["id"], lesson["id"], "学校")
+
+    target = mandarin_app.choose_sentence_target("lesson", student["id"], "学校")
+    response = mandarin_app.app.test_client().get(
+        "/", query_string={"mode": "sentence", "sentence_source": "lesson", "target_word": "学校", "student_id": student["id"]}
+    )
+
+    assert target["word"] == "学校"
+    assert b"Latest Lesson" in response.data
+    assert "学校".encode("utf-8") in response.data
+
+
+def test_lesson_routes_and_progress_render_learner_scoped_content(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    client = mandarin_app.app.test_client()
+    create_response = client.post(
+        "/",
+        data={
+            "form_type": "lesson-create",
+            "student_id": student["id"],
+            "lesson_date": "2026-09-08",
+            "title": "Travel",
+            "notes": "Practised airport vocabulary.",
+        },
+    )
+    lesson = mandarin_app.get_lessons(student["id"])[0]
+    add_response = client.post(
+        "/",
+        data={
+            "form_type": "lesson-vocabulary-add",
+            "student_id": student["id"],
+            "lesson_id": lesson["id"],
+            "vocabulary_word": "机场",
+        },
+    )
+    progress_response = client.get("/", query_string={"mode": "progress", "student_id": student["id"]})
+
+    assert b"Lesson created" in create_response.data
+    assert "机场".encode("utf-8") in add_response.data
+    assert b"Recent Lessons" in progress_response.data
+    assert b"Travel" in progress_response.data
