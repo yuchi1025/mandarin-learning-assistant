@@ -11,6 +11,7 @@
 - Added Needs Practice as read-only learner-specific accuracy analytics, while Review Mistakes remains the focused mistake-review quiz source.
 - Added Sentence Practice with learner-scoped vocabulary sources (saved, due, latest lesson, and recent), persisted original sentences, and validated Ollama feedback that keeps learner input separate from suggested improvements.
 - Added learner-scoped Lesson Notes with editable dates, titles, notes, and built-in dictionary vocabulary. Latest lesson vocabulary can be reused in Meaning Quiz, Listening Quiz, and Sentence Practice.
+- Added a deterministic learner-specific This Week summary using existing quiz, review, saved-vocabulary, sentence-practice, conversation, and lesson records. It reports first-attempt performance only and shows improving vocabulary only when both earlier and recent quiz history are sufficient.
 - Added Daily Conversation with learner-scoped, persisted multi-turn sessions, curated daily-life prompts, validated Ollama feedback, and beginner-friendly Mandarin follow-up questions.
 - Added fixed topic categories for the built-in vocabulary without changing the canonical dictionary JSON schema. Learners can filter Search, Batch, Saved Vocabulary, and Quiz Mode by category.
 - Expanded the built-in dictionary from 200 to 300 daily-use words, including common work, travel, food, health, and conversation vocabulary.

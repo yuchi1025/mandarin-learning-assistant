@@ -975,6 +975,63 @@
                 </div>
             </section>
 
+            <section class="progress-panel weekly-summary-panel">
+                <h2>This Week</h2>
+                {% if progress_summary.weekly_summary.has_activity %}
+                    <p class="weekly-summary-period">{{ progress_summary.weekly_summary.start_day }} to {{ progress_summary.weekly_summary.end_day }}</p>
+                    <div class="progress-stats weekly-summary-stats">
+                        <div class="progress-stat">
+                            <span>Quiz Questions</span>
+                            <strong>{{ progress_summary.weekly_summary.quiz_attempted }}</strong>
+                        </div>
+                        <div class="progress-stat">
+                            <span>First-Attempt Accuracy</span>
+                            <strong>{{ progress_summary.weekly_summary.quiz_accuracy }}%</strong>
+                        </div>
+                        <div class="progress-stat">
+                            <span>Vocabulary Reviewed</span>
+                            <strong>{{ progress_summary.weekly_summary.vocabulary_reviewed }}</strong>
+                        </div>
+                    </div>
+                    <div class="progress-list compact-progress-list weekly-summary-list">
+                        <div class="progress-row"><span>Review Today completions</span><strong>{{ progress_summary.weekly_summary.review_today_completions }}</strong></div>
+                        <div class="progress-row"><span>New saved vocabulary</span><strong>{{ progress_summary.weekly_summary.saved_vocabulary }}</strong></div>
+                        <div class="progress-row"><span>Sentence practices</span><strong>{{ progress_summary.weekly_summary.sentence_practices }}</strong></div>
+                        <div class="progress-row"><span>Conversation turns</span><strong>{{ progress_summary.weekly_summary.conversation_turns }}{% if progress_summary.weekly_summary.conversation_sessions %} · {{ progress_summary.weekly_summary.conversation_sessions }} sessions{% endif %}</strong></div>
+                        <div class="progress-row"><span>Lessons added</span><strong>{{ progress_summary.weekly_summary.lessons_added }}</strong></div>
+                    </div>
+
+                    {% if progress_summary.weekly_summary.improving_words %}
+                        <div class="weekly-insight">
+                            <h3>Improving</h3>
+                            {% for item in progress_summary.weekly_summary.improving_words %}
+                                <span>{{ item.word | display_chinese_pair }} · {{ item.pinyin }} · {{ item.earlier_accuracy }}% to {{ item.recent_accuracy }}%</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if progress_summary.weekly_summary.weak_words %}
+                        <div class="weekly-insight">
+                            <h3>Still Needs Practice</h3>
+                            {% for item in progress_summary.weekly_summary.weak_words %}
+                                <span>{{ item.word | display_chinese_pair }} · {{ item.pinyin }} · {{ item.accuracy }}%</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if progress_summary.weekly_summary.recent_lessons %}
+                        <div class="weekly-insight">
+                            <h3>Lessons This Week</h3>
+                            {% for lesson in progress_summary.weekly_summary.recent_lessons %}
+                                <span>{{ lesson.lesson_date }} · {{ lesson.title or 'Untitled lesson' }} · {{ lesson.vocabulary_count }} words</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <p class="progress-empty">No learning activity recorded this week yet.</p>
+                {% endif %}
+            </section>
+
             <section class="progress-panel">
                 <h2>Quiz Results</h2>
                 <div class="progress-stats quiz-progress-stats">

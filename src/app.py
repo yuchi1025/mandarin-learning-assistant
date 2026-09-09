@@ -346,6 +346,7 @@ def init_progress_db():
                 first_attempt_correct INTEGER NOT NULL CHECK (first_attempt_correct IN (0, 1)),
                 completed_at TEXT NOT NULL,
                 interaction_key TEXT NOT NULL,
+                quiz_source TEXT NOT NULL DEFAULT 'all',
                 UNIQUE (student_id, interaction_key)
             )
             """
@@ -359,8 +360,14 @@ def init_progress_db():
             connection.execute(
                 "UPDATE quiz_attempts SET first_attempt_correct = is_correct WHERE first_attempt_correct IS NULL"
             )
+        if "quiz_source" not in quiz_attempt_columns:
+            connection.execute("ALTER TABLE quiz_attempts ADD COLUMN quiz_source TEXT NOT NULL DEFAULT 'all'")
         connection.execute(
             "CREATE INDEX IF NOT EXISTS idx_quiz_attempts_student_date ON quiz_attempts (student_id, completed_at)"
+        )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_quiz_attempts_student_source_date "
+            "ON quiz_attempts (student_id, quiz_source, completed_at)"
         )
         connection.execute(
             """
@@ -1000,10 +1007,11 @@ def update_review_schedule(student_id, vocabulary_word, first_attempt_correct):
         )
 
 
-def record_quiz_attempt(student_id, vocabulary_word, is_correct, interaction_key):
+def record_quiz_attempt(student_id, vocabulary_word, is_correct, interaction_key, quiz_source="all"):
     student_id = parse_student_id(student_id)
     word = str(vocabulary_word or "").strip()
     attempt_key = str(interaction_key or "").strip()
+    source = normalize_quiz_source(quiz_source)
     if student_id is None or not word or not attempt_key or get_student(student_id) is None:
         return
 
@@ -1014,12 +1022,19 @@ def record_quiz_attempt(student_id, vocabulary_word, is_correct, interaction_key
             "SELECT id FROM quiz_attempts WHERE student_id = ? AND interaction_key = ?",
             (student_id, attempt_key),
         ).fetchone()
-        values = (word, int(bool(is_correct)), datetime.now().isoformat(timespec="seconds"), student_id, attempt_key)
+        values = (
+            word,
+            int(bool(is_correct)),
+            datetime.now().isoformat(timespec="seconds"),
+            source,
+            student_id,
+            attempt_key,
+        )
         if existing_attempt:
             connection.execute(
                 """
                 UPDATE quiz_attempts
-                SET vocabulary_word = ?, is_correct = ?, completed_at = ?
+                SET vocabulary_word = ?, is_correct = ?, completed_at = ?, quiz_source = ?
                 WHERE student_id = ? AND interaction_key = ?
                 """,
                 values,
@@ -1028,9 +1043,9 @@ def record_quiz_attempt(student_id, vocabulary_word, is_correct, interaction_key
             connection.execute(
                 """
                 INSERT INTO quiz_attempts (
-                    student_id, vocabulary_word, is_correct, first_attempt_correct, completed_at, interaction_key
+                    student_id, vocabulary_word, is_correct, first_attempt_correct, completed_at, interaction_key, quiz_source
                 )
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     student_id,
@@ -1039,6 +1054,7 @@ def record_quiz_attempt(student_id, vocabulary_word, is_correct, interaction_key
                     int(bool(is_correct)),
                     datetime.now().isoformat(timespec="seconds"),
                     attempt_key,
+                    source,
                 ),
             )
             first_attempt_recorded = True
@@ -1277,6 +1293,146 @@ def get_empty_progress_summary(selected_day=None):
         "weak_words": [],
         "due_reviews": [],
         "recent_lessons": [],
+        "weekly_summary": None,
+    }
+
+
+def get_weekly_improving_vocabulary(student_id, start_day, end_day, limit=3):
+    student_id = parse_student_id(student_id)
+    if student_id is None or get_student(student_id) is None:
+        return []
+
+    with get_progress_connection() as connection:
+        rows = [row_to_dict(row) for row in connection.execute(
+            """
+            SELECT vocabulary_word,
+                   SUM(CASE WHEN substr(completed_at, 1, 10) BETWEEN ? AND ? THEN first_attempt_correct ELSE 0 END) AS recent_correct,
+                   SUM(CASE WHEN substr(completed_at, 1, 10) BETWEEN ? AND ? THEN 1 ELSE 0 END) AS recent_attempted,
+                   SUM(CASE WHEN substr(completed_at, 1, 10) < ? THEN first_attempt_correct ELSE 0 END) AS earlier_correct,
+                   SUM(CASE WHEN substr(completed_at, 1, 10) < ? THEN 1 ELSE 0 END) AS earlier_attempted
+            FROM quiz_attempts
+            WHERE student_id = ? AND substr(completed_at, 1, 10) <= ?
+            GROUP BY vocabulary_word
+            """,
+            (start_day, end_day, start_day, end_day, start_day, start_day, student_id, end_day),
+        )]
+
+    improving_words = []
+    for row in rows:
+        if row["recent_attempted"] < 2 or row["earlier_attempted"] < 2:
+            continue
+        recent_accuracy = row["recent_correct"] / row["recent_attempted"]
+        earlier_accuracy = row["earlier_correct"] / row["earlier_attempted"]
+        if recent_accuracy <= earlier_accuracy:
+            continue
+        entry = DICTIONARY_ENTRIES_BY_WORD.get(row["vocabulary_word"])
+        if entry:
+            improving_words.append({
+                "word": entry["word"],
+                "traditional": entry.get("traditional", entry["word"]),
+                "pinyin": entry["pinyin"],
+                "recent_accuracy": round(recent_accuracy * 100),
+                "earlier_accuracy": round(earlier_accuracy * 100),
+            })
+    return sorted(
+        improving_words,
+        key=lambda item: (item["recent_accuracy"] - item["earlier_accuracy"], item["recent_accuracy"]),
+        reverse=True,
+    )[:limit]
+
+
+def get_weekly_progress_summary(student_id, today=None):
+    student_id = parse_student_id(student_id)
+    if student_id is None or get_student(student_id) is None:
+        return None
+
+    end_date = today or review_date_today()
+    start_date = end_date - timedelta(days=6)
+    start_day = start_date.isoformat()
+    end_day = end_date.isoformat()
+    window_parameters = (student_id, start_day, end_day)
+
+    with get_progress_connection() as connection:
+        quiz_metrics = row_to_dict(connection.execute(
+            """
+            SELECT COUNT(*) AS attempted,
+                   COALESCE(SUM(first_attempt_correct), 0) AS correct,
+                   COUNT(DISTINCT vocabulary_word) AS vocabulary_reviewed,
+                   COALESCE(SUM(CASE WHEN quiz_source = 'today' AND is_correct = 1 THEN 1 ELSE 0 END), 0) AS review_today_completions
+            FROM quiz_attempts
+            WHERE student_id = ? AND substr(completed_at, 1, 10) BETWEEN ? AND ?
+            """,
+            window_parameters,
+        ).fetchone())
+        saved_vocabulary = connection.execute(
+            "SELECT COUNT(*) AS count FROM saved_vocabulary WHERE student_id = ? AND substr(saved_at, 1, 10) BETWEEN ? AND ?",
+            window_parameters,
+        ).fetchone()["count"]
+        sentence_practices = connection.execute(
+            "SELECT COUNT(*) AS count FROM sentence_practice_events WHERE student_id = ? AND substr(created_at, 1, 10) BETWEEN ? AND ?",
+            window_parameters,
+        ).fetchone()["count"]
+        conversation_metrics = row_to_dict(connection.execute(
+            """
+            SELECT COUNT(*) AS turns, COUNT(DISTINCT conversation_id) AS sessions
+            FROM conversation_turns
+            WHERE student_id = ? AND substr(created_at, 1, 10) BETWEEN ? AND ?
+            """,
+            window_parameters,
+        ).fetchone())
+        lessons_added = connection.execute(
+            "SELECT COUNT(*) AS count FROM lessons WHERE student_id = ? AND substr(created_at, 1, 10) BETWEEN ? AND ?",
+            window_parameters,
+        ).fetchone()["count"]
+        recent_lessons = [row_to_dict(row) for row in connection.execute(
+            """
+            SELECT lessons.id, lessons.lesson_date, lessons.title,
+                   COUNT(lesson_vocabulary.vocabulary_word) AS vocabulary_count
+            FROM lessons
+            LEFT JOIN lesson_vocabulary ON lesson_vocabulary.lesson_id = lessons.id
+            WHERE lessons.student_id = ? AND lessons.lesson_date BETWEEN ? AND ?
+            GROUP BY lessons.id
+            ORDER BY lessons.lesson_date DESC, lessons.id DESC
+            LIMIT 3
+            """,
+            window_parameters,
+        )]
+        weekly_quiz_words = {
+            row["vocabulary_word"] for row in connection.execute(
+                """
+                SELECT DISTINCT vocabulary_word FROM quiz_attempts
+                WHERE student_id = ? AND substr(completed_at, 1, 10) BETWEEN ? AND ?
+                """,
+                window_parameters,
+            )
+        }
+
+    attempted = quiz_metrics["attempted"]
+    weak_words = [
+        item for item in get_weak_vocabulary_stats(student_id, limit=100)
+        if item["word"] in weekly_quiz_words
+    ][:3]
+    improving_words = get_weekly_improving_vocabulary(student_id, start_day, end_day)
+    activity_count = (
+        attempted + saved_vocabulary + sentence_practices + conversation_metrics["turns"] + lessons_added
+    )
+    return {
+        "start_day": start_day,
+        "end_day": end_day,
+        "has_activity": bool(activity_count),
+        "quiz_attempted": attempted,
+        "quiz_correct": quiz_metrics["correct"],
+        "quiz_accuracy": round((quiz_metrics["correct"] / attempted) * 100) if attempted else 0,
+        "vocabulary_reviewed": quiz_metrics["vocabulary_reviewed"],
+        "review_today_completions": quiz_metrics["review_today_completions"],
+        "saved_vocabulary": saved_vocabulary,
+        "sentence_practices": sentence_practices,
+        "conversation_turns": conversation_metrics["turns"],
+        "conversation_sessions": conversation_metrics["sessions"],
+        "lessons_added": lessons_added,
+        "recent_lessons": recent_lessons,
+        "weak_words": weak_words,
+        "improving_words": improving_words,
     }
 
 
@@ -1395,6 +1551,7 @@ def get_progress_summary(student_id, selected_day=None):
     weak_words = get_weak_vocabulary_stats(student_id)
     due_reviews = get_due_review_entries(student_id)
     recent_lessons = get_lessons(student_id, limit=3)
+    weekly_summary = get_weekly_progress_summary(student_id)
     return {
         "total_searches": total_searches,
         "unique_words": unique_words,
@@ -1413,6 +1570,7 @@ def get_progress_summary(student_id, selected_day=None):
         "weak_words": weak_words,
         "due_reviews": due_reviews,
         "recent_lessons": recent_lessons,
+        "weekly_summary": weekly_summary,
     }
 
 def simplify_known_traditional_text(text):
@@ -2479,7 +2637,7 @@ def home():
                 quiz_attempt_key = uuid.uuid4().hex
             else:
                 is_correct = selected_answer == quiz["correct_answer"]
-                record_quiz_attempt(student_id, quiz["word"], is_correct, quiz_attempt_key)
+                record_quiz_attempt(student_id, quiz["word"], is_correct, quiz_attempt_key, quiz_source)
                 if is_correct:
                     if not quiz_score["question_counted"]:
                         quiz_score["attempted"] += 1

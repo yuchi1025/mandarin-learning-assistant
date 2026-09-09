@@ -1113,6 +1113,32 @@ h1 {
     font-size: 1.15rem;
 }
 
+.weekly-summary-period {
+    margin: -6px 0 14px;
+    color: #6a5b4d;
+    font-size: 0.92rem;
+}
+
+.weekly-summary-list {
+    margin-top: 16px;
+}
+
+.weekly-insight {
+    display: grid;
+    gap: 6px;
+    margin-top: 18px;
+}
+
+.weekly-insight h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.weekly-insight span {
+    color: #4f443a;
+    line-height: 1.45;
+}
+
 .progress-list {
     display: grid;
     gap: 10px;

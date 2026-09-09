@@ -2185,3 +2185,138 @@ def test_lesson_routes_and_progress_render_learner_scoped_content(monkeypatch, t
     assert "机场".encode("utf-8") in add_response.data
     assert b"Recent Lessons" in progress_response.data
     assert b"Travel" in progress_response.data
+
+
+def test_weekly_progress_counts_only_recent_learner_activity(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    today = mandarin_app.date(2026, 9, 9)
+    alice = mandarin_app.create_student("Alice")
+    ben = mandarin_app.create_student("Ben")
+    mandarin_app.init_progress_db()
+    with mandarin_app.get_progress_connection() as connection:
+        connection.executemany(
+            """
+            INSERT INTO quiz_attempts (
+                student_id, vocabulary_word, is_correct, first_attempt_correct, completed_at, interaction_key, quiz_source
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                (alice["id"], "学校", 1, 1, "2026-09-03T09:00:00", "alice-week-1", "all"),
+                (alice["id"], "机场", 1, 0, "2026-09-09T09:00:00", "alice-week-2", "today"),
+                (alice["id"], "朋友", 1, 1, "2026-09-02T09:00:00", "alice-old", "all"),
+                (ben["id"], "朋友", 1, 1, "2026-09-09T09:00:00", "ben-week", "today"),
+            ],
+        )
+        connection.execute(
+            "INSERT INTO saved_vocabulary (student_id, vocabulary_word, saved_at) VALUES (?, ?, ?)",
+            (alice["id"], "学校", "2026-09-04T09:00:00"),
+        )
+        connection.execute(
+            "INSERT INTO sentence_practice_events (student_id, target_word, original_sentence, created_at) VALUES (?, ?, ?, ?)",
+            (alice["id"], "学校", "我去学校。", "2026-09-05T09:00:00"),
+        )
+        connection.executemany(
+            """
+            INSERT INTO conversation_turns (student_id, conversation_id, prompt, learner_answer, improved_answer, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            [
+                (alice["id"], "week-chat", "今天怎么样？", "很好。", None, "2026-09-06T09:00:00"),
+                (alice["id"], "week-chat", "吃饭了吗？", "吃了。", None, "2026-09-07T09:00:00"),
+            ],
+        )
+        cursor = connection.execute(
+            """
+            INSERT INTO lessons (student_id, lesson_date, title, notes, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (alice["id"], "2026-09-08", "Daily routine", "", "2026-09-08T09:00:00", "2026-09-08T09:00:00"),
+        )
+        connection.execute(
+            "INSERT INTO lesson_vocabulary (lesson_id, vocabulary_word) VALUES (?, ?)",
+            (cursor.lastrowid, "学校"),
+        )
+
+    summary = mandarin_app.get_weekly_progress_summary(alice["id"], today)
+    ben_summary = mandarin_app.get_weekly_progress_summary(ben["id"], today)
+
+    assert summary["start_day"] == "2026-09-03"
+    assert summary["quiz_attempted"] == 2
+    assert summary["quiz_correct"] == 1
+    assert summary["quiz_accuracy"] == 50
+    assert summary["vocabulary_reviewed"] == 2
+    assert summary["review_today_completions"] == 1
+    assert summary["saved_vocabulary"] == 1
+    assert summary["sentence_practices"] == 1
+    assert summary["conversation_turns"] == 2
+    assert summary["conversation_sessions"] == 1
+    assert summary["lessons_added"] == 1
+    assert summary["recent_lessons"][0]["title"] == "Daily routine"
+    assert ben_summary["quiz_attempted"] == 1
+    assert ben_summary["saved_vocabulary"] == 0
+
+
+def test_weekly_progress_uses_first_attempts_and_does_not_count_retries_twice(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    today = mandarin_app.date(2026, 9, 9)
+    student = mandarin_app.create_student("Alice")
+
+    mandarin_app.record_quiz_attempt(student["id"], "机场", False, "retry-key", "today")
+    mandarin_app.record_quiz_attempt(student["id"], "机场", True, "retry-key", "today")
+    with mandarin_app.get_progress_connection() as connection:
+        connection.execute(
+            "UPDATE quiz_attempts SET completed_at = ? WHERE student_id = ? AND interaction_key = ?",
+            ("2026-09-09T09:00:00", student["id"], "retry-key"),
+        )
+
+    summary = mandarin_app.get_weekly_progress_summary(student["id"], today)
+
+    assert summary["quiz_attempted"] == 1
+    assert summary["quiz_correct"] == 0
+    assert summary["quiz_accuracy"] == 0
+    assert summary["review_today_completions"] == 1
+    assert [item["word"] for item in summary["weak_words"]] == ["机场"]
+
+
+def test_weekly_progress_only_shows_improving_words_with_enough_first_attempt_data(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    mandarin_app.init_progress_db()
+    with mandarin_app.get_progress_connection() as connection:
+        connection.executemany(
+            """
+            INSERT INTO quiz_attempts (
+                student_id, vocabulary_word, is_correct, first_attempt_correct, completed_at, interaction_key, quiz_source
+            ) VALUES (?, ?, ?, ?, ?, ?, 'all')
+            """,
+            [
+                (student["id"], "学校", 0, 0, "2026-08-29T09:00:00", "earlier-1"),
+                (student["id"], "学校", 0, 0, "2026-08-30T09:00:00", "earlier-2"),
+                (student["id"], "学校", 1, 1, "2026-09-04T09:00:00", "recent-1"),
+                (student["id"], "学校", 1, 1, "2026-09-05T09:00:00", "recent-2"),
+                (student["id"], "朋友", 0, 0, "2026-09-06T09:00:00", "not-enough-1"),
+            ],
+        )
+
+    summary = mandarin_app.get_weekly_progress_summary(student["id"], mandarin_app.date(2026, 9, 9))
+
+    assert summary["improving_words"] == [{
+        "word": "学校",
+        "traditional": "學校",
+        "pinyin": "xué xiào",
+        "recent_accuracy": 100,
+        "earlier_accuracy": 0,
+    }]
+
+
+def test_weekly_progress_empty_state_renders_without_changing_existing_progress_sections(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    response = mandarin_app.app.test_client().get(
+        "/", query_string={"mode": "progress", "student_id": student["id"]}
+    )
+
+    assert b"This Week" in response.data
+    assert b"No learning activity recorded this week yet." in response.data
+    assert b"Quiz Results" in response.data
+    assert b"Review Today" in response.data

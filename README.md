@@ -30,6 +30,7 @@ Current version: `v3.2.0`
   - Added Sentence Practice so learners can write a Mandarin sentence from saved, due, latest-lesson, or recently searched vocabulary and receive validated local-AI feedback.
   - Added Daily Conversation for learner-scoped, multi-turn daily-life Mandarin writing practice with structured local-AI feedback and follow-up questions.
   - Added learner-scoped Lesson Notes so tutors can record lesson coverage and reuse lesson vocabulary in quiz and sentence practice.
+  - Added a weekly Progress Mode summary for recent learner activity, first-attempt quiz performance, practice activity, and lesson context.
   - Added Progress Mode so searched words are stored locally and can be reviewed by day.
   - Added local student profiles so multiple learners can share one app installation while keeping progress separate.
   - Added topic categories across Search, Batch, Saved Vocabulary, and Quiz Mode so learners can focus practice on one vocabulary area.
