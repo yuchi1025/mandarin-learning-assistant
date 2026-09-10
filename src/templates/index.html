@@ -174,6 +174,7 @@
             {% endif %}
 
             {% for item in results %}
+                {% set traditional_first = query | prefers_traditional(item.word) %}
                 <section class="result-card result-card-with-save"{% if mode == 'batch' %} style="order: {{ batch_entry_orders.get(item.word, 999) }}"{% endif %}>
                     <form method="post" class="save-vocabulary-form result-card-save-form">
                         <input type="hidden" name="form_type" value="saved-vocabulary">
@@ -193,9 +194,9 @@
                     <div class="card-header">
                         <div class="word-block">
                             <div class="word-line">
-                                <h2>{{ item.word }}</h2>
+                                <h2>{{ item.traditional if traditional_first else item.word }}</h2>
                                 {% if item.traditional and item.traditional != item.word %}
-                                    <span class="traditional-word">{{ item.traditional }}</span>
+                                    <span class="traditional-word">{{ item.word if traditional_first else item.traditional }}</span>
                                 {% endif %}
                                 <button
                                     type="button"
@@ -213,7 +214,7 @@
                                 <span class="part-of-speech">{{ item.part_of_speech }}</span>
                                 <span class="word-category">{{ category_labels.get(item.category, category_labels['everyday']) }}</span>
                             </div>
-                            <span>{{ item.pinyin | display_pinyin_pair(item.word, item.traditional) }}</span>
+                            <span>{{ item.pinyin | display_pinyin_pair(item.word, item.traditional, traditional_first) }}</span>
                         </div>
                     </div>
                     <p><strong>Meaning:</strong> {{ item.english }}</p>
@@ -237,8 +238,8 @@
                                         </svg>
                                     </button>
                                     <div class="example-text">
-                                        <span class="example-hanzi">{{ sentence.text }}</span>
-                                        <span class="example-pinyin">{{ sentence.pinyin }}</span>
+                                        <span class="example-hanzi">{{ sentence.text | display_example_pair(query, item.word, item.traditional) }}</span>
+                                        <span class="example-pinyin">{{ sentence.text | display_example_pinyin(query, item.word, item.traditional) }}</span>
                                         {% if sentence.translation %}
                                             <span class="example-translation">{{ sentence.translation }}</span>
                                         {% endif %}
@@ -760,37 +761,37 @@
         {% if mode == 'quiz' %}
             <nav class="quiz-source-switch" aria-label="Quiz source">
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source='all', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source='all', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None, _anchor='quiz-practice') }}"
                     class="{% if quiz_source == 'all' %}active{% endif %}"
                 >
                     All Words
                 </a>
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source='recent', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source='recent', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None, _anchor='quiz-practice') }}"
                     class="{% if quiz_source == 'recent' %}active{% endif %}"
                 >
                     Recent Searches
                 </a>
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source='saved', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source='saved', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None, _anchor='quiz-practice') }}"
                     class="{% if quiz_source == 'saved' %}active{% endif %}"
                 >
                     Saved Words
                 </a>
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source='review', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source='review', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None, _anchor='quiz-practice') }}"
                     class="{% if quiz_source == 'review' %}active{% endif %}"
                 >
                     Review Mistakes
                 </a>
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source='today', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source='today', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None, _anchor='quiz-practice') }}"
                     class="{% if quiz_source == 'today' %}active{% endif %}"
                 >
                     Review Today
                 </a>
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source='lesson', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source='lesson', quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None, _anchor='quiz-practice') }}"
                     class="{% if quiz_source == 'lesson' %}active{% endif %}"
                 >
                     Latest Lesson
@@ -799,20 +800,20 @@
 
             <nav class="quiz-type-switch" aria-label="Quiz type">
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source=quiz_source, quiz_type='meaning', category=category, student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source=quiz_source, quiz_type='meaning', category=category, student_id=selected_student.id if selected_student else None, _anchor='quiz-practice') }}"
                     class="{% if quiz_type == 'meaning' %}active{% endif %}"
                 >
                     Meaning Quiz
                 </a>
                 <a
-                    href="{{ url_for('home', mode='quiz', quiz_source=quiz_source, quiz_type='listening', category=category, student_id=selected_student.id if selected_student else None) }}"
+                    href="{{ url_for('home', mode='quiz', quiz_source=quiz_source, quiz_type='listening', category=category, student_id=selected_student.id if selected_student else None, _anchor='quiz-practice') }}"
                     class="{% if quiz_type == 'listening' %}active{% endif %}"
                 >
                     Listening Quiz
                 </a>
             </nav>
 
-            <form method="get" class="category-filter-form quiz-category-filter">
+            <form method="get" action="{{ url_for('home', _anchor='quiz-practice') }}" class="category-filter-form quiz-category-filter">
                 <input type="hidden" name="mode" value="quiz">
                 <input type="hidden" name="student_id" value="{{ selected_student.id if selected_student else '' }}">
                 <input type="hidden" name="quiz_source" value="{{ quiz_source }}">
@@ -827,7 +828,7 @@
             </form>
 
             {% if quiz_source_empty %}
-                <section class="quiz-card quiz-empty-state">
+                <section class="quiz-card quiz-empty-state" id="quiz-practice">
                     {% if not selected_student %}
                         <h2>Choose a learner first</h2>
                         <p>Select a learner to practise that learner's vocabulary.</p>
@@ -848,7 +849,7 @@
                     {% endif %}
                 </section>
             {% elif quiz %}
-            <section class="quiz-card">
+            <section class="quiz-card" id="quiz-practice">
                 <div class="quiz-header">
                     <p class="eyebrow">
                         {% if quiz_source == 'recent' %}Recent Searches
@@ -872,7 +873,7 @@
                     </button>
                 {% else %}
                 <p class="quiz-word">
-                    {{ quiz.word | display_chinese_pair }}
+                    {{ quiz.word | display_entry_pair(quiz.traditional) }}
                     <button
                         type="button"
                         class="audio-button inline-audio-button"
@@ -886,7 +887,7 @@
                             <path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"></path>
                         </svg>
                     </button>
-                    <span>({{ quiz.pinyin }})</span>
+                    <span>({{ quiz.pinyin | display_pinyin_pair(quiz.word, quiz.traditional) }})</span>
                 </p>
                 {% if quiz_type == 'listening' and listening_reveal %}
                     <p class="listening-reveal-meaning">{{ quiz.correct_answer }}</p>
@@ -947,8 +948,8 @@
                                 That answer is not correct. Try again.
                             {% else %}
                             "{{ quiz_feedback.selected_answer | display_chinese_pair }}" matches
-                            "{{ quiz_feedback.wrong_word | display_chinese_pair }}" ({{ quiz_feedback.wrong_pinyin }}),
-                            not "{{ quiz.word | display_chinese_pair }}". Try again.
+                            "{{ quiz_feedback.wrong_word | display_entry_pair(quiz_feedback.wrong_traditional) }}" ({{ quiz_feedback.wrong_pinyin | display_pinyin_pair(quiz_feedback.wrong_word, quiz_feedback.wrong_traditional) }}),
+                            not "{{ quiz.word | display_entry_pair(quiz.traditional) }}". Try again.
                             {% endif %}
                         </p>
                     </div>

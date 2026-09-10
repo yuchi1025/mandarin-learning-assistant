@@ -7,6 +7,7 @@ from validate_dictionary import validate_entries
 
 
 DICTIONARY_PATH = Path(__file__).resolve().parent.parent / "data" / "dictionary.json"
+ALIASES_PATH = Path(__file__).resolve().parent.parent / "data" / "dictionary_aliases.json"
 EXPECTED_FIELDS = ["word", "traditional", "pinyin", "english", "part_of_speech", "explanation", "examples"]
 PINYIN_WORD_OVERRIDES = {
     "记得": "jì dé",
@@ -22,7 +23,7 @@ def load_entries():
 def test_dictionary_is_valid():
     entries = load_entries()
 
-    assert validate_entries(entries, expected_count=500) == []
+    assert validate_entries(entries, expected_count=501) == []
 
 
 def test_dictionary_words_are_unique():
@@ -69,3 +70,23 @@ def test_dictionary_includes_new_daily_use_words():
     assert entries_by_word["歌曲"]["pinyin"] == "gē qǔ"
     assert entries_by_word["紧张"]["pinyin"] == "jǐn zhāng"
     assert entries_by_word["登机牌"]["traditional"] == "登機牌"
+    assert entries_by_word["通过"]["traditional"] == "通過"
+    assert entries_by_word["通过"]["pinyin"] == "tōng guò"
+
+
+def test_dictionary_uses_taiwan_spoon_term_with_legacy_alias():
+    entries_by_word = {entry["word"]: entry for entry in load_entries()}
+    aliases = json.loads(ALIASES_PATH.read_text(encoding="utf-8"))
+
+    assert "勺子" not in entries_by_word
+    assert entries_by_word["汤匙"]["traditional"] == "湯匙"
+    assert entries_by_word["汤匙"]["pinyin"] == "tāng chí"
+    assert aliases["汤匙"] == ["勺子"]
+
+
+def test_dictionary_uses_taiwan_contact_term_with_legacy_alias():
+    entries_by_word = {entry["word"]: entry for entry in load_entries()}
+    aliases = json.loads(ALIASES_PATH.read_text(encoding="utf-8"))
+
+    assert entries_by_word["联系"]["traditional"] == "聯絡"
+    assert aliases["联系"] == ["聯繫"]

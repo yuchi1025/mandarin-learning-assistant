@@ -17,6 +17,9 @@
 - Expanded the built-in dictionary from 200 to 300 daily-use words, including common work, travel, food, health, and conversation vocabulary.
 - Expanded the built-in dictionary to 400 daily-use words, adding high-frequency home, health, food, travel, technology, and communication vocabulary.
 - Expanded the built-in dictionary to 500 daily-use words, adding emotions, family, common grammar, shopping, workplace, travel, and household vocabulary.
+- Added `通过 / 通過` as built-in vocabulary and exact English meaning aliases so `pass` and `through` no longer collide with partial matches such as `password` and `passport`.
+- Made Search and Batch result cards script-aware: Traditional queries display Traditional first, while Simplified and English queries display Simplified first; examples follow the same order and avoid duplicate pinyin unless pronunciation differs.
+- Began a Taiwan-primary dictionary policy with `汤匙 / 湯匙` as the canonical spoon entry. Mainland `勺子` and its pinyin remain searchable aliases, and existing learner references are migrated without losing history.
 
 ## v0
 

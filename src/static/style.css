@@ -398,6 +398,7 @@ h1 {
 }
 
 .quiz-card {
+    scroll-margin-top: 1rem;
     padding: 22px;
     margin-bottom: 24px;
 }

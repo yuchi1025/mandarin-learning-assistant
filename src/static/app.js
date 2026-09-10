@@ -187,8 +187,8 @@ function renderExample(sentence) {
                 </svg>
             </button>
             <div class="example-text">
-                <span class="example-hanzi">${escapeHtml(sentence.text)}</span>
-                <span class="example-pinyin">${escapeHtml(sentence.pinyin)}</span>
+                <span class="example-hanzi">${escapeHtml(sentence.display_text || sentence.text)}</span>
+                <span class="example-pinyin">${escapeHtml(sentence.display_pinyin || sentence.pinyin)}</span>
                 ${translation}
             </div>
         </li>
@@ -201,8 +201,10 @@ function renderAiResult(card, item, isSaved) {
         ? `<button type="button" class="saved-toggle ai-save-button" data-saved="${isSaved ? "true" : "false"}">${isSaved ? "Unsave" : "Save"}</button>`
         : `<button type="button" class="saved-toggle" disabled title="Choose a learner first">Save</button>`;
     const pinyinLine = item.pinyin ? `<span>${escapeHtml(item.display_pinyin || item.pinyin)}</span>` : "";
-    const traditionalLine = item.traditional && item.traditional !== item.word
-        ? `<span class="traditional-word">${escapeHtml(item.traditional)}</span>`
+    const primaryWord = item.display_word || item.word;
+    const secondaryWord = item.display_secondary_word || (item.traditional !== item.word ? item.traditional : "");
+    const traditionalLine = secondaryWord
+        ? `<span class="traditional-word">${escapeHtml(secondaryWord)}</span>`
         : "";
     const meaningLine = item.english ? `<p><strong>Meaning:</strong> ${escapeHtml(item.english)}</p>` : "";
     const categoryLabel = item.category_label || "Everyday life";
@@ -225,13 +227,13 @@ function renderAiResult(card, item, isSaved) {
         <div class="card-header">
             <div class="word-block">
                 <div class="word-line">
-                    <h2>${escapeHtml(item.word)}</h2>
+                    <h2>${escapeHtml(primaryWord)}</h2>
                     ${traditionalLine}
                     <button
                         type="button"
                         class="audio-button inline-audio-button"
-                        data-speak="${escapeHtml(item.word)}"
-                        aria-label="Play pronunciation for ${escapeHtml(item.word)}"
+                        data-speak="${escapeHtml(primaryWord)}"
+                        aria-label="Play pronunciation for ${escapeHtml(primaryWord)}"
                         title="Play pronunciation"
                     >
                         <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon">
@@ -488,6 +490,17 @@ function bindCopyButtons() {
     });
 }
 
+function bindAutoResizeTextareas() {
+    document.querySelectorAll(".lesson-form textarea[name='notes']").forEach(function (textarea) {
+        const resize = function () {
+            textarea.style.height = "auto";
+            textarea.style.height = `${textarea.scrollHeight}px`;
+        };
+        textarea.addEventListener("input", resize);
+        resize();
+    });
+}
+
 function rememberSelectedStudent() {
     const selector = document.getElementById("student-select");
     if (!selector) {
@@ -580,6 +593,7 @@ window.addEventListener("load", function () {
     bindFeedbackForm("sentence-practice-form", "sentence-feedback-loading");
     bindFeedbackForm("conversation-form", "conversation-feedback-loading");
     bindCopyButtons();
+    bindAutoResizeTextareas();
     rememberSelectedStudent();
     restoreBatchMode();
     renderRecentSearches();

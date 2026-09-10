@@ -45,6 +45,88 @@ def test_home_page_loads():
     assert b"Mandarin Learning Assistant" in response.data
 
 
+def test_lesson_notes_use_content_based_auto_resize():
+    app_js = mandarin_app.app.test_client().get("/static/app.js")
+
+    assert app_js.status_code == 200
+    assert b"bindAutoResizeTextareas" in app_js.data
+    assert b"textarea.scrollHeight" in app_js.data
+    assert b"textarea.addEventListener(\"input\", resize)" in app_js.data
+
+
+def test_legacy_dictionary_alias_is_stored_as_taiwan_term(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-10", "Kitchen", "")
+
+    assert mandarin_app.save_vocabulary(student["id"], "勺子") is True
+    assert mandarin_app.add_lesson_vocabulary(student["id"], lesson["id"], "勺子") is None
+
+    assert [entry["word"] for entry in mandarin_app.get_saved_vocabulary_entries(student["id"])] == ["汤匙"]
+    assert [
+        entry["word"] for entry in mandarin_app.get_lesson_vocabulary_entries(student["id"], lesson["id"])
+    ] == ["汤匙"]
+    with mandarin_app.get_progress_connection() as connection:
+        assert connection.execute("SELECT vocabulary_word FROM saved_vocabulary").fetchone()[0] == "汤匙"
+        assert connection.execute("SELECT vocabulary_word FROM lesson_vocabulary").fetchone()[0] == "汤匙"
+
+
+def test_taiwan_spoon_uses_one_correct_pinyin_display():
+    assert mandarin_app.to_sentence_pinyin("汤匙") == "tāng chí"
+    assert mandarin_app.to_sentence_pinyin("湯匙") == "tāng chí"
+    assert mandarin_app.display_pinyin_pair("tāng chí", "汤匙", "湯匙") == "tāng chí"
+
+
+def test_hobby_uses_contextual_pronunciation_in_both_scripts():
+    assert mandarin_app.to_sentence_pinyin("爱好") == "ài hào"
+    assert mandarin_app.to_sentence_pinyin("愛好") == "ài hào"
+    assert mandarin_app.display_pinyin_pair("ài hào", "爱好", "愛好") == "ài hào"
+
+
+def test_sentence_pinyin_preserves_word_context_for_polyphonic_characters():
+    assert mandarin_app.to_sentence_pinyin("我去银行。") == "wǒ qù yín háng。"
+    assert mandarin_app.to_sentence_pinyin("我喜欢音乐。") == "wǒ xǐ huān yīn yuè。"
+    assert mandarin_app.to_sentence_pinyin("他的行为很好。") == "tā de xíng wéi hěn hǎo。"
+
+
+def test_ai_pinyin_pair_applies_known_tone_sandhi_once():
+    assert mandarin_app.display_pinyin_pair("bù gòu", "不够", "不夠") == "bú gòu"
+
+
+def test_quiz_uses_paired_pinyin_for_regional_pronunciations(monkeypatch):
+    monkeypatch.setattr(
+        mandarin_app,
+        "build_quiz",
+        lambda *args, **kwargs: {
+            "word": "软件",
+            "traditional": "軟體",
+            "pinyin": "ruǎn jiàn",
+            "correct_answer": "software",
+            "choices": ["software", "hardware", "website", "password"],
+        },
+    )
+    client = mandarin_app.app.test_client()
+
+    response = client.get("/", query_string={"mode": "quiz"})
+
+    assert "软件 / 軟體".encode() in response.data
+    assert b"ru\xc7\x8en ji\xc3\xa0n / ru\xc7\x8en t\xc7\x90" in response.data
+
+
+def test_contact_uses_taiwan_word_and_both_pronunciations():
+    assert mandarin_app.display_entry_pair("联系", "聯絡") == "联系 / 聯絡"
+    assert mandarin_app.display_pinyin_pair("lián xì", "联系", "聯絡") == "lián xì / lián luò"
+
+
+def test_quiz_controls_land_on_the_quiz_card():
+    client = mandarin_app.app.test_client()
+
+    response = client.get("/", query_string={"mode": "quiz"})
+
+    assert b'id="quiz-practice"' in response.data
+    assert response.data.count(b"#quiz-practice") == 9
+
+
 def test_learner_panel_precedes_mode_switch_and_search_guidance_is_mode_scoped():
     client = mandarin_app.app.test_client()
 
@@ -1517,6 +1599,46 @@ def test_display_pinyin_pair_shows_taiwan_lexical_pronunciation():
     assert mandarin_app.display_pinyin_pair("jī chǎng", "机场", "機場") == "jī chǎng"
 
 
+def test_traditional_search_displays_word_and_examples_traditional_first():
+    response = mandarin_app.app.test_client().post(
+        "/", data={"form_type": "search", "query": "通過"}
+    )
+    response_text = response.get_data(as_text=True)
+
+    assert "<h2>通過</h2>" in response_text
+    assert '<span class="traditional-word">通过</span>' in response_text
+    assert "我通過了考試。 / 我通过了考试。" in response_text
+    assert "我透過了考試" not in response_text
+    assert "wǒ tōng guò le kǎo shì。" in response_text
+
+
+def test_simplified_search_displays_word_and_examples_simplified_first():
+    response = mandarin_app.app.test_client().post(
+        "/", data={"form_type": "search", "query": "通过"}
+    )
+    response_text = response.get_data(as_text=True)
+
+    assert "<h2>通过</h2>" in response_text
+    assert '<span class="traditional-word">通過</span>' in response_text
+    assert "我通过了考试。 / 我通過了考試。" in response_text
+
+
+def test_entry_examples_use_taiwan_vocabulary_and_pair_changed_pinyin():
+    assert mandarin_app.display_example_pair("我使用软件。", "software", "软件", "軟體") == (
+        "我使用软件。 / 我使用軟體。"
+    )
+    assert mandarin_app.display_example_pinyin("我使用软件。", "software", "软件", "軟體") == (
+        "wǒ shǐ yòng ruǎn jiàn。 / wǒ shǐ yòng ruǎn tǐ。"
+    )
+
+
+def test_batch_script_preference_is_detected_per_vocabulary_word():
+    query = "通過\n机场"
+
+    assert mandarin_app.query_prefers_traditional(query, "通过") is True
+    assert mandarin_app.query_prefers_traditional(query, "机场") is False
+
+
 def test_quiz_feedback_displays_both_chinese_scripts(monkeypatch):
     quiz = {
         "word": "学习",
@@ -1736,6 +1858,20 @@ def test_ai_result_accepts_traditional_query_match():
     assert mandarin_app.validate_ai_result("學習", result) is True
 
 
+def test_ai_result_accepts_equivalent_traditional_query_before_taiwan_phrase_conversion():
+    result = {
+        "word": "通过",
+        "traditional": "透過",
+        "pinyin": "tōng guò",
+        "english": "to pass; through",
+        "part_of_speech": "verb",
+        "explanation": "To pass something or go through it.",
+        "examples": [],
+    }
+
+    assert mandarin_app.validate_ai_result("通過", result) is True
+
+
 def test_sentence_pinyin_uses_phrase_override_for_jide():
     assert mandarin_app.to_sentence_pinyin("我不记得他的名字。") == "wǒ bú jì dé tā de míng zì。"
     assert mandarin_app.to_sentence_pinyin("我不記得他的名字。") == "wǒ bú jì dé tā de míng zì。"
@@ -1885,6 +2021,50 @@ def test_normalize_ai_word_forms_traditionalizes_known_simplified_characters():
 
     assert word == "作业"
     assert traditional == "作業"
+
+
+def test_normalize_ai_word_forms_preserves_equivalent_traditional_query():
+    word, traditional = mandarin_app.normalize_ai_word_forms("通過", "通过", "通過")
+
+    assert word == "通过"
+    assert traditional == "通過"
+
+
+def test_normalize_ai_word_forms_keeps_taiwan_vocabulary_for_english_query():
+    word, traditional = mandarin_app.normalize_ai_word_forms("software", "软件", "軟件")
+
+    assert word == "软件"
+    assert traditional == "軟體"
+
+
+def test_fetch_ai_explanation_accepts_tongguo_traditional_query(monkeypatch):
+    monkeypatch.setattr(
+        mandarin_app,
+        "request_ollama_json",
+        lambda system_prompt, user_prompt: (
+            {
+                "word": "通过",
+                "traditional": "通過",
+                "pinyin": "tōng guò",
+                "english": "to pass; through",
+                "part_of_speech": "verb",
+                "category": "actions",
+                "explanation": "To pass a test, check, or place.",
+                "examples": [
+                    {"text": "我通过了考试。", "translation": "I passed the exam."},
+                    {"text": "请通过检查。", "translation": "Please pass the inspection."},
+                ],
+            },
+            None,
+        ),
+    )
+
+    result, error = mandarin_app.fetch_ai_explanation("通過")
+
+    assert error is None
+    assert result["word"] == "通过"
+    assert result["traditional"] == "通過"
+    assert result["pinyin"] == "tōng guò"
 
 
 def test_normalize_ai_word_forms_cleans_pinyin_from_word():

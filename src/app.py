@@ -32,6 +32,8 @@ TTS_COMMAND = os.getenv("TTS_COMMAND", "/usr/bin/say")
 AI_EXPLANATION_CACHE = {}
 OLLAMA_START_ATTEMPTED = False
 TO_SIMPLIFIED = OpenCC("t2s")
+TO_SIMPLIFIED_TAIWAN = OpenCC("tw2sp")
+TO_TRADITIONAL_CHARACTERS = OpenCC("s2t")
 # Use Taiwan Traditional vocabulary for learner-facing paired-script displays.
 TO_TRADITIONAL = OpenCC("s2twp")
 VALID_PARTS_OF_SPEECH = {
@@ -65,7 +67,7 @@ CATEGORY_LABELS = {
 }
 CATEGORY_WORDS = {
     "basics": "你好 谢谢 可以 不要 早上好 晚上好 再见 对不起 没关系 请 请问 没事 是 不是 有 没有 要 想 会 能 应该 怎么 哪里 什么时候 谁 哪个 几 很 也 都 还 就 但是 所以 如果 和 在 里 上 下 当然 一起 已经 还没有 正在 同意".split(),
-    "actions": "吃饭 喝水 等一下 知道 觉得 喜欢 不喜欢 回家 出去 进来 看 听 说 打开 关上 开始 结束 找 给 带 用 做 去 来 到 走 坐 住 睡觉 起床 洗澡 洗手 穿 拿 放 送 帮忙 问 回答 懂 明白 认识 记得 忘记 建议 检查 准备 希望 计划 决定 选择 参加 练习 介绍 解释 发现 改变 解决 试试 休息 运动 跑步 游泳 旅行 帮助".split(),
+    "actions": "吃饭 喝水 等一下 知道 觉得 喜欢 不喜欢 回家 出去 进来 看 听 说 打开 关上 开始 结束 找 给 带 用 做 去 来 到 走 坐 住 睡觉 起床 洗澡 洗手 穿 拿 放 送 帮忙 问 回答 懂 明白 认识 记得 忘记 建议 检查 通过 准备 希望 计划 决定 选择 参加 练习 介绍 解释 发现 改变 解决 试试 休息 运动 跑步 游泳 旅行 帮助".split(),
     "time": "现在 时间 今天 明天 昨天 早上 中午 晚上 周末 生日 年 月 日 星期 分钟 小时 去年 前年 后年 早 晚".split(),
     "places": "车站 地铁 公交车 出租车 机场 火车 飞机 路 左边 右边 前面 后面 旁边 公园 附近 地址 地图 护照 行李 预订 房子 公寓 银行 自行车 入口 出口 国家 城市 北京 上海".split(),
     "food": "多少钱 买 卖 商店 超市 饭店 水 咖啡 茶 饭 面条 苹果 香蕉 鸡蛋 牛奶 钱 卡 现金 票 产品 菜单 点菜 服务员 付款 找钱 价格 颜色 红色 白色 黑色".split(),
@@ -103,7 +105,7 @@ CATEGORY_BY_WORD.update({
         "time": "延误".split(),
         "places": "邮局 出差 签证 海关 导游 旅馆 单程 往返 登机牌 航班 目的地".split(),
         "food": "顾客 商场 市场 订单 尺码 折扣 质量 品牌 收银员 快递 包裹 洗衣店".split(),
-        "people": "亲戚 夫妻 丈夫 妻子 爷爷 奶奶 外公 外婆 儿子 女儿 理发店 锁 插座 灯 盘子 杯子 勺子 筷子 刀 叉子 毛巾 牙刷 肥皂 镜子 床".split(),
+        "people": "亲戚 夫妻 丈夫 妻子 爷爷 奶奶 外公 外婆 儿子 女儿 理发店 锁 插座 灯 盘子 杯子 汤匙 筷子 刀 叉子 毛巾 牙刷 肥皂 镜子 床".split(),
         "study": "认真 正确 错误 面试 简历 客户 合同 培训 上司 任务 进度".split(),
         "descriptions": "紧张 害怕 生气 难过 惊讶 无聊 有趣 好笑 奇怪".split(),
         "health": "担心".split(),
@@ -115,13 +117,16 @@ CATEGORY_BY_WORD.update({
 
 
 DICTIONARY_PATH = Path(__file__).resolve().parent.parent / "data" / "dictionary.json"
+DICTIONARY_ALIASES_PATH = Path(__file__).resolve().parent.parent / "data" / "dictionary_aliases.json"
 PROGRESS_DB_PATH = Path(os.getenv("PROGRESS_DB_PATH", Path(__file__).resolve().parent.parent / "data" / "progress.db"))
 PINYIN_PHRASE_OVERRIDES = {
+    "愛好": "ài hào",
+    "个": "gè",
+    "個": "gè",
     "不记得": "bú jì dé",
     "不記得": "bú jì dé",
     "不够": "bú gòu",
     "不夠": "bú gòu",
-    "行为": "xíng wéi",
     "行為": "xíng wéi",
     "日期": "rì qí",
     "星期一": "xīng qí yī",
@@ -135,7 +140,8 @@ PINYIN_PHRASE_OVERRIDES = {
     "星期": "xīng qí",
     "记得": "jì dé",
     "記得": "jì dé",
-    "歌曲": "gē qǔ",
+    "汤匙": "tāng chí",
+    "湯匙": "tāng chí",
 }
 PINYIN_OVERRIDE_PHRASES = sorted(PINYIN_PHRASE_OVERRIDES, key=len, reverse=True)
 BATCH_LIST_PREFIX_PATTERN = re.compile(
@@ -156,8 +162,7 @@ def to_sentence_pinyin(text):
 
     def append_plain_text_pinyin():
         if plain_text:
-            for character in plain_text:
-                pinyin_parts.extend(lazy_pinyin(character, style=Style.TONE))
+            pinyin_parts.extend(lazy_pinyin("".join(plain_text), style=Style.TONE))
             plain_text.clear()
 
     index = 0
@@ -201,6 +206,34 @@ def to_speech_text(text):
     return re.sub(r"[\"'‘’“”「」『』]", "", text).strip()
 
 
+def load_dictionary_aliases():
+    if not DICTIONARY_ALIASES_PATH.exists():
+        return {}
+    with DICTIONARY_ALIASES_PATH.open(encoding="utf-8") as aliases_file:
+        raw_aliases = json.load(aliases_file)
+    return {
+        str(word).strip(): [str(alias).strip() for alias in aliases if str(alias).strip()]
+        for word, aliases in raw_aliases.items()
+        if str(word).strip() and isinstance(aliases, list)
+    }
+
+
+DICTIONARY_ALIASES = load_dictionary_aliases()
+DICTIONARY_CANONICAL_BY_ALIAS = {
+    alias: word for word, aliases in DICTIONARY_ALIASES.items() for alias in aliases
+}
+
+
+def canonicalize_dictionary_word(word):
+    normalized = str(word or "").strip()
+    return DICTIONARY_CANONICAL_BY_ALIAS.get(normalized, normalized)
+
+
+def dictionary_reference_forms(word):
+    canonical = canonicalize_dictionary_word(word)
+    return [canonical, *DICTIONARY_ALIASES.get(canonical, [])]
+
+
 def load_dictionary():
     with DICTIONARY_PATH.open(encoding="utf-8") as dictionary_file:
         raw_entries = json.load(dictionary_file)
@@ -235,6 +268,11 @@ def load_dictionary():
                 "explanation": str(raw_entry.get("explanation", "")).strip(),
                 "examples": structured_examples,
                 "search_pinyin": remove_tone_marks(pinyin),
+                "aliases": DICTIONARY_ALIASES.get(word, []),
+                "search_alias_pinyin": [
+                    remove_tone_marks(" ".join(lazy_pinyin(alias, style=Style.TONE)))
+                    for alias in DICTIONARY_ALIASES.get(word, [])
+                ],
                 "category": CATEGORY_BY_WORD.get(word, "everyday"),
             }
         )
@@ -244,6 +282,10 @@ def load_dictionary():
 
 DICTIONARY_ENTRIES = load_dictionary()
 DICTIONARY_ENTRIES_BY_WORD = {entry["word"]: entry for entry in DICTIONARY_ENTRIES}
+
+
+def get_dictionary_entry(word):
+    return DICTIONARY_ENTRIES_BY_WORD.get(canonicalize_dictionary_word(word))
 
 
 def normalize_category(value):
@@ -271,6 +313,50 @@ def get_progress_connection():
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
     return connection
+
+
+def migrate_dictionary_alias_references(connection):
+    """Keep learner history connected when a regional alias becomes canonical."""
+    for alias, canonical in DICTIONARY_CANONICAL_BY_ALIAS.items():
+        connection.execute(
+            """
+            INSERT OR IGNORE INTO saved_vocabulary
+                (student_id, vocabulary_word, saved_at, source, entry_json)
+            SELECT student_id, ?, saved_at, source, entry_json
+            FROM saved_vocabulary WHERE vocabulary_word = ?
+            """,
+            (canonical, alias),
+        )
+        connection.execute("DELETE FROM saved_vocabulary WHERE vocabulary_word = ?", (alias,))
+        connection.execute(
+            """
+            INSERT OR IGNORE INTO review_schedules
+                (student_id, vocabulary_word, next_review_at, review_interval_days,
+                 consecutive_correct, status, updated_at)
+            SELECT student_id, ?, next_review_at, review_interval_days,
+                   consecutive_correct, status, updated_at
+            FROM review_schedules WHERE vocabulary_word = ?
+            """,
+            (canonical, alias),
+        )
+        connection.execute("DELETE FROM review_schedules WHERE vocabulary_word = ?", (alias,))
+        connection.execute(
+            """
+            INSERT OR IGNORE INTO lesson_vocabulary (lesson_id, vocabulary_word)
+            SELECT lesson_id, ? FROM lesson_vocabulary WHERE vocabulary_word = ?
+            """,
+            (canonical, alias),
+        )
+        connection.execute("DELETE FROM lesson_vocabulary WHERE vocabulary_word = ?", (alias,))
+        connection.execute("UPDATE search_events SET word = ? WHERE word = ?", (canonical, alias))
+        connection.execute(
+            "UPDATE quiz_attempts SET vocabulary_word = ? WHERE vocabulary_word = ?",
+            (canonical, alias),
+        )
+        connection.execute(
+            "UPDATE sentence_practice_events SET target_word = ? WHERE target_word = ?",
+            (canonical, alias),
+        )
 
 
 def init_progress_db():
@@ -470,6 +556,7 @@ def init_progress_db():
             )
             """
         )
+        migrate_dictionary_alias_references(connection)
 
 
 def row_to_dict(row):
@@ -620,12 +707,19 @@ def get_lesson_vocabulary_entries(student_id, lesson_id):
             "SELECT vocabulary_word FROM lesson_vocabulary WHERE lesson_id = ? ORDER BY vocabulary_word",
             (lesson["id"],),
         )]
-    return [DICTIONARY_ENTRIES_BY_WORD[word] for word in words if word in DICTIONARY_ENTRIES_BY_WORD]
+    entries = []
+    seen_words = set()
+    for word in words:
+        entry = get_dictionary_entry(word)
+        if entry and entry["word"] not in seen_words:
+            entries.append(entry)
+            seen_words.add(entry["word"])
+    return entries
 
 
 def add_lesson_vocabulary(student_id, lesson_id, vocabulary_word):
     lesson = get_lesson(student_id, lesson_id)
-    word = str(vocabulary_word or "").strip()
+    word = canonicalize_dictionary_word(vocabulary_word)
     if lesson is None:
         return "Choose a valid lesson first."
     if word not in DICTIONARY_ENTRIES_BY_WORD:
@@ -644,10 +738,11 @@ def remove_lesson_vocabulary(student_id, lesson_id, vocabulary_word):
     if lesson is None:
         return False
     with get_progress_connection() as connection:
-        connection.execute(
-            "DELETE FROM lesson_vocabulary WHERE lesson_id = ? AND vocabulary_word = ?",
-            (lesson["id"], str(vocabulary_word or "").strip()),
-        )
+        for word in dictionary_reference_forms(vocabulary_word):
+            connection.execute(
+                "DELETE FROM lesson_vocabulary WHERE lesson_id = ? AND vocabulary_word = ?",
+                (lesson["id"], word),
+            )
     return True
 
 
@@ -676,19 +771,21 @@ def get_saved_vocabulary_entries(student_id):
             )
         ]
     entries = []
+    seen_words = set()
     for saved_word in saved_words:
         if saved_word["source"] == "dictionary":
-            entry = DICTIONARY_ENTRIES_BY_WORD.get(saved_word["vocabulary_word"])
+            entry = get_dictionary_entry(saved_word["vocabulary_word"])
         else:
             entry = deserialize_saved_ai_entry(saved_word["entry_json"])
-        if entry:
+        if entry and entry["word"] not in seen_words:
             entries.append(entry)
+            seen_words.add(entry["word"])
     return entries
 
 
 def save_vocabulary(student_id, vocabulary_word):
     student_id = parse_student_id(student_id)
-    word = str(vocabulary_word or "").strip()
+    word = canonicalize_dictionary_word(vocabulary_word)
     if student_id is None or word not in DICTIONARY_ENTRIES_BY_WORD or get_student(student_id) is None:
         return False
 
@@ -708,31 +805,35 @@ def save_vocabulary(student_id, vocabulary_word):
 
 def unsave_vocabulary(student_id, vocabulary_word):
     student_id = parse_student_id(student_id)
-    word = str(vocabulary_word or "").strip()
+    word = canonicalize_dictionary_word(vocabulary_word)
     if student_id is None or not word or get_student(student_id) is None:
         return False
 
     init_progress_db()
     with get_progress_connection() as connection:
-        connection.execute(
-            "DELETE FROM saved_vocabulary WHERE student_id = ? AND vocabulary_word = ?",
-            (student_id, word),
-        )
+        for reference_word in dictionary_reference_forms(word):
+            connection.execute(
+                "DELETE FROM saved_vocabulary WHERE student_id = ? AND vocabulary_word = ?",
+                (student_id, reference_word),
+            )
     return True
 
 
 def is_vocabulary_saved(student_id, vocabulary_word):
     student_id = parse_student_id(student_id)
-    word = str(vocabulary_word or "").strip()
+    word = canonicalize_dictionary_word(vocabulary_word)
     if student_id is None or not word or get_student(student_id) is None:
         return False
 
     init_progress_db()
     with get_progress_connection() as connection:
-        return connection.execute(
-            "SELECT 1 FROM saved_vocabulary WHERE student_id = ? AND vocabulary_word = ?",
-            (student_id, word),
-        ).fetchone() is not None
+        return any(
+            connection.execute(
+                "SELECT 1 FROM saved_vocabulary WHERE student_id = ? AND vocabulary_word = ?",
+                (student_id, reference_word),
+            ).fetchone() is not None
+            for reference_word in dictionary_reference_forms(word)
+        )
 
 
 def normalize_saved_ai_entry(result):
@@ -775,8 +876,9 @@ def save_ai_vocabulary(student_id, result):
     entry = normalize_saved_ai_entry(result)
     if student_id is None or entry is None or get_student(student_id) is None:
         return None
-    if entry["word"] in DICTIONARY_ENTRIES_BY_WORD:
-        return DICTIONARY_ENTRIES_BY_WORD[entry["word"]] if save_vocabulary(student_id, entry["word"]) else None
+    dictionary_entry = get_dictionary_entry(entry["word"])
+    if dictionary_entry:
+        return dictionary_entry if save_vocabulary(student_id, dictionary_entry["word"]) else None
 
     init_progress_db()
     with get_progress_connection() as connection:
@@ -932,7 +1034,7 @@ def review_date_today():
 
 def ensure_new_review_schedule(student_id, vocabulary_word):
     student_id = parse_student_id(student_id)
-    word = str(vocabulary_word or "").strip()
+    word = canonicalize_dictionary_word(vocabulary_word)
     if student_id is None or not word or get_student(student_id) is None:
         return
 
@@ -952,7 +1054,7 @@ def ensure_new_review_schedule(student_id, vocabulary_word):
 
 def update_review_schedule(student_id, vocabulary_word, first_attempt_correct):
     student_id = parse_student_id(student_id)
-    word = str(vocabulary_word or "").strip()
+    word = canonicalize_dictionary_word(vocabulary_word)
     if student_id is None or not word or get_student(student_id) is None:
         return
 
@@ -1009,7 +1111,7 @@ def update_review_schedule(student_id, vocabulary_word, first_attempt_correct):
 
 def record_quiz_attempt(student_id, vocabulary_word, is_correct, interaction_key, quiz_source="all"):
     student_id = parse_student_id(student_id)
-    word = str(vocabulary_word or "").strip()
+    word = canonicalize_dictionary_word(vocabulary_word)
     attempt_key = str(interaction_key or "").strip()
     source = normalize_quiz_source(quiz_source)
     if student_id is None or not word or not attempt_key or get_student(student_id) is None:
@@ -1261,7 +1363,7 @@ def choose_sentence_target(source, student_id, requested_word=None):
 
 
 def get_quiz_pool_entry(student_id, vocabulary_word):
-    word = str(vocabulary_word or "").strip()
+    word = canonicalize_dictionary_word(vocabulary_word)
     entries_by_word = {entry["word"]: entry for entry in get_quiz_entries()}
     entries_by_word.update({entry["word"]: entry for entry in get_saved_vocabulary_entries(student_id)})
     return entries_by_word.get(word)
@@ -1325,7 +1427,7 @@ def get_weekly_improving_vocabulary(student_id, start_day, end_day, limit=3):
         earlier_accuracy = row["earlier_correct"] / row["earlier_attempted"]
         if recent_accuracy <= earlier_accuracy:
             continue
-        entry = DICTIONARY_ENTRIES_BY_WORD.get(row["vocabulary_word"])
+        entry = get_dictionary_entry(row["vocabulary_word"])
         if entry:
             improving_words.append({
                 "word": entry["word"],
@@ -1588,15 +1690,97 @@ def display_chinese_pair(text):
     return simplified if simplified == traditional else f"{simplified} / {traditional}"
 
 
+@app.template_filter("display_entry_pair")
+def display_entry_pair(word, traditional=None):
+    simplified = str(word or "").strip()
+    traditional_text = str(traditional or simplified).strip() or simplified
+    return simplified if simplified == traditional_text else f"{simplified} / {traditional_text}"
+
+
+def query_prefers_traditional(query, vocabulary_word):
+    simplified_word = simplify_known_traditional_text(str(vocabulary_word or ""))
+    for query_part in split_batch_queries(query):
+        query_word = clean_ai_word_form(query_part)
+        if not contains_chinese(query_word) or query_word == simplified_word:
+            continue
+        if simplified_word in {
+            simplify_known_traditional_text(query_word),
+            TO_SIMPLIFIED_TAIWAN.convert(query_word),
+        }:
+            return True
+    return False
+
+
+@app.template_filter("prefers_traditional")
+def prefers_traditional_filter(query, vocabulary_word):
+    return query_prefers_traditional(query, vocabulary_word)
+
+
+def get_entry_sentence_forms(text, vocabulary_word, vocabulary_traditional):
+    simplified = simplify_known_traditional_text(str(text or ""))
+    word = simplify_known_traditional_text(str(vocabulary_word or ""))
+    traditional_word = str(vocabulary_traditional or "").strip()
+    taiwan_word = traditionalize_known_simplified_text(word)
+    if word and traditional_word and traditional_word != taiwan_word:
+        traditional = TO_TRADITIONAL_CHARACTERS.convert(simplified)
+        generic_word = TO_TRADITIONAL_CHARACTERS.convert(word)
+        traditional = traditional.replace(generic_word, traditional_word)
+    else:
+        traditional = traditionalize_known_simplified_text(simplified)
+    return simplified, traditional
+
+
+@app.template_filter("display_example_pair")
+def display_example_pair(text, query, vocabulary_word, vocabulary_traditional):
+    simplified, traditional = get_entry_sentence_forms(text, vocabulary_word, vocabulary_traditional)
+    if simplified == traditional:
+        return simplified
+    if query_prefers_traditional(query, vocabulary_word):
+        return f"{traditional} / {simplified}"
+    return f"{simplified} / {traditional}"
+
+
+@app.template_filter("display_example_pinyin")
+def display_example_pinyin(text, query, vocabulary_word, vocabulary_traditional):
+    simplified, traditional = get_entry_sentence_forms(text, vocabulary_word, vocabulary_traditional)
+    simplified_pinyin = to_sentence_pinyin(simplified)
+    traditional_pinyin = to_sentence_pinyin(traditional)
+    if simplified_pinyin == traditional_pinyin:
+        return simplified_pinyin
+    if query_prefers_traditional(query, vocabulary_word):
+        return f"{traditional_pinyin} / {simplified_pinyin}"
+    return f"{simplified_pinyin} / {traditional_pinyin}"
+
+
 @app.template_filter("display_pinyin_pair")
-def display_pinyin_pair(pinyin, word, traditional=None):
-    primary = str(pinyin or "").strip()
+def display_pinyin_pair(pinyin, word, traditional=None, traditional_first=False):
+    word_text = str(word or "").strip()
+    primary = PINYIN_PHRASE_OVERRIDES.get(word_text, str(pinyin or "").strip())
     traditional_word = str(traditional or "").strip()
-    if not traditional_word or traditional_word == str(word or "").strip() or not contains_chinese(traditional_word):
+    if not traditional_word or traditional_word == word_text or not contains_chinese(traditional_word):
         return primary
 
     traditional_pinyin = to_sentence_pinyin(traditional_word)
-    return primary if not traditional_pinyin or traditional_pinyin == primary else f"{primary} / {traditional_pinyin}"
+    if not traditional_pinyin or traditional_pinyin == primary:
+        return primary
+    return f"{traditional_pinyin} / {primary}" if traditional_first else f"{primary} / {traditional_pinyin}"
+
+
+def add_query_display_fields(entry, query):
+    word = str(entry.get("word", ""))
+    traditional = str(entry.get("traditional", word))
+    traditional_first = query_prefers_traditional(query, word)
+    entry["display_word"] = traditional if traditional_first else word
+    entry["display_secondary_word"] = word if traditional_first and word != traditional else (
+        traditional if not traditional_first and traditional != word else ""
+    )
+    entry["display_pinyin"] = display_pinyin_pair(
+        entry.get("pinyin", ""), word, traditional, traditional_first
+    )
+    for example in entry.get("examples", []):
+        example["display_text"] = display_example_pair(example.get("text", ""), query, word, traditional)
+        example["display_pinyin"] = display_example_pinyin(example.get("text", ""), query, word, traditional)
+    return entry
 
 
 def clean_ai_word_form(text):
@@ -1607,6 +1791,7 @@ def clean_ai_word_form(text):
 
 
 def normalize_ai_word_forms(query, word, traditional):
+    query_word = clean_ai_word_form(query)
     word = clean_ai_word_form(word)
     traditional = clean_ai_word_form(traditional) or word
 
@@ -1616,6 +1801,13 @@ def normalize_ai_word_forms(query, word, traditional):
     elif contains_chinese(traditional):
         word = simplify_known_traditional_text(traditional)
         traditional = traditionalize_known_simplified_text(word)
+
+    if (
+        contains_chinese(query_word)
+        and query_word != word
+        and simplify_known_traditional_text(query_word) == word
+    ):
+        traditional = query_word
 
     return word, traditional
 
@@ -1671,13 +1863,20 @@ def search_entries(query):
         word = entry["word"]
         traditional = entry["traditional"]
         search_pinyin = entry["search_pinyin"]
+        aliases = entry.get("aliases", [])
+        search_alias_pinyin = entry.get("search_alias_pinyin", [])
         english = entry["english"].lower()
 
+        english_parts = {alias.strip() for alias in re.split(r"[;/]", english) if alias.strip()}
+        english_aliases = english_parts | {alias.removeprefix("to ").strip() for alias in english_parts}
         if (
             normalized_query == word
             or normalized_query == traditional
+            or normalized_query in aliases
             or normalized_query_no_tones == search_pinyin
+            or normalized_query_no_tones in search_alias_pinyin
             or normalized_query == english
+            or normalized_query in english_aliases
         ):
             exact_matches.append(entry)
 
@@ -1692,6 +1891,8 @@ def search_entries(query):
         traditional = entry["traditional"]
         pinyin = entry["pinyin"].lower()
         search_pinyin = entry["search_pinyin"]
+        aliases = entry.get("aliases", [])
+        search_alias_pinyin = entry.get("search_alias_pinyin", [])
         english = entry["english"].lower()
         explanation = entry["explanation"].lower()
         part_of_speech = entry["part_of_speech"].lower()
@@ -1705,26 +1906,43 @@ def search_entries(query):
 
         score = None
 
-        if normalized_query == word or normalized_query == traditional:
+        if normalized_query == word or normalized_query == traditional or normalized_query in aliases:
             score = (0, len(word))
-        elif normalized_query_no_tones == search_pinyin:
+        elif normalized_query_no_tones == search_pinyin or normalized_query_no_tones in search_alias_pinyin:
             score = (1, len(search_pinyin))
         elif normalized_query == english:
             score = (2, len(english))
         elif query_is_single_char:
-            if word.startswith(normalized_query) or traditional.startswith(normalized_query):
+            if (
+                word.startswith(normalized_query)
+                or traditional.startswith(normalized_query)
+                or any(alias.startswith(normalized_query) for alias in aliases)
+            ):
                 score = (3, min(len(word), len(traditional)))
-            elif search_pinyin.startswith(normalized_query_no_tones):
+            elif search_pinyin.startswith(normalized_query_no_tones) or any(
+                alias_pinyin.startswith(normalized_query_no_tones) for alias_pinyin in search_alias_pinyin
+            ):
                 score = (4, len(search_pinyin))
-        elif word.startswith(normalized_query) or traditional.startswith(normalized_query):
+        elif (
+            word.startswith(normalized_query)
+            or traditional.startswith(normalized_query)
+            or any(alias.startswith(normalized_query) for alias in aliases)
+        ):
             score = (3, min(len(word), len(traditional)))
-        elif search_pinyin.startswith(normalized_query_no_tones):
+        elif search_pinyin.startswith(normalized_query_no_tones) or any(
+            alias_pinyin.startswith(normalized_query_no_tones) for alias_pinyin in search_alias_pinyin
+        ):
             score = (4, len(search_pinyin))
         elif english.startswith(normalized_query):
             score = (5, len(english))
-        elif normalized_query in word or normalized_query in traditional:
+        elif normalized_query in word or normalized_query in traditional or any(
+            normalized_query in alias for alias in aliases
+        ):
             score = (6, min(len(word), len(traditional)))
-        elif normalized_query_no_tones in search_pinyin and not query_is_short_ascii:
+        elif (
+            normalized_query_no_tones in search_pinyin
+            or any(normalized_query_no_tones in alias_pinyin for alias_pinyin in search_alias_pinyin)
+        ) and not query_is_short_ascii:
             score = (7, len(search_pinyin))
         elif english_word_contains:
             score = (8, len(english))
@@ -1890,8 +2108,15 @@ def validate_ai_result(query, result):
     if not explanation:
         return False
 
-    if query_is_chinese and query.strip() not in {word, traditional}:
-        return False
+    if query_is_chinese:
+        query_word = clean_ai_word_form(query)
+        simplified_query = simplify_known_traditional_text(query_word)
+        simplified_forms = {
+            simplify_known_traditional_text(word),
+            simplify_known_traditional_text(traditional),
+        }
+        if not query_word or simplified_query not in simplified_forms:
+            return False
 
     if query_is_chinese and not english:
         return False
@@ -2661,6 +2886,10 @@ def home():
                         "selected_answer": selected_answer,
                         "is_correct": False,
                         "wrong_word": wrong_entry["word"] if wrong_entry else "",
+                        "wrong_traditional": (
+                            wrong_entry.get("traditional")
+                            or traditionalize_known_simplified_text(wrong_entry["word"])
+                        ) if wrong_entry else "",
                         "wrong_pinyin": wrong_entry["pinyin"] if wrong_entry else "",
                     }
 
@@ -2739,6 +2968,8 @@ def ai_explanation():
         return jsonify({"ok": False, "error": error}), 503
 
     result = dict(result)
+    result["examples"] = [dict(example) for example in result.get("examples", [])]
+    add_query_display_fields(result, query)
     result["category"] = get_entry_category(result)
     result["category_label"] = CATEGORY_LABELS[result["category"]]
 

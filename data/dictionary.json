@@ -4621,14 +4621,14 @@
   },
   {
     "word": "联系",
-    "traditional": "聯繫",
+    "traditional": "聯絡",
     "pinyin": "lián xì",
     "english": "to contact",
     "part_of_speech": "verb",
-    "explanation": "A common daily-use word meaning to contact.",
+    "explanation": "To communicate with or get in touch with someone.",
     "examples": [
-      "我想联系。 (I want to to contact.)",
-      "我们今天联系。 (We will to contact today.)"
+      "我想联系他。 (I want to contact him.)",
+      "我们今天再联系。 (We will contact each other again today.)"
     ]
   },
   {
@@ -5892,15 +5892,15 @@
     ]
   },
   {
-    "word": "勺子",
-    "traditional": "勺子",
-    "pinyin": "sháo zi",
+    "word": "汤匙",
+    "traditional": "湯匙",
+    "pinyin": "tāng chí",
     "english": "spoon",
     "part_of_speech": "noun",
-    "explanation": "A common daily-use word meaning spoon.",
+    "explanation": "The common Taiwan Mandarin word for a spoon.",
     "examples": [
-      "这是勺子。 (This is spoon.)",
-      "我需要勺子。 (I need spoon.)"
+      "这是汤匙。 (This is a spoon.)",
+      "我需要一支汤匙。 (I need a spoon.)"
     ]
   },
   {
@@ -5997,6 +5997,18 @@
     "examples": [
       "这是床。 (This is bed.)",
       "我需要床。 (I need bed.)"
+    ]
+  },
+  {
+    "word": "通过",
+    "traditional": "通過",
+    "pinyin": "tōng guò",
+    "english": "to pass; through",
+    "part_of_speech": "verb",
+    "explanation": "To pass a test or check, or to move through a place.",
+    "examples": [
+      "我通过了考试。 (I passed the exam.)",
+      "请通过安全检查。 (Please go through the security check.)"
     ]
   }
 ]

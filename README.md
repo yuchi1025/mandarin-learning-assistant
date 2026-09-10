@@ -23,6 +23,8 @@ Current version: `v3.2.0`
   - Built a working local prototype of a Mandarin Learning Assistant for individual self-study.
   - Combined dictionary lookup, pinyin support, pronunciation audio, example sentences, recent searches, AI fallback, batch lookup, progress tracking, and quiz practice in one web app.
   - Enabled learners to search by Chinese, English, pinyin with tone marks, or pinyin without tone marks.
+  - Kept Simplified and Traditional Chinese visible together while placing the learner's searched script first in words and example sentences.
+  - Uses Taiwan Mandarin vocabulary as the preferred learner-facing term; recognized regional alternatives remain searchable through dictionary aliases.
   - Added local AI fallback so unknown valid words can show a structured explanation instead of only returning “not found.”
   - Added Quiz Mode so lookup can turn into active recall practice with immediate feedback.
   - Added a learner-specific Review Mistakes quiz source for revisiting words missed on their first answer while preserving quiz history.
@@ -251,7 +253,7 @@ Progress history and local student profiles are stored in `data/progress.db`. Th
 Validate the built-in dictionary after editing it:
 
 ```bash
-python3 scripts/validate_dictionary.py --expected-count 500
+python3 scripts/validate_dictionary.py --expected-count 501
 ```
 
 The script checks for invalid JSON, missing required fields, inconsistent field order, empty values, duplicate words, malformed examples, tone-marked dictionary pinyin, and the optional expected entry count.
@@ -350,7 +352,8 @@ mandarin-learning-assistant/
 │       ├── demo.mp4
 │       └── demo.gif
 └── data/
-    └── dictionary.json
+    ├── dictionary.json
+    └── dictionary_aliases.json
 ```
 
 Key folders and files:
@@ -362,11 +365,12 @@ Key folders and files:
 - `src/static/app.js` contains Vanilla JavaScript for audio, recent searches, async AI loading, and quiz interaction.
 - `tests/` contains pytest coverage for dictionary quality, consistent field order, tone-marked pinyin, search behavior, Flask routes, static JavaScript loading, and cleaned sentence-audio text.
 - `docs/VERSION_NOTES.md` records the project progress from v0 to v3.2.0.
-- `scripts/validate_dictionary.py` validates the 500-entry dictionary, required fields, consistent field order, duplicate words, examples, and tone-marked pinyin.
+- `scripts/validate_dictionary.py` validates the 501-entry dictionary, required fields, consistent field order, duplicate words, examples, and tone-marked pinyin.
 - `assets/logo/` contains the product banner, app icon, and favicon source.
 - `assets/screenshots/` contains Search Mode, Search Result, and Quiz Mode screenshots.
 - `assets/demo/` contains the MP4 demo with audio and the silent GIF preview.
 - `data/dictionary.json` contains the built-in Mandarin dictionary dataset.
+- `data/dictionary_aliases.json` maps recognized regional terms to preferred Taiwan Mandarin entries.
 - `requirements.txt` lists Python dependencies.
 - `AGENTS.md` contains project guidance for future AI-assisted editing.
 
