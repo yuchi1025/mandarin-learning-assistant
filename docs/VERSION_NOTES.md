@@ -10,7 +10,7 @@
 - Added learner-specific spaced-repetition review scheduling. Saved words begin due today; first-answer misses are due tomorrow; correct first answers advance through 2, 4, 7, and then gradually longer intervals. Review Today reuses the existing Meaning and Listening quiz flows.
 - Added Needs Practice as read-only learner-specific accuracy analytics, while Review Mistakes remains the focused mistake-review quiz source.
 - Added Sentence Practice with learner-scoped vocabulary sources (saved, due, latest lesson, and recent), persisted original sentences, and validated Ollama feedback that keeps learner input separate from suggested improvements.
-- Added learner-scoped Lesson Notes with editable dates, titles, notes, and built-in dictionary vocabulary. Latest lesson vocabulary can be reused in Meaning Quiz, Listening Quiz, and Sentence Practice.
+- Added learner-scoped Lesson Notes with editable dates, titles, notes, built-in dictionary vocabulary, and custom Chinese words resolved by local AI or an optional tutor-supplied English meaning. Latest lesson vocabulary can be reused in Meaning Quiz, Listening Quiz, and Sentence Practice.
 - Added a deterministic learner-specific This Week summary using existing quiz, review, saved-vocabulary, sentence-practice, conversation, and lesson records. It reports first-attempt performance only and shows improving vocabulary only when both earlier and recent quiz history are sufficient.
 - Added Daily Conversation with learner-scoped, persisted multi-turn sessions, curated daily-life prompts, validated Ollama feedback, and beginner-friendly Mandarin follow-up questions.
 - Added fixed topic categories for the built-in vocabulary without changing the canonical dictionary JSON schema. Learners can filter Search, Batch, Saved Vocabulary, and Quiz Mode by category.
@@ -20,6 +20,8 @@
 - Added `通过 / 通過` as built-in vocabulary and exact English meaning aliases so `pass` and `through` no longer collide with partial matches such as `password` and `passport`.
 - Made Search and Batch result cards script-aware: Traditional queries display Traditional first, while Simplified and English queries display Simplified first; examples follow the same order and avoid duplicate pinyin unless pronunciation differs.
 - Began a Taiwan-primary dictionary policy with `汤匙 / 湯匙` as the canonical spoon entry. Mainland `勺子` and its pinyin remain searchable aliases, and existing learner references are migrated without losing history.
+- Made `公车 / 公車` the Taiwan-primary bus entry with the natural English meaning `bus`; `公交车 / 公交車` remain searchable aliases and existing learner references migrate automatically.
+- Audited the built-in dictionary for Taiwan usage and made high-confidence Taiwan terms canonical across greetings, transport, dining, technology, work, shopping, and travel, including `早安`, `捷運`, `計程車`, `餐廳`, `服務生`, `專案`, `影片`, `網路`, `冷氣`, `機車`, `外送`, `登入`, `品質`, `登機證`, `班機`, and `履歷`. Mainland forms remain searchable aliases and migrate to the Taiwan entries without losing learner history; Taiwan pronunciations such as `垃圾 lè sè` and `品質 pǐn zhí` are explicit validation overrides.
 
 ## v0
 

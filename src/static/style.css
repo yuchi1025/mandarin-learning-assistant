@@ -489,6 +489,8 @@ h1 {
 .lesson-form input,
 .lesson-form textarea,
 .lesson-vocabulary-form input {
+    width: 100%;
+    max-width: 100%;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: #fff;
@@ -499,7 +501,8 @@ h1 {
 
 .lesson-form textarea {
     min-height: 110px;
-    resize: vertical;
+    overflow-y: hidden;
+    resize: none;
     line-height: 1.5;
 }
 
@@ -548,7 +551,9 @@ h1 {
 
 .lesson-vocabulary-row > div:first-child {
     display: grid;
+    min-width: 0;
     gap: 3px;
+    overflow-wrap: anywhere;
 }
 
 .lesson-vocabulary-row > div:first-child span:first-of-type {
@@ -568,6 +573,10 @@ h1 {
     border-color: var(--accent);
 }
 
+#lesson-editor {
+    scroll-margin-top: 16px;
+}
+
 .lesson-message {
     margin: 0 0 14px;
     color: #416a45;
@@ -576,6 +585,12 @@ h1 {
 
 .lesson-error {
     color: #a2442e;
+}
+
+.lesson-lookup-status {
+    margin: 0;
+    color: #6a5b4d;
+    font-style: italic;
 }
 
 .sentence-practice-form label,
@@ -1417,6 +1432,23 @@ ul {
     .progress-row {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .lesson-panel-header,
+    .lesson-vocabulary-header,
+    .lesson-vocabulary-row,
+    .lesson-list-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .lesson-practice-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .lesson-vocabulary-actions {
+        justify-content: flex-start;
     }
 
     .mode-switch {

@@ -346,7 +346,7 @@
             {% else %}
                 <section class="lesson-panel">
                     <h2>New Lesson</h2>
-                    <form method="post" class="lesson-form">
+                    <form method="post" action="{{ url_for('home', mode='lessons', student_id=selected_student.id, _anchor='lesson-editor') }}" class="lesson-form">
                         <input type="hidden" name="form_type" value="lesson-create">
                         <input type="hidden" name="student_id" value="{{ selected_student.id }}">
                         <label for="lesson-date">Lesson date</label>
@@ -363,12 +363,12 @@
                 {% if lesson_message %}<p class="lesson-message">{{ lesson_message }}</p>{% endif %}
 
                 {% if selected_lesson %}
-                    <section class="lesson-panel">
+                    <section class="lesson-panel" id="lesson-editor">
                         <div class="lesson-panel-header">
                             <h2>{{ selected_lesson.title or 'Untitled lesson' }}</h2>
                             <span>{{ selected_lesson.lesson_date }}</span>
                         </div>
-                        <form method="post" class="lesson-form">
+                        <form method="post" action="{{ url_for('home', mode='lessons', student_id=selected_student.id, lesson_id=selected_lesson.id, _anchor='lesson-editor') }}" class="lesson-form">
                             <input type="hidden" name="form_type" value="lesson-update">
                             <input type="hidden" name="student_id" value="{{ selected_student.id }}">
                             <input type="hidden" name="lesson_id" value="{{ selected_lesson.id }}">
@@ -390,13 +390,18 @@
                                 </div>
                             {% endif %}
                         </div>
-                        <form method="post" class="lesson-vocabulary-form">
+                        <form method="post" action="{{ url_for('home', mode='lessons', student_id=selected_student.id, lesson_id=selected_lesson.id, _anchor='lesson-editor') }}" class="lesson-vocabulary-form" id="lesson-vocabulary-form">
                             <input type="hidden" name="form_type" value="lesson-vocabulary-add">
                             <input type="hidden" name="student_id" value="{{ selected_student.id }}">
                             <input type="hidden" name="lesson_id" value="{{ selected_lesson.id }}">
-                            <label for="lesson-vocabulary-word">Add built-in dictionary word</label>
-                            <input id="lesson-vocabulary-word" name="vocabulary_word" type="text" placeholder="For example: 学校" required>
+                            <label for="lesson-vocabulary-word">Add vocabulary word</label>
+                            <input id="lesson-vocabulary-word" name="vocabulary_word" type="text" maxlength="20" placeholder="For example: 学校" required>
+                            <label for="lesson-vocabulary-meaning">English meaning <span class="field-optional">optional</span></label>
+                            <input id="lesson-vocabulary-meaning" name="vocabulary_meaning" type="text" maxlength="240" placeholder="Leave blank to look up with local AI">
                             <button type="submit">Add word</button>
+                            <p class="lesson-lookup-status" id="lesson-vocabulary-loading" role="status" aria-live="polite" hidden>
+                                Looking up the word and its meaning with local AI…
+                            </p>
                         </form>
                         {% if lesson_vocabulary %}
                             <div class="lesson-vocabulary-list">
@@ -411,7 +416,7 @@
                                             <button type="button" class="audio-button inline-audio-button" data-speak="{{ item.word }}" aria-label="Play pronunciation for {{ item.word }}" title="Play pronunciation">
                                                 <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon"><path d="M3 10v4h4l5 4V6L7 10H3z"></path><path d="M16 8a5 5 0 0 1 0 8"></path><path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"></path></svg>
                                             </button>
-                                            <form method="post">
+                                            <form method="post" action="{{ url_for('home', mode='lessons', student_id=selected_student.id, lesson_id=selected_lesson.id, _anchor='lesson-editor') }}">
                                                 <input type="hidden" name="form_type" value="lesson-vocabulary-remove">
                                                 <input type="hidden" name="student_id" value="{{ selected_student.id }}">
                                                 <input type="hidden" name="lesson_id" value="{{ selected_lesson.id }}">
@@ -433,7 +438,7 @@
                     {% if lessons %}
                         <div class="lesson-list">
                             {% for lesson in lessons %}
-                                <a class="lesson-list-row {% if selected_lesson and lesson.id == selected_lesson.id %}selected{% endif %}" href="{{ url_for('home', mode='lessons', lesson_id=lesson.id, student_id=selected_student.id) }}">
+                                <a class="lesson-list-row {% if selected_lesson and lesson.id == selected_lesson.id %}selected{% endif %}" href="{{ url_for('home', mode='lessons', lesson_id=lesson.id, student_id=selected_student.id, _anchor='lesson-editor') }}">
                                     <strong>{{ lesson.lesson_date }} · {{ lesson.title or 'Untitled lesson' }}</strong>
                                     <span>{{ lesson.vocabulary_count }} vocabulary words</span>
                                 </a>
@@ -523,7 +528,7 @@
                     {% elif sentence_source == 'today' %}
                         <p>You're all caught up for today.</p>
                     {% elif sentence_source == 'lesson' %}
-                        <p>Add built-in vocabulary to the latest lesson first.</p>
+                        <p>Add vocabulary to the latest lesson first.</p>
                     {% else %}
                         <p>Search for a few vocabulary words first, then return here.</p>
                     {% endif %}
@@ -842,7 +847,7 @@
                         <h2>You're all caught up for today.</h2>
                     {% elif quiz_source == 'lesson' %}
                         <h2>No latest-lesson vocabulary to practise</h2>
-                        <p>Create a lesson and add built-in vocabulary first.</p>
+                        <p>Create a lesson and add vocabulary first.</p>
                     {% else %}
                         <h2>No mistakes to review</h2>
                         <p>This learner has no first-attempt mistakes yet.</p>

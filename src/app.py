@@ -66,13 +66,13 @@ CATEGORY_LABELS = {
     "everyday": "Everyday life",
 }
 CATEGORY_WORDS = {
-    "basics": "你好 谢谢 可以 不要 早上好 晚上好 再见 对不起 没关系 请 请问 没事 是 不是 有 没有 要 想 会 能 应该 怎么 哪里 什么时候 谁 哪个 几 很 也 都 还 就 但是 所以 如果 和 在 里 上 下 当然 一起 已经 还没有 正在 同意".split(),
+    "basics": "你好 谢谢 可以 不要 早安 晚上好 再见 对不起 没关系 请 请问 没事 是 不是 有 没有 要 想 会 能 应该 怎么 哪里 什么时候 谁 哪个 几 很 也 都 还 就 但是 所以 如果 和 在 里 上 下 当然 一起 已经 还没有 正在 同意".split(),
     "actions": "吃饭 喝水 等一下 知道 觉得 喜欢 不喜欢 回家 出去 进来 看 听 说 打开 关上 开始 结束 找 给 带 用 做 去 来 到 走 坐 住 睡觉 起床 洗澡 洗手 穿 拿 放 送 帮忙 问 回答 懂 明白 认识 记得 忘记 建议 检查 通过 准备 希望 计划 决定 选择 参加 练习 介绍 解释 发现 改变 解决 试试 休息 运动 跑步 游泳 旅行 帮助".split(),
     "time": "现在 时间 今天 明天 昨天 早上 中午 晚上 周末 生日 年 月 日 星期 分钟 小时 去年 前年 后年 早 晚".split(),
-    "places": "车站 地铁 公交车 出租车 机场 火车 飞机 路 左边 右边 前面 后面 旁边 公园 附近 地址 地图 护照 行李 预订 房子 公寓 银行 自行车 入口 出口 国家 城市 北京 上海".split(),
-    "food": "多少钱 买 卖 商店 超市 饭店 水 咖啡 茶 饭 面条 苹果 香蕉 鸡蛋 牛奶 钱 卡 现金 票 产品 菜单 点菜 服务员 付款 找钱 价格 颜色 红色 白色 黑色".split(),
+    "places": "车站 捷运 公车 计程车 机场 火车 飞机 路 左边 右边 前面 后面 旁边 公园 附近 地址 地图 护照 行李 预订 房子 公寓 银行 自行车 入口 出口 国家 城市 北京 上海".split(),
+    "food": "多少钱 买 卖 商店 超市 餐厅 水 咖啡 茶 饭 面条 苹果 香蕉 鸡蛋 牛奶 钱 卡 现金 票 产品 菜单 点菜 服务生 付款 找钱 价格 颜色 红色 白色 黑色".split(),
     "people": "家 人 男人 女人 孩子 爸爸 妈妈 哥哥 姐姐 弟弟 妹妹 房间 厨房 洗手间 门 窗户 桌子 椅子 教练".split(),
-    "study": "学习 工作 下班 上班 学校 公司 医院 老师 学生 同事 书 考试 作业 课堂 同学 课程 老板 会议 项目 邮件 文件 经理 办公室".split(),
+    "study": "学习 工作 下班 上班 学校 公司 医院 老师 学生 同事 书 考试 作业 课堂 同学 课程 老板 会议 专案 邮件 文件 经理 办公室".split(),
     "descriptions": "累 开心 热 冷 好吃 好喝 漂亮 贵 便宜 快 慢 远 近 忙 空 新 旧 大 小 多 少 重要 可能 不同 容易 困难 安全 小心 疼".split(),
     "grammar": "为什么 因为".split(),
     "health": "天气 雨 太阳 药 身体 生病 医生 预约 过敏".split(),
@@ -84,16 +84,16 @@ CATEGORY_BY_WORD = {
 CATEGORY_BY_WORD.update({
     word: category
     for category, words in {
-        "basics": "答案 回复 通知 联系 邀请 庆祝 礼物 新年 假期".split(),
-        "actions": "唱歌 跳舞 画画 阅读 写 读 充电 租 搬家 打扫 修理 开车 停车 加油 过马路 锻炼 借 还钱 注册 登录".split(),
+        "basics": "答案 回复 通知 联络 邀请 庆祝 礼物 新年 假期".split(),
+        "actions": "唱歌 跳舞 画画 阅读 写 读 充电 租 搬家 打扫 修理 开车 停车 加油 过马路 锻炼 借 还钱 注册 登入".split(),
         "time": "春天 夏天 秋天 冬天".split(),
-        "places": "楼 电梯 邻居 司机 摩托车 交通 堵车 绿灯 红灯".split(),
-        "food": "早餐 午饭 晚饭 水果 蔬菜 肉 鱼 鸡肉 牛肉 猪肉 汤 米饭 饺子 包子 甜 辣 咸 饿 饱 外卖 信用卡 工资 发票".split(),
-        "people": "客厅 卧室 阳台 垃圾 干净 脏 坏 空调 冰箱 洗衣机".split(),
+        "places": "楼 电梯 邻居 司机 机车 交通 堵车 绿灯 红灯".split(),
+        "food": "早餐 午餐 晚餐 水果 蔬菜 肉 鱼 鸡肉 牛肉 猪肉 汤 米饭 饺子 包子 甜 辣 咸 饿 饱 外送 信用卡 薪水 发票".split(),
+        "people": "客厅 卧室 阳台 垃圾 干净 脏 坏 冷气 冰箱 洗衣机".split(),
         "study": "故事 节目 游戏".split(),
         "descriptions": "免费".split(),
         "health": "诊所 护士 感冒 发烧 咳嗽 头疼 肚子 牙齿 眼睛 健康".split(),
-        "technology": "歌曲 视频 网络 网站 密码 电池 耳机".split(),
+        "technology": "歌曲 影片 网路 网站 密码 电池 耳机".split(),
     }.items()
     for word in words
 })
@@ -103,10 +103,10 @@ CATEGORY_BY_WORD.update({
         "basics": "相信 认为 同样 特别 比 最 更 一点 一些 每 从 向 跟 被 让 虽然 可是 还是 或者 一边 一直".split(),
         "actions": "爱 讨厌 担心 放心 理发 试穿 退货 交换 请假 加班".split(),
         "time": "延误".split(),
-        "places": "邮局 出差 签证 海关 导游 旅馆 单程 往返 登机牌 航班 目的地".split(),
-        "food": "顾客 商场 市场 订单 尺码 折扣 质量 品牌 收银员 快递 包裹 洗衣店".split(),
+        "places": "邮局 出差 签证 海关 导游 旅馆 单程 往返 登机证 班机 目的地".split(),
+        "food": "顾客 商场 市场 订单 尺寸 折扣 品质 品牌 收银员 快递 包裹 洗衣店".split(),
         "people": "亲戚 夫妻 丈夫 妻子 爷爷 奶奶 外公 外婆 儿子 女儿 理发店 锁 插座 灯 盘子 杯子 汤匙 筷子 刀 叉子 毛巾 牙刷 肥皂 镜子 床".split(),
-        "study": "认真 正确 错误 面试 简历 客户 合同 培训 上司 任务 进度".split(),
+        "study": "认真 正确 错误 面试 履历 客户 合同 训练 上司 任务 进度".split(),
         "descriptions": "紧张 害怕 生气 难过 惊讶 无聊 有趣 好笑 奇怪".split(),
         "health": "担心".split(),
         "technology": "".split(),
@@ -140,6 +140,9 @@ PINYIN_PHRASE_OVERRIDES = {
     "星期": "xīng qí",
     "记得": "jì dé",
     "記得": "jì dé",
+    "垃圾": "lè sè",
+    "品质": "pǐn zhí",
+    "品質": "pǐn zhí",
     "汤匙": "tāng chí",
     "湯匙": "tāng chí",
 }
@@ -552,10 +555,17 @@ def init_progress_db():
             CREATE TABLE IF NOT EXISTS lesson_vocabulary (
                 lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
                 vocabulary_word TEXT NOT NULL,
+                entry_json TEXT,
                 PRIMARY KEY (lesson_id, vocabulary_word)
             )
             """
         )
+        lesson_vocabulary_columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(lesson_vocabulary)")
+        }
+        if "entry_json" not in lesson_vocabulary_columns:
+            connection.execute("ALTER TABLE lesson_vocabulary ADD COLUMN entry_json TEXT")
         migrate_dictionary_alias_references(connection)
 
 
@@ -703,32 +713,99 @@ def get_lesson_vocabulary_entries(student_id, lesson_id):
         return []
 
     with get_progress_connection() as connection:
-        words = [row["vocabulary_word"] for row in connection.execute(
-            "SELECT vocabulary_word FROM lesson_vocabulary WHERE lesson_id = ? ORDER BY vocabulary_word",
+        rows = [row_to_dict(row) for row in connection.execute(
+            "SELECT vocabulary_word, entry_json FROM lesson_vocabulary WHERE lesson_id = ? ORDER BY vocabulary_word",
             (lesson["id"],),
         )]
     entries = []
     seen_words = set()
-    for word in words:
-        entry = get_dictionary_entry(word)
+    for row in rows:
+        entry = get_dictionary_entry(row["vocabulary_word"])
+        if entry is None:
+            entry = deserialize_lesson_vocabulary_entry(row["entry_json"])
         if entry and entry["word"] not in seen_words:
             entries.append(entry)
             seen_words.add(entry["word"])
     return entries
 
 
-def add_lesson_vocabulary(student_id, lesson_id, vocabulary_word):
+def make_custom_lesson_vocabulary_entry(vocabulary_word, english_meaning):
+    raw_word = str(vocabulary_word or "").strip()
+    english = " ".join(str(english_meaning or "").strip().split())
+    if not raw_word or not contains_chinese(raw_word) or len(clean_ai_word_form(raw_word)) > 20:
+        return None
+    if not english or len(english) > 240:
+        return None
+
+    word, traditional = normalize_ai_word_forms(raw_word, raw_word, "")
+    return {
+        "word": word,
+        "traditional": traditional,
+        "pinyin": to_sentence_pinyin(word),
+        "english": english,
+        "part_of_speech": "word",
+        "explanation": f"A custom lesson word meaning {english}.",
+        "examples": [],
+        "category": "everyday",
+    }
+
+
+def deserialize_lesson_vocabulary_entry(entry_json):
+    try:
+        entry = json.loads(entry_json or "")
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return None
+    if not isinstance(entry, dict):
+        return None
+    word = str(entry.get("word", "")).strip()
+    english = str(entry.get("english", "")).strip()
+    if not word or not english:
+        return None
+    return {
+        "word": word,
+        "traditional": str(entry.get("traditional", word)).strip() or word,
+        "pinyin": str(entry.get("pinyin", "")).strip() or to_sentence_pinyin(word),
+        "english": english,
+        "part_of_speech": normalize_part_of_speech(str(entry.get("part_of_speech", "word"))),
+        "explanation": str(entry.get("explanation", "")).strip(),
+        "examples": [],
+        "category": normalize_entry_category(entry.get("category")),
+    }
+
+
+def add_lesson_vocabulary(student_id, lesson_id, vocabulary_word, english_meaning=""):
     lesson = get_lesson(student_id, lesson_id)
-    word = canonicalize_dictionary_word(vocabulary_word)
+    raw_word = str(vocabulary_word or "").strip()
+    simplified_word = simplify_known_traditional_text(clean_ai_word_form(raw_word))
+    word = canonicalize_dictionary_word(simplified_word)
     if lesson is None:
         return "Choose a valid lesson first."
-    if word not in DICTIONARY_ENTRIES_BY_WORD:
-        return "Lesson vocabulary must be an existing built-in dictionary word."
+
+    dictionary_entry = get_dictionary_entry(word)
+    custom_entry = None
+    ai_error = None
+    if dictionary_entry is None and str(english_meaning or "").strip():
+        custom_entry = make_custom_lesson_vocabulary_entry(raw_word, english_meaning)
+    elif dictionary_entry is None and raw_word and contains_chinese(raw_word):
+        ai_result, ai_error = get_ai_explanation(raw_word)
+        custom_entry = normalize_saved_ai_entry(ai_result) if ai_result else None
+    if dictionary_entry:
+        word = dictionary_entry["word"]
+    elif custom_entry:
+        word = custom_entry["word"]
+    elif ai_error:
+        return f"Could not add this custom word. {ai_error}"
+    else:
+        return "Enter a Chinese word, or add an English meaning if local AI cannot identify it."
 
     with get_progress_connection() as connection:
         cursor = connection.execute(
-            "INSERT OR IGNORE INTO lesson_vocabulary (lesson_id, vocabulary_word) VALUES (?, ?)",
-            (lesson["id"], word),
+            "INSERT OR IGNORE INTO lesson_vocabulary (lesson_id, vocabulary_word, entry_json) VALUES (?, ?, ?)",
+            (
+                lesson["id"],
+                word,
+                json.dumps(custom_entry, ensure_ascii=True) if custom_entry else None,
+            ),
         )
     return None if cursor.rowcount else "This word is already in the lesson."
 
@@ -2739,7 +2816,12 @@ def home():
         elif form_type == "lesson-vocabulary-add":
             mode = "lessons"
             lesson_id = request.form.get("lesson_id")
-            lesson_error = add_lesson_vocabulary(student_id, lesson_id, request.form.get("vocabulary_word")) or ""
+            lesson_error = add_lesson_vocabulary(
+                student_id,
+                lesson_id,
+                request.form.get("vocabulary_word"),
+                request.form.get("vocabulary_meaning"),
+            ) or ""
             lesson_message = "Vocabulary added." if not lesson_error else ""
             selected_lesson = get_lesson(student_id, lesson_id)
             lesson_vocabulary = get_lesson_vocabulary_entries(student_id, lesson_id)

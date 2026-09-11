@@ -247,7 +247,7 @@
     "part_of_speech": "verb",
     "explanation": "Returning to one’s home.",
     "examples": [
-      "我下班以后直接坐地铁回家休息。 (I go straight home by MRT after work.)",
+      "我下班以后直接坐捷运回家休息。 (I go straight home by MRT after work.)",
       "周末的时候我常常回家看父母。 (I often go home to visit my parents on weekends.)"
     ]
   },
@@ -379,7 +379,7 @@
     "part_of_speech": "verb",
     "explanation": "The conclusion or completion of something.",
     "examples": [
-      "会议结束以后大家一起去吃晚饭。 (After the meeting ends, let’s have dinner together.)",
+      "会议结束以后大家一起去吃晚餐。 (After the meeting ends, let’s have dinner together.)",
       "课程结束的时候老师给了很多作业。 (The teacher gave a lot of homework at the end of class.)"
     ]
   },
@@ -408,15 +408,15 @@
     ]
   },
   {
-    "word": "早上好",
-    "traditional": "早上好",
-    "pinyin": "zǎo shàng hǎo",
+    "word": "早安",
+    "traditional": "早安",
+    "pinyin": "zǎo ān",
     "english": "good morning",
     "part_of_speech": "greeting",
     "explanation": "A polite greeting used in the morning.",
     "examples": [
-      "早上好，你今天起得很早。 (Good morning, you got up early today.)",
-      "老师说：早上好，同学们。 (The teacher said: good morning, students.)"
+      "早安，你今天起得很早。 (Good morning, you got up early today.)",
+      "老师说：早安，同学们。 (The teacher said: good morning, students.)"
     ]
   },
   {
@@ -487,7 +487,7 @@
     "part_of_speech": "phrase",
     "explanation": "A polite way to start a question.",
     "examples": [
-      "请问，地铁站在哪里？ (Excuse me, where is the MRT station?)",
+      "请问，捷运站在哪里？ (Excuse me, where is the MRT station?)",
       "请问，这个多少钱？ (May I ask, how much is this?)"
     ]
   },
@@ -740,7 +740,7 @@
     "explanation": "Sitting down or taking a vehicle.",
     "examples": [
       "请坐。 (Please sit.)",
-      "我每天坐地铁上班。 (I take the MRT to work every day.)"
+      "我每天坐捷运上班。 (I take the MRT to work every day.)"
     ]
   },
   {
@@ -1076,7 +1076,7 @@
     "explanation": "A business or workplace.",
     "examples": [
       "我在这家公司工作。 (I work at this company.)",
-      "公司离地铁站很近。 (The office is close to the MRT station.)"
+      "公司离捷运站很近。 (The office is close to the MRT station.)"
     ]
   },
   {
@@ -1116,15 +1116,15 @@
     ]
   },
   {
-    "word": "饭店",
-    "traditional": "飯店",
-    "pinyin": "fàn diàn",
-    "english": "restaurant; hotel",
+    "word": "餐厅",
+    "traditional": "餐廳",
+    "pinyin": "cān tīng",
+    "english": "restaurant",
     "part_of_speech": "noun",
-    "explanation": "A place to eat meals, and sometimes a hotel depending on context.",
+    "explanation": "A place where meals are prepared and served.",
     "examples": [
-      "这家饭店很好吃。 (This restaurant is good.)",
-      "我们晚上去饭店吃饭。 (We will eat at a restaurant tonight.)"
+      "这家餐厅的菜很好吃。 (The food at this restaurant is delicious.)",
+      "我们晚上去餐厅吃饭。 (We will eat at a restaurant tonight.)"
     ]
   },
   {
@@ -1140,39 +1140,39 @@
     ]
   },
   {
-    "word": "地铁",
-    "traditional": "地鐵",
-    "pinyin": "dì tiě",
+    "word": "捷运",
+    "traditional": "捷運",
+    "pinyin": "jié yùn",
     "english": "MRT; subway",
     "part_of_speech": "noun",
     "explanation": "An underground or urban train system.",
     "examples": [
-      "我每天坐地铁上班。 (I take the MRT to work every day.)",
-      "地铁站在哪里？ (Where is the subway station?)"
+      "我每天坐捷运上班。 (I take the MRT to work every day.)",
+      "捷运站在哪里？ (Where is the MRT station?)"
     ]
   },
   {
-    "word": "公交车",
-    "traditional": "公交車",
-    "pinyin": "gōng jiāo chē",
+    "word": "公车",
+    "traditional": "公車",
+    "pinyin": "gōng chē",
     "english": "bus",
     "part_of_speech": "noun",
     "explanation": "Public road transport.",
     "examples": [
-      "我坐公交车去学校。 (I take the bus to school.)",
-      "公交车来了。 (The bus is here.)"
+      "我坐公车去学校。 (I take the bus to school.)",
+      "公车来了。 (The bus is here.)"
     ]
   },
   {
-    "word": "出租车",
-    "traditional": "出租車",
-    "pinyin": "chū zū chē",
+    "word": "计程车",
+    "traditional": "計程車",
+    "pinyin": "jì chéng chē",
     "english": "taxi",
     "part_of_speech": "noun",
     "explanation": "A paid car service.",
     "examples": [
-      "下雨了，我们坐出租车吧。 (It is raining, let us take a taxi.)",
-      "出租车在门口等。 (The taxi is waiting at the door.)"
+      "下雨了，我们坐计程车吧。 (It is raining, let us take a taxi.)",
+      "计程车在门口等。 (The taxi is waiting at the door.)"
     ]
   },
   {
@@ -1388,7 +1388,7 @@
     "explanation": "Food that tastes good.",
     "examples": [
       "这个菜很好吃。 (This dish is delicious.)",
-      "那家饭店的面条好吃。 (The noodles at that restaurant are good.)"
+      "那家餐厅的面条好吃。 (The noodles at that restaurant are good.)"
     ]
   },
   {
@@ -1447,7 +1447,7 @@
     "part_of_speech": "adjective",
     "explanation": "High speed or soon.",
     "examples": [
-      "地铁很快。 (The MRT is fast.)",
+      "捷运很快。 (The MRT is fast.)",
       "快一点，我们要迟到了。 (Hurry up, we will be late.)"
     ]
   },
@@ -1483,7 +1483,7 @@
     "part_of_speech": "adjective",
     "explanation": "A short distance away.",
     "examples": [
-      "公司离地铁站很近。 (The office is near the MRT station.)",
+      "公司离捷运站很近。 (The office is near the MRT station.)",
       "我家很近。 (My home is nearby.)"
     ]
   },
@@ -1747,7 +1747,7 @@
     "part_of_speech": "conjunction",
     "explanation": "Introduces a condition.",
     "examples": [
-      "如果下雨，我们就坐地铁。 (If it rains, we will take the MRT.)",
+      "如果下雨，我们就坐捷运。 (If it rains, we will take the MRT.)",
       "如果你有空，请给我电话。 (If you are free, please call me.)"
     ]
   },
@@ -1963,7 +1963,7 @@
     "part_of_speech": "noun",
     "explanation": "A person who works with you.",
     "examples": [
-      "我和同事一起吃午饭。 (I eat lunch with my coworker.)",
+      "我和同事一起吃午餐。 (I eat lunch with my coworker.)",
       "这个同事很会帮忙。 (This coworker is very helpful.)"
     ]
   },
@@ -2880,15 +2880,15 @@
     ]
   },
   {
-    "word": "服务员",
-    "traditional": "服務員",
-    "pinyin": "fú wù yuán",
+    "word": "服务生",
+    "traditional": "服務生",
+    "pinyin": "fú wù shēng",
     "english": "server; waiter",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning server; waiter.",
     "examples": [
-      "这是服务员。 (This is server; waiter.)",
-      "我想了解服务员。 (I want to learn about server; waiter.)"
+      "服务生，请给我菜单。 (Server, please give me the menu.)",
+      "这位服务生很亲切。 (This server is very friendly.)"
     ]
   },
   {
@@ -3204,15 +3204,15 @@
     ]
   },
   {
-    "word": "项目",
-    "traditional": "項目",
-    "pinyin": "xiàng mù",
+    "word": "专案",
+    "traditional": "專案",
+    "pinyin": "zhuān àn",
     "english": "project",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning project.",
     "examples": [
-      "这是项目。 (This is project.)",
-      "我想了解项目。 (I want to learn about project.)"
+      "这个专案很重要。 (This project is important.)",
+      "我们正在讨论新专案。 (We are discussing the new project.)"
     ]
   },
   {
@@ -3732,27 +3732,27 @@
     ]
   },
   {
-    "word": "视频",
-    "traditional": "視頻",
-    "pinyin": "shì pín",
+    "word": "影片",
+    "traditional": "影片",
+    "pinyin": "yǐng piàn",
     "english": "video",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning video.",
     "examples": [
-      "这是视频。 (This is video.)",
-      "我需要视频。 (I need video.)"
+      "我看了一段影片。 (I watched a video.)",
+      "请把影片传给我。 (Please send me the video.)"
     ]
   },
   {
-    "word": "网络",
-    "traditional": "網絡",
-    "pinyin": "wǎng luò",
+    "word": "网路",
+    "traditional": "網路",
+    "pinyin": "wǎng lù",
     "english": "internet; network",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning internet; network.",
     "examples": [
-      "这是网络。 (This is internet; network.)",
-      "我需要网络。 (I need internet; network.)"
+      "这里的网路很快。 (The internet is fast here.)",
+      "我的网路断了。 (My internet connection stopped working.)"
     ]
   },
   {
@@ -3816,15 +3816,15 @@
     ]
   },
   {
-    "word": "空调",
-    "traditional": "空調",
-    "pinyin": "kōng tiáo",
+    "word": "冷气",
+    "traditional": "冷氣",
+    "pinyin": "lěng qì",
     "english": "air conditioner",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning air conditioner.",
     "examples": [
-      "这是空调。 (This is air conditioner.)",
-      "我需要空调。 (I need air conditioner.)"
+      "请打开冷气。 (Please turn on the air conditioner.)",
+      "冷气有一点冷。 (The air conditioning is a little cold.)"
     ]
   },
   {
@@ -3962,13 +3962,13 @@
   {
     "word": "垃圾",
     "traditional": "垃圾",
-    "pinyin": "lā jī",
+    "pinyin": "lè sè",
     "english": "trash; garbage",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning trash; garbage.",
     "examples": [
-      "这是垃圾。 (This is trash; garbage.)",
-      "我需要垃圾。 (I need trash; garbage.)"
+      "请把垃圾丢掉。 (Please throw away the trash.)",
+      "垃圾车来了。 (The garbage truck is here.)"
     ]
   },
   {
@@ -4080,15 +4080,15 @@
     ]
   },
   {
-    "word": "摩托车",
-    "traditional": "摩托車",
-    "pinyin": "mó tuō chē",
+    "word": "机车",
+    "traditional": "機車",
+    "pinyin": "jī chē",
     "english": "motorcycle",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning motorcycle.",
     "examples": [
-      "这是摩托车。 (This is motorcycle.)",
-      "我需要摩托车。 (I need motorcycle.)"
+      "他骑机车上班。 (He rides a motorcycle to work.)",
+      "请把机车停在这里。 (Please park the motorcycle here.)"
     ]
   },
   {
@@ -4284,27 +4284,27 @@
     ]
   },
   {
-    "word": "午饭",
-    "traditional": "午飯",
-    "pinyin": "wǔ fàn",
+    "word": "午餐",
+    "traditional": "午餐",
+    "pinyin": "wǔ cān",
     "english": "lunch",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning lunch.",
     "examples": [
-      "这是午饭。 (This is lunch.)",
-      "我需要午饭。 (I need lunch.)"
+      "我们一起吃午餐。 (We eat lunch together.)",
+      "今天的午餐很好吃。 (Today's lunch is delicious.)"
     ]
   },
   {
-    "word": "晚饭",
-    "traditional": "晚飯",
-    "pinyin": "wǎn fàn",
+    "word": "晚餐",
+    "traditional": "晚餐",
+    "pinyin": "wǎn cān",
     "english": "dinner",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning dinner.",
     "examples": [
-      "这是晚饭。 (This is dinner.)",
-      "我需要晚饭。 (I need dinner.)"
+      "我们七点吃晚餐。 (We eat dinner at seven.)",
+      "晚餐准备好了。 (Dinner is ready.)"
     ]
   },
   {
@@ -4500,15 +4500,15 @@
     ]
   },
   {
-    "word": "外卖",
-    "traditional": "外賣",
-    "pinyin": "wài mài",
+    "word": "外送",
+    "traditional": "外送",
+    "pinyin": "wài sòng",
     "english": "food delivery",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning food delivery.",
     "examples": [
-      "这是外卖。 (This is food delivery.)",
-      "我需要外卖。 (I need food delivery.)"
+      "我们今天叫外送。 (We are ordering food delivery today.)",
+      "这家餐厅有外送服务。 (This restaurant offers delivery.)"
     ]
   },
   {
@@ -4548,15 +4548,15 @@
     ]
   },
   {
-    "word": "工资",
-    "traditional": "工資",
-    "pinyin": "gōng zī",
+    "word": "薪水",
+    "traditional": "薪水",
+    "pinyin": "xīn shuǐ",
     "english": "salary; wages",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning salary; wages.",
     "examples": [
-      "这是工资。 (This is salary; wages.)",
-      "我需要工资。 (I need salary; wages.)"
+      "我今天领薪水。 (I receive my salary today.)",
+      "这份工作的薪水不错。 (The salary for this job is good.)"
     ]
   },
   {
@@ -4596,15 +4596,15 @@
     ]
   },
   {
-    "word": "登录",
-    "traditional": "登錄",
-    "pinyin": "dēng lù",
+    "word": "登入",
+    "traditional": "登入",
+    "pinyin": "dēng rù",
     "english": "to log in",
     "part_of_speech": "verb",
     "explanation": "A common daily-use word meaning to log in.",
     "examples": [
-      "我想登录。 (I want to to log in.)",
-      "我们今天登录。 (We will to log in today.)"
+      "请先登入网站。 (Please log in to the website first.)",
+      "我无法登入账号。 (I cannot log in to my account.)"
     ]
   },
   {
@@ -4620,15 +4620,15 @@
     ]
   },
   {
-    "word": "联系",
+    "word": "联络",
     "traditional": "聯絡",
-    "pinyin": "lián xì",
+    "pinyin": "lián luò",
     "english": "to contact",
     "part_of_speech": "verb",
     "explanation": "To communicate with or get in touch with someone.",
     "examples": [
-      "我想联系他。 (I want to contact him.)",
-      "我们今天再联系。 (We will contact each other again today.)"
+      "我想联络他。 (I want to contact him.)",
+      "我们今天再联络。 (We will contact each other again today.)"
     ]
   },
   {
@@ -5088,15 +5088,15 @@
     ]
   },
   {
-    "word": "尺码",
-    "traditional": "尺碼",
-    "pinyin": "chǐ mǎ",
+    "word": "尺寸",
+    "traditional": "尺寸",
+    "pinyin": "chǐ cùn",
     "english": "size",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning size.",
     "examples": [
-      "这是尺码。 (This is size.)",
-      "我需要尺码。 (I need size.)"
+      "这个尺寸太大了。 (This size is too large.)",
+      "请问有小一点的尺寸吗？ (Do you have a smaller size?)"
     ]
   },
   {
@@ -5148,15 +5148,15 @@
     ]
   },
   {
-    "word": "质量",
-    "traditional": "質量",
-    "pinyin": "zhì liàng",
+    "word": "品质",
+    "traditional": "品質",
+    "pinyin": "pǐn zhí",
     "english": "quality",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning quality.",
     "examples": [
-      "这是质量。 (This is quality.)",
-      "我需要质量。 (I need quality.)"
+      "这个产品的品质很好。 (This product is high quality.)",
+      "我们很重视品质。 (We care a lot about quality.)"
     ]
   },
   {
@@ -5664,15 +5664,15 @@
     ]
   },
   {
-    "word": "登机牌",
-    "traditional": "登機牌",
-    "pinyin": "dēng jī pái",
+    "word": "登机证",
+    "traditional": "登機證",
+    "pinyin": "dēng jī zhèng",
     "english": "boarding pass",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning boarding pass.",
     "examples": [
-      "这是登机牌。 (This is boarding pass.)",
-      "我需要登机牌。 (I need boarding pass.)"
+      "这是我的登机证。 (This is my boarding pass.)",
+      "请准备好登机证。 (Please have your boarding pass ready.)"
     ]
   },
   {
@@ -5688,15 +5688,15 @@
     ]
   },
   {
-    "word": "航班",
-    "traditional": "航班",
-    "pinyin": "háng bān",
+    "word": "班机",
+    "traditional": "班機",
+    "pinyin": "bān jī",
     "english": "flight",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning flight.",
     "examples": [
-      "这是航班。 (This is flight.)",
-      "我需要航班。 (I need flight.)"
+      "我的班机下午起飞。 (My flight departs in the afternoon.)",
+      "这班班机延误了。 (This flight is delayed.)"
     ]
   },
   {
@@ -5724,15 +5724,15 @@
     ]
   },
   {
-    "word": "简历",
-    "traditional": "簡歷",
-    "pinyin": "jiǎn lì",
+    "word": "履历",
+    "traditional": "履歷",
+    "pinyin": "lǚ lì",
     "english": "resume",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning resume.",
     "examples": [
-      "这是简历。 (This is resume.)",
-      "我需要简历。 (I need resume.)"
+      "请寄一份履历给我。 (Please send me a resume.)",
+      "我正在修改履历。 (I am revising my resume.)"
     ]
   },
   {
@@ -5760,15 +5760,15 @@
     ]
   },
   {
-    "word": "培训",
-    "traditional": "培訓",
-    "pinyin": "péi xùn",
+    "word": "训练",
+    "traditional": "訓練",
+    "pinyin": "xùn liàn",
     "english": "training",
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning training.",
     "examples": [
-      "这是培训。 (This is training.)",
-      "我需要培训。 (I need training.)"
+      "公司安排了新人训练。 (The company arranged training for new employees.)",
+      "今天的训练很实用。 (Today's training was practical.)"
     ]
   },
   {

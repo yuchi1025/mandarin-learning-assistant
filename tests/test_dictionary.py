@@ -13,6 +13,8 @@ PINYIN_WORD_OVERRIDES = {
     "记得": "jì dé",
     "日期": "rì qí",
     "星期": "xīng qí",
+    "垃圾": "lè sè",
+    "品质": "pǐn zhí",
 }
 
 
@@ -69,7 +71,7 @@ def test_dictionary_includes_new_daily_use_words():
     assert entries_by_word["检查"]["english"] == "to check; inspection"
     assert entries_by_word["歌曲"]["pinyin"] == "gē qǔ"
     assert entries_by_word["紧张"]["pinyin"] == "jǐn zhāng"
-    assert entries_by_word["登机牌"]["traditional"] == "登機牌"
+    assert entries_by_word["登机证"]["traditional"] == "登機證"
     assert entries_by_word["通过"]["traditional"] == "通過"
     assert entries_by_word["通过"]["pinyin"] == "tōng guò"
 
@@ -88,5 +90,52 @@ def test_dictionary_uses_taiwan_contact_term_with_legacy_alias():
     entries_by_word = {entry["word"]: entry for entry in load_entries()}
     aliases = json.loads(ALIASES_PATH.read_text(encoding="utf-8"))
 
-    assert entries_by_word["联系"]["traditional"] == "聯絡"
-    assert aliases["联系"] == ["聯繫"]
+    assert entries_by_word["联络"]["traditional"] == "聯絡"
+    assert aliases["联络"] == ["联系", "聯繫"]
+
+
+def test_dictionary_uses_taiwan_bus_term_with_mainland_aliases():
+    entries_by_word = {entry["word"]: entry for entry in load_entries()}
+    aliases = json.loads(ALIASES_PATH.read_text(encoding="utf-8"))
+
+    assert "公交车" not in entries_by_word
+    assert entries_by_word["公车"]["traditional"] == "公車"
+    assert entries_by_word["公车"]["pinyin"] == "gōng chē"
+    assert entries_by_word["公车"]["english"] == "bus"
+    assert aliases["公车"] == ["公交车", "公交車"]
+
+
+def test_dictionary_uses_taiwan_primary_regional_vocabulary():
+    entries_by_word = {entry["word"]: entry for entry in load_entries()}
+    aliases = json.loads(ALIASES_PATH.read_text(encoding="utf-8"))
+    expected_terms = {
+        "早安": ("早安", "good morning", ["早上好"]),
+        "餐厅": ("餐廳", "restaurant", ["饭店", "飯店"]),
+        "捷运": ("捷運", "MRT; subway", ["地铁", "地鐵"]),
+        "计程车": ("計程車", "taxi", ["出租车", "出租車"]),
+        "服务生": ("服務生", "server; waiter", ["服务员", "服務員"]),
+        "专案": ("專案", "project", ["项目", "項目"]),
+        "影片": ("影片", "video", ["视频", "視頻"]),
+        "网路": ("網路", "internet; network", ["网络", "網絡"]),
+        "冷气": ("冷氣", "air conditioner", ["空调", "空調"]),
+        "机车": ("機車", "motorcycle", ["摩托车", "摩托車"]),
+        "午餐": ("午餐", "lunch", ["午饭", "午飯"]),
+        "晚餐": ("晚餐", "dinner", ["晚饭", "晚飯"]),
+        "外送": ("外送", "food delivery", ["外卖", "外賣"]),
+        "薪水": ("薪水", "salary; wages", ["工资", "工資"]),
+        "登入": ("登入", "to log in", ["登录", "登錄"]),
+        "尺寸": ("尺寸", "size", ["尺码", "尺碼"]),
+        "品质": ("品質", "quality", ["质量", "質量"]),
+        "登机证": ("登機證", "boarding pass", ["登机牌", "登機牌"]),
+        "班机": ("班機", "flight", ["航班"]),
+        "履历": ("履歷", "resume", ["简历", "簡歷"]),
+        "训练": ("訓練", "training", ["培训", "培訓"]),
+    }
+
+    for word, (traditional, english, mainland_aliases) in expected_terms.items():
+        assert entries_by_word[word]["traditional"] == traditional
+        assert entries_by_word[word]["english"] == english
+        assert aliases[word] == mainland_aliases
+        assert not set(mainland_aliases) & entries_by_word.keys()
+
+    assert entries_by_word["垃圾"]["pinyin"] == "lè sè"

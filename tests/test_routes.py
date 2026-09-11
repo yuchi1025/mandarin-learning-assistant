@@ -47,11 +47,83 @@ def test_home_page_loads():
 
 def test_lesson_notes_use_content_based_auto_resize():
     app_js = mandarin_app.app.test_client().get("/static/app.js")
+    style_css = mandarin_app.app.test_client().get("/static/style.css")
 
     assert app_js.status_code == 200
     assert b"bindAutoResizeTextareas" in app_js.data
     assert b"textarea.scrollHeight" in app_js.data
+    assert b"textarea.offsetHeight - textarea.clientHeight" in app_js.data
     assert b"textarea.addEventListener(\"input\", resize)" in app_js.data
+    assert app_js.data.index(b"bindAutoResizeTextareas();") < app_js.data.index(b'window.addEventListener("load"')
+    assert b"overflow-y: hidden" in style_css.data
+    assert b"resize: none" in style_css.data
+
+
+def test_lesson_layout_has_stable_editor_targets_and_mobile_stacking(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-10", "Layout", "Notes")
+    response = mandarin_app.app.test_client().get(
+        "/", query_string={"mode": "lessons", "student_id": student["id"], "lesson_id": lesson["id"]}
+    )
+    style_css = mandarin_app.app.test_client().get("/static/style.css")
+
+    assert response.status_code == 200
+    assert b'id="lesson-editor"' in response.data
+    assert response.data.count(b"#lesson-editor") == 4
+    assert response.data.count(b'action="/?mode=lessons&amp;student_id=1&amp;lesson_id=1#lesson-editor"') == 2
+    assert b'action="/?mode=lessons&amp;student_id=1#lesson-editor"' in response.data
+    assert b".lesson-panel-header," in style_css.data
+    assert b".lesson-vocabulary-row," in style_css.data
+    assert b".lesson-list-row {" in style_css.data
+    assert b"flex-direction: column" in style_css.data
+    assert b"overflow-wrap: anywhere" in style_css.data
+
+
+def test_lesson_vocabulary_shows_local_ai_lookup_status():
+    app_js = mandarin_app.app.test_client().get("/static/app.js")
+
+    assert app_js.status_code == 200
+    assert b"bindLessonVocabularyLookup" in app_js.data
+    assert b"meaningInput.value.trim()" in app_js.data
+    assert b"loading.hidden = false" in app_js.data
+    assert b'form.setAttribute("aria-busy", "true")' in app_js.data
+
+
+def test_long_lesson_content_remains_in_normal_document_flow(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
+    long_notes = "Long teacher note. " * 300
+    selected_lesson = mandarin_app.create_lesson(
+        student["id"], "2026-09-11", "Selected long lesson", long_notes
+    )
+    for index in range(18):
+        mandarin_app.create_lesson(
+            student["id"], "2026-09-10", f"Previous lesson {index:02d}", "Previous notes"
+        )
+    for entry in mandarin_app.DICTIONARY_ENTRIES[:40]:
+        assert mandarin_app.add_lesson_vocabulary(student["id"], selected_lesson["id"], entry["word"]) is None
+
+    response = mandarin_app.app.test_client().get(
+        "/",
+        query_string={
+            "mode": "lessons",
+            "student_id": student["id"],
+            "lesson_id": selected_lesson["id"],
+        },
+    )
+    response_text = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert long_notes.strip() in response_text
+    assert "Save lesson" in response_text
+    assert "Create lesson" in response_text
+    assert "No vocabulary added" not in response_text
+    assert mandarin_app.DICTIONARY_ENTRIES[39]["word"] in response_text
+    assert "Previous lesson 00" in response_text
+    assert "Previous lesson 17" in response_text
+    assert response_text.index("Save lesson") < response_text.index("Lesson Vocabulary")
+    assert response_text.index("Lesson Vocabulary") < response_text.index("Previous Lessons")
 
 
 def test_legacy_dictionary_alias_is_stored_as_taiwan_term(monkeypatch, tmp_path):
@@ -69,6 +141,26 @@ def test_legacy_dictionary_alias_is_stored_as_taiwan_term(monkeypatch, tmp_path)
     with mandarin_app.get_progress_connection() as connection:
         assert connection.execute("SELECT vocabulary_word FROM saved_vocabulary").fetchone()[0] == "汤匙"
         assert connection.execute("SELECT vocabulary_word FROM lesson_vocabulary").fetchone()[0] == "汤匙"
+
+
+def test_legacy_bus_references_migrate_to_taiwan_term(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-11", "Transport", "")
+    with mandarin_app.get_progress_connection() as connection:
+        connection.execute(
+            "INSERT INTO saved_vocabulary (student_id, vocabulary_word, saved_at) VALUES (?, ?, ?)",
+            (student["id"], "公交车", "2026-09-11T09:00:00"),
+        )
+        connection.execute(
+            "INSERT INTO lesson_vocabulary (lesson_id, vocabulary_word) VALUES (?, ?)",
+            (lesson["id"], "公交車"),
+        )
+
+    mandarin_app.init_progress_db()
+
+    assert [entry["word"] for entry in mandarin_app.get_saved_vocabulary_entries(student["id"])] == ["公车"]
+    assert [entry["word"] for entry in mandarin_app.get_lesson_vocabulary_entries(student["id"], lesson["id"])] == ["公车"]
 
 
 def test_taiwan_spoon_uses_one_correct_pinyin_display():
@@ -114,8 +206,8 @@ def test_quiz_uses_paired_pinyin_for_regional_pronunciations(monkeypatch):
 
 
 def test_contact_uses_taiwan_word_and_both_pronunciations():
-    assert mandarin_app.display_entry_pair("联系", "聯絡") == "联系 / 聯絡"
-    assert mandarin_app.display_pinyin_pair("lián xì", "联系", "聯絡") == "lián xì / lián luò"
+    assert mandarin_app.display_entry_pair("联络", "聯絡") == "联络 / 聯絡"
+    assert mandarin_app.display_pinyin_pair("lián luò", "联络", "聯絡") == "lián luò"
 
 
 def test_quiz_controls_land_on_the_quiz_card():
@@ -2271,17 +2363,110 @@ def test_lessons_are_created_edited_and_isolated_by_learner(monkeypatch, tmp_pat
     assert mandarin_app.get_lessons(ben["id"]) == []
 
 
-def test_lesson_vocabulary_persists_rejects_duplicates_and_invalid_words(monkeypatch, tmp_path):
+def test_lesson_vocabulary_persists_accepts_custom_words_and_rejects_invalid_input(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        mandarin_app,
+        "get_ai_explanation",
+        lambda query: (None, "AI explanation is unavailable for this test."),
+    )
     student = mandarin_app.create_student("Alice")
     lesson = mandarin_app.create_lesson(student["id"], "2026-09-08")
 
     assert mandarin_app.add_lesson_vocabulary(student["id"], lesson["id"], "学校") is None
     assert mandarin_app.add_lesson_vocabulary(student["id"], lesson["id"], "学校") == "This word is already in the lesson."
     assert mandarin_app.add_lesson_vocabulary(student["id"], lesson["id"], "不存在") == (
-        "Lesson vocabulary must be an existing built-in dictionary word."
+        "Could not add this custom word. AI explanation is unavailable for this test."
     )
-    assert [entry["word"] for entry in mandarin_app.get_lesson_vocabulary_entries(student["id"], lesson["id"])] == ["学校"]
+    assert mandarin_app.add_lesson_vocabulary(student["id"], lesson["id"], "不存在", "not to exist") is None
+    assert mandarin_app.add_lesson_vocabulary(student["id"], lesson["id"], "plain text", "invalid") == (
+        "Enter a Chinese word, or add an English meaning if local AI cannot identify it."
+    )
+    entries = mandarin_app.get_lesson_vocabulary_entries(student["id"], lesson["id"])
+    assert [entry["word"] for entry in entries] == ["不存在", "学校"]
+    assert entries[0]["traditional"] == "不存在"
+    assert entries[0]["pinyin"] == "bù cún zài"
+    assert entries[0]["english"] == "not to exist"
+
+
+def test_custom_lesson_vocabulary_can_get_its_meaning_from_local_ai(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-11")
+    requested_queries = []
+
+    def fake_ai_explanation(query):
+        requested_queries.append(query)
+        return ({
+            "word": "測驗詞",
+            "traditional": "測驗詞",
+            "pinyin": "cè yàn cí",
+            "english": "test term",
+            "part_of_speech": "noun",
+            "category": "study",
+            "explanation": "A word used for testing.",
+            "examples": [],
+        }, None)
+
+    monkeypatch.setattr(mandarin_app, "get_ai_explanation", fake_ai_explanation)
+
+    assert mandarin_app.add_lesson_vocabulary(student["id"], lesson["id"], "測驗詞") is None
+    entries = mandarin_app.get_lesson_vocabulary_entries(student["id"], lesson["id"])
+
+    assert requested_queries == ["測驗詞"]
+    assert entries[0]["word"] == "测验词"
+    assert entries[0]["traditional"] == "測驗詞"
+    assert entries[0]["english"] == "test term"
+    assert entries[0]["category"] == "study"
+
+
+def test_existing_lesson_vocabulary_table_migrates_for_custom_entries(monkeypatch, tmp_path):
+    db_path = use_temp_progress_db(monkeypatch, tmp_path)
+    with mandarin_app.sqlite3.connect(db_path) as connection:
+        connection.execute(
+            """
+            CREATE TABLE lesson_vocabulary (
+                lesson_id INTEGER NOT NULL,
+                vocabulary_word TEXT NOT NULL,
+                PRIMARY KEY (lesson_id, vocabulary_word)
+            )
+            """
+        )
+
+    mandarin_app.init_progress_db()
+
+    with mandarin_app.get_progress_connection() as connection:
+        columns = {row["name"] for row in connection.execute("PRAGMA table_info(lesson_vocabulary)")}
+    assert "entry_json" in columns
+
+
+def test_custom_lesson_vocabulary_works_in_lesson_practice_routes(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-11", "Custom words")
+    client = mandarin_app.app.test_client()
+
+    response = client.post(
+        "/",
+        query_string={"mode": "lessons", "student_id": student["id"], "lesson_id": lesson["id"]},
+        data={
+            "form_type": "lesson-vocabulary-add",
+            "student_id": student["id"],
+            "lesson_id": lesson["id"],
+            "vocabulary_word": "測驗詞",
+            "vocabulary_meaning": "test term",
+        },
+    )
+    pool = mandarin_app.get_quiz_pool("lesson", student["id"])
+    quiz = mandarin_app.build_quiz(question_word="测验词", pool_entries=pool)
+    sentence_target = mandarin_app.choose_sentence_target("lesson", student["id"], "测验词")
+
+    assert response.status_code == 200
+    assert "测验词 / 測驗詞".encode() in response.data
+    assert b"test term" in response.data
+    assert quiz["correct_answer"] == "test term"
+    assert sentence_target["word"] == "测验词"
+    assert sentence_target["pinyin"] == "cè yàn cí"
 
 
 def test_removing_lesson_vocabulary_does_not_remove_dictionary_data(monkeypatch, tmp_path):

@@ -494,10 +494,32 @@ function bindAutoResizeTextareas() {
     document.querySelectorAll(".lesson-form textarea[name='notes']").forEach(function (textarea) {
         const resize = function () {
             textarea.style.height = "auto";
-            textarea.style.height = `${textarea.scrollHeight}px`;
+            const borderHeight = textarea.offsetHeight - textarea.clientHeight;
+            textarea.style.height = `${textarea.scrollHeight + borderHeight}px`;
         };
         textarea.addEventListener("input", resize);
         resize();
+    });
+}
+
+function bindLessonVocabularyLookup() {
+    const form = document.getElementById("lesson-vocabulary-form");
+    const meaningInput = document.getElementById("lesson-vocabulary-meaning");
+    const loading = document.getElementById("lesson-vocabulary-loading");
+    if (!form || !meaningInput || !loading) {
+        return;
+    }
+
+    form.addEventListener("submit", function () {
+        if (meaningInput.value.trim()) {
+            return;
+        }
+        const button = form.querySelector('button[type="submit"]');
+        loading.hidden = false;
+        form.setAttribute("aria-busy", "true");
+        if (button) {
+            button.disabled = true;
+        }
     });
 }
 
@@ -567,6 +589,10 @@ function restoreBatchMode() {
     }
 }
 
+// The script is loaded after the page markup, so size lesson notes before the
+// load event restores a fragment or previous scroll position.
+bindAutoResizeTextareas();
+
 window.addEventListener("load", function () {
     const isRefresh = isRefreshNavigation();
     if (isRefresh) {
@@ -593,7 +619,7 @@ window.addEventListener("load", function () {
     bindFeedbackForm("sentence-practice-form", "sentence-feedback-loading");
     bindFeedbackForm("conversation-form", "conversation-feedback-loading");
     bindCopyButtons();
-    bindAutoResizeTextareas();
+    bindLessonVocabularyLookup();
     rememberSelectedStudent();
     restoreBatchMode();
     renderRecentSearches();

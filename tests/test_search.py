@@ -40,9 +40,43 @@ def test_taiwan_term_and_mainland_alias_find_the_same_spoon_entry():
 
 
 def test_taiwan_contact_term_and_legacy_form_find_the_same_entry():
-    assert words_for("联系") == ["联系"]
-    assert words_for("聯絡") == ["联系"]
-    assert words_for("聯繫") == ["联系"]
+    assert words_for("联系") == ["联络"]
+    assert words_for("聯絡") == ["联络"]
+    assert words_for("聯繫") == ["联络"]
+
+
+def test_mainland_terms_find_taiwan_primary_entries():
+    expected_aliases = {
+        "早上好": "早安",
+        "饭店": "餐厅",
+        "地铁": "捷运",
+        "出租车": "计程车",
+        "服务员": "服务生",
+        "项目": "专案",
+        "视频": "影片",
+        "网络": "网路",
+        "空调": "冷气",
+        "摩托车": "机车",
+        "午饭": "午餐",
+        "晚饭": "晚餐",
+        "外卖": "外送",
+        "工资": "薪水",
+        "登录": "登入",
+        "尺码": "尺寸",
+        "质量": "品质",
+        "登机牌": "登机证",
+        "航班": "班机",
+        "简历": "履历",
+        "培训": "训练",
+    }
+
+    for mainland_term, taiwan_term in expected_aliases.items():
+        assert words_for(mainland_term) == [taiwan_term]
+
+
+def test_taiwan_bus_term_and_mainland_aliases_find_the_same_entry():
+    for query in ("公车", "公車", "gong che", "gōng chē", "公交车", "公交車", "gong jiao che", "bus"):
+        assert words_for(query) == ["公车"]
 
 
 def test_partial_search_still_works():
