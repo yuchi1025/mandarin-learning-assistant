@@ -70,8 +70,10 @@ def test_lesson_layout_has_stable_editor_targets_and_mobile_stacking(monkeypatch
 
     assert response.status_code == 200
     assert b'id="lesson-editor"' in response.data
-    assert response.data.count(b"#lesson-editor") == 4
-    assert response.data.count(b'action="/?mode=lessons&amp;student_id=1&amp;lesson_id=1#lesson-editor"') == 2
+    assert b'id="lesson-vocabulary"' in response.data
+    assert response.data.count(b"#lesson-editor") == 3
+    assert response.data.count(b'action="/?mode=lessons&amp;student_id=1&amp;lesson_id=1#lesson-editor"') == 1
+    assert response.data.count(b'action="/?mode=lessons&amp;student_id=1&amp;lesson_id=1#lesson-vocabulary"') == 1
     assert b'action="/?mode=lessons&amp;student_id=1#lesson-editor"' in response.data
     assert b".lesson-panel-header," in style_css.data
     assert b".lesson-vocabulary-row," in style_css.data
@@ -88,6 +90,33 @@ def test_lesson_vocabulary_shows_local_ai_lookup_status():
     assert b"meaningInput.value.trim()" in app_js.data
     assert b"loading.hidden = false" in app_js.data
     assert b'form.setAttribute("aria-busy", "true")' in app_js.data
+
+
+def test_vocabulary_feedback_is_next_to_add_word_controls(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
+    lesson = mandarin_app.create_lesson(
+        student["id"], "2026-09-12", "Long notes", "Teacher notes. " * 300
+    )
+
+    response = mandarin_app.app.test_client().post(
+        "/",
+        query_string={"mode": "lessons", "student_id": student["id"], "lesson_id": lesson["id"]},
+        data={
+            "form_type": "lesson-vocabulary-add",
+            "student_id": student["id"],
+            "lesson_id": lesson["id"],
+            "vocabulary_word": "学校",
+        },
+    )
+    response_text = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert 'id="lesson-vocabulary"' in response_text
+    assert "Vocabulary added." in response_text
+    assert response_text.index('id="lesson-vocabulary"') < response_text.index("Vocabulary added.")
+    assert response_text.index("Vocabulary added.") < response_text.index('id="lesson-vocabulary-form"')
+    assert '#lesson-vocabulary"' in response_text
 
 
 def test_long_lesson_content_remains_in_normal_document_flow(monkeypatch, tmp_path):
@@ -1713,6 +1742,37 @@ def test_simplified_search_displays_word_and_examples_simplified_first():
     assert "<h2>通过</h2>" in response_text
     assert '<span class="traditional-word">通過</span>' in response_text
     assert "我通过了考试。 / 我通過了考試。" in response_text
+
+
+def test_vocabulary_views_use_stored_traditional_form_for_tongguo(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-12", "Passing")
+    assert mandarin_app.save_vocabulary(student["id"], "通过") is True
+    assert mandarin_app.add_lesson_vocabulary(student["id"], lesson["id"], "通过") is None
+    client = mandarin_app.app.test_client()
+
+    responses = [
+        client.get("/", query_string={"mode": "saved", "student_id": student["id"]}),
+        client.get(
+            "/",
+            query_string={"mode": "lessons", "student_id": student["id"], "lesson_id": lesson["id"]},
+        ),
+        client.get(
+            "/",
+            query_string={
+                "mode": "sentence",
+                "sentence_source": "lesson",
+                "target_word": "通过",
+                "student_id": student["id"],
+            },
+        ),
+    ]
+
+    for response in responses:
+        assert response.status_code == 200
+        assert "通过 / 通過".encode() in response.data
+        assert "通过 / 透過".encode() not in response.data
 
 
 def test_entry_examples_use_taiwan_vocabulary_and_pair_changed_pinyin():

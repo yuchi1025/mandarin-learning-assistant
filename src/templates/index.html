@@ -276,7 +276,7 @@
                     {% for item in saved_entries %}
                         <article class="saved-vocabulary-row">
                             <div class="saved-vocabulary-word">
-                                <strong>{{ item.word | display_chinese_pair }}</strong>
+                                <strong>{{ item.word | display_entry_pair(item.traditional) }}</strong>
                                 <span>{{ item.pinyin | display_pinyin_pair(item.word, item.traditional) }}</span>
                             </div>
                             <span class="saved-vocabulary-meaning">{{ item.english }}</span>
@@ -359,8 +359,8 @@
                     </form>
                 </section>
 
-                {% if lesson_error %}<p class="lesson-message lesson-error">{{ lesson_error }}</p>{% endif %}
-                {% if lesson_message %}<p class="lesson-message">{{ lesson_message }}</p>{% endif %}
+                {% if not selected_lesson and lesson_error %}<p class="lesson-message lesson-error">{{ lesson_error }}</p>{% endif %}
+                {% if not selected_lesson and lesson_message %}<p class="lesson-message">{{ lesson_message }}</p>{% endif %}
 
                 {% if selected_lesson %}
                     <section class="lesson-panel" id="lesson-editor">
@@ -368,6 +368,8 @@
                             <h2>{{ selected_lesson.title or 'Untitled lesson' }}</h2>
                             <span>{{ selected_lesson.lesson_date }}</span>
                         </div>
+                        {% if lesson_feedback_target == 'lesson' and lesson_error %}<p class="lesson-message lesson-error">{{ lesson_error }}</p>{% endif %}
+                        {% if lesson_feedback_target == 'lesson' and lesson_message %}<p class="lesson-message">{{ lesson_message }}</p>{% endif %}
                         <form method="post" action="{{ url_for('home', mode='lessons', student_id=selected_student.id, lesson_id=selected_lesson.id, _anchor='lesson-editor') }}" class="lesson-form">
                             <input type="hidden" name="form_type" value="lesson-update">
                             <input type="hidden" name="student_id" value="{{ selected_student.id }}">
@@ -381,7 +383,7 @@
                             <button type="submit">Save lesson</button>
                         </form>
 
-                        <div class="lesson-vocabulary-header">
+                        <div class="lesson-vocabulary-header" id="lesson-vocabulary">
                             <h3>Lesson Vocabulary</h3>
                             {% if lesson_vocabulary %}
                                 <div class="lesson-practice-actions">
@@ -390,7 +392,9 @@
                                 </div>
                             {% endif %}
                         </div>
-                        <form method="post" action="{{ url_for('home', mode='lessons', student_id=selected_student.id, lesson_id=selected_lesson.id, _anchor='lesson-editor') }}" class="lesson-vocabulary-form" id="lesson-vocabulary-form">
+                        {% if lesson_feedback_target == 'vocabulary' and lesson_error %}<p class="lesson-message lesson-error">{{ lesson_error }}</p>{% endif %}
+                        {% if lesson_feedback_target == 'vocabulary' and lesson_message %}<p class="lesson-message">{{ lesson_message }}</p>{% endif %}
+                        <form method="post" action="{{ url_for('home', mode='lessons', student_id=selected_student.id, lesson_id=selected_lesson.id, _anchor='lesson-vocabulary') }}" class="lesson-vocabulary-form" id="lesson-vocabulary-form">
                             <input type="hidden" name="form_type" value="lesson-vocabulary-add">
                             <input type="hidden" name="student_id" value="{{ selected_student.id }}">
                             <input type="hidden" name="lesson_id" value="{{ selected_lesson.id }}">
@@ -408,7 +412,7 @@
                                 {% for item in lesson_vocabulary %}
                                     <article class="lesson-vocabulary-row">
                                         <div>
-                                            <strong>{{ item.word | display_chinese_pair }}</strong>
+                                            <strong>{{ item.word | display_entry_pair(item.traditional) }}</strong>
                                             <span>{{ item.pinyin | display_pinyin_pair(item.word, item.traditional) }}</span>
                                             <span>{{ item.english }}</span>
                                         </div>
@@ -416,7 +420,7 @@
                                             <button type="button" class="audio-button inline-audio-button" data-speak="{{ item.word }}" aria-label="Play pronunciation for {{ item.word }}" title="Play pronunciation">
                                                 <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon"><path d="M3 10v4h4l5 4V6L7 10H3z"></path><path d="M16 8a5 5 0 0 1 0 8"></path><path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"></path></svg>
                                             </button>
-                                            <form method="post" action="{{ url_for('home', mode='lessons', student_id=selected_student.id, lesson_id=selected_lesson.id, _anchor='lesson-editor') }}">
+                                            <form method="post" action="{{ url_for('home', mode='lessons', student_id=selected_student.id, lesson_id=selected_lesson.id, _anchor='lesson-vocabulary') }}">
                                                 <input type="hidden" name="form_type" value="lesson-vocabulary-remove">
                                                 <input type="hidden" name="student_id" value="{{ selected_student.id }}">
                                                 <input type="hidden" name="lesson_id" value="{{ selected_lesson.id }}">
@@ -538,7 +542,7 @@
                     <div class="sentence-practice-header">
                         <div>
                             <p class="eyebrow">{{ sentence_source.replace('_', ' ').title() }}</p>
-                            <h2>{{ sentence_target.word | display_chinese_pair }}</h2>
+                            <h2>{{ sentence_target.word | display_entry_pair(sentence_target.traditional) }}</h2>
                             <p class="sentence-practice-pinyin">{{ sentence_target.pinyin }}</p>
                             <p class="sentence-practice-meaning">{{ sentence_target.english }}</p>
                         </div>
@@ -1011,7 +1015,7 @@
                         <div class="weekly-insight">
                             <h3>Improving</h3>
                             {% for item in progress_summary.weekly_summary.improving_words %}
-                                <span>{{ item.word | display_chinese_pair }} · {{ item.pinyin }} · {{ item.earlier_accuracy }}% to {{ item.recent_accuracy }}%</span>
+                                <span>{{ item.word | display_entry_pair(item.traditional) }} · {{ item.pinyin }} · {{ item.earlier_accuracy }}% to {{ item.recent_accuracy }}%</span>
                             {% endfor %}
                         </div>
                     {% endif %}
@@ -1020,7 +1024,7 @@
                         <div class="weekly-insight">
                             <h3>Still Needs Practice</h3>
                             {% for item in progress_summary.weekly_summary.weak_words %}
-                                <span>{{ item.word | display_chinese_pair }} · {{ item.pinyin }} · {{ item.accuracy }}%</span>
+                                <span>{{ item.word | display_entry_pair(item.traditional) }} · {{ item.pinyin }} · {{ item.accuracy }}%</span>
                             {% endfor %}
                         </div>
                     {% endif %}
@@ -1084,7 +1088,7 @@
                         {% for item in progress_summary.weak_words %}
                             <div class="progress-row weak-word-row">
                                 <div>
-                                    <strong>{{ item.word | display_chinese_pair }}</strong>
+                                    <strong>{{ item.word | display_entry_pair(item.traditional) }}</strong>
                                     <span class="progress-pinyin">{{ item.pinyin }}</span>
                                 </div>
                                 <span class="weak-word-stats">
@@ -1117,7 +1121,7 @@
                         {% for item in progress_summary.due_reviews %}
                             <div class="progress-row weak-word-row">
                                 <div>
-                                    <strong>{{ item.word | display_chinese_pair }}</strong>
+                                    <strong>{{ item.word | display_entry_pair(item.traditional) }}</strong>
                                     <span class="progress-pinyin">{{ item.pinyin }}</span>
                                 </div>
                                 <span class="weak-word-stats">Due {{ item.next_review_at }} · {{ item.review_status }}</span>

@@ -573,7 +573,8 @@ h1 {
     border-color: var(--accent);
 }
 
-#lesson-editor {
+#lesson-editor,
+#lesson-vocabulary {
     scroll-margin-top: 16px;
 }
 

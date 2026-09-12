@@ -2687,6 +2687,7 @@ def home():
     lesson_vocabulary = get_lesson_vocabulary_entries(student_id, lesson_id)
     lesson_message = ""
     lesson_error = ""
+    lesson_feedback_target = "lesson"
     conversation_id = request.form.get("conversation_id") or request.args.get("conversation_id") or uuid.uuid4().hex
     default_conversation_prompt, default_conversation_prompt_english = get_daily_conversation_prompt()
     conversation_prompt = clean_generated_mandarin_sentence(
@@ -2815,6 +2816,7 @@ def home():
             lessons = get_lessons(student_id)
         elif form_type == "lesson-vocabulary-add":
             mode = "lessons"
+            lesson_feedback_target = "vocabulary"
             lesson_id = request.form.get("lesson_id")
             lesson_error = add_lesson_vocabulary(
                 student_id,
@@ -2828,6 +2830,7 @@ def home():
             lessons = get_lessons(student_id)
         elif form_type == "lesson-vocabulary-remove":
             mode = "lessons"
+            lesson_feedback_target = "vocabulary"
             lesson_id = request.form.get("lesson_id")
             if remove_lesson_vocabulary(student_id, lesson_id, request.form.get("vocabulary_word")):
                 lesson_message = "Vocabulary removed from this lesson."
@@ -3022,6 +3025,7 @@ def home():
         lesson_vocabulary=lesson_vocabulary,
         lesson_message=lesson_message,
         lesson_error=lesson_error,
+        lesson_feedback_target=lesson_feedback_target,
         today_date=date.today().isoformat(),
         conversation_id=conversation_id,
         conversation_prompt=conversation_prompt,
