@@ -488,7 +488,8 @@ h1 {
 
 .lesson-form input,
 .lesson-form textarea,
-.lesson-vocabulary-form input {
+.lesson-vocabulary-form input,
+.lesson-vocabulary-form textarea {
     width: 100%;
     max-width: 100%;
     border: 1px solid var(--border);
@@ -497,6 +498,18 @@ h1 {
     color: var(--ink);
     font: inherit;
     padding: 10px 12px;
+}
+
+.lesson-vocabulary-form textarea {
+    min-height: 84px;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.field-help {
+    margin: -4px 0 2px;
+    color: #6a5b4d;
+    font-size: 0.9rem;
 }
 
 .lesson-form textarea {

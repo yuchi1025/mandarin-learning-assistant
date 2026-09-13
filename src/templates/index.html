@@ -398,13 +398,12 @@
                             <input type="hidden" name="form_type" value="lesson-vocabulary-add">
                             <input type="hidden" name="student_id" value="{{ selected_student.id }}">
                             <input type="hidden" name="lesson_id" value="{{ selected_lesson.id }}">
-                            <label for="lesson-vocabulary-word">Add vocabulary word</label>
-                            <input id="lesson-vocabulary-word" name="vocabulary_word" type="text" maxlength="20" placeholder="For example: 学校" required>
-                            <label for="lesson-vocabulary-meaning">English meaning <span class="field-optional">optional</span></label>
-                            <input id="lesson-vocabulary-meaning" name="vocabulary_meaning" type="text" maxlength="240" placeholder="Leave blank to look up with local AI">
-                            <button type="submit">Add word</button>
+                            <label for="lesson-vocabulary-word">Add vocabulary words</label>
+                            <textarea id="lesson-vocabulary-word" name="vocabulary_word" maxlength="2000" rows="3" placeholder="Separate words with spaces, commas, or new lines: 学校 朋友 机场" required></textarea>
+                            <p class="field-help">Add up to 50 words at once. Local AI will look up words that are not in the built-in dictionary.</p>
+                            <button type="submit">Add words</button>
                             <p class="lesson-lookup-status" id="lesson-vocabulary-loading" role="status" aria-live="polite" hidden>
-                                Looking up the word and its meaning with local AI…
+                                Checking vocabulary and looking up any unknown words with local AI…
                             </p>
                         </form>
                         {% if lesson_vocabulary %}

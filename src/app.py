@@ -810,6 +810,40 @@ def add_lesson_vocabulary(student_id, lesson_id, vocabulary_word, english_meanin
     return None if cursor.rowcount else "This word is already in the lesson."
 
 
+def parse_lesson_vocabulary_words(raw_words):
+    words = []
+    for value in re.split(r"[\s,，、;；]+", str(raw_words or "")):
+        word = value.strip()
+        if word and word not in words:
+            words.append(word)
+    return words
+
+
+def add_lesson_vocabulary_batch(student_id, lesson_id, raw_words, english_meaning=""):
+    words = parse_lesson_vocabulary_words(raw_words)
+    if not words:
+        return 0, [], "Enter at least one Chinese word."
+    if len(words) > 50:
+        return 0, [], "Add no more than 50 vocabulary words at a time."
+    if len(words) > 1 and str(english_meaning or "").strip():
+        return 0, [], "English meaning can only be used when adding one word."
+
+    errors = []
+    added_count = 0
+    for word in words:
+        error = add_lesson_vocabulary(
+            student_id,
+            lesson_id,
+            word,
+            english_meaning if len(words) == 1 else "",
+        )
+        if error:
+            errors.append(f"{word}: {error}")
+        else:
+            added_count += 1
+    return added_count, errors, ""
+
+
 def remove_lesson_vocabulary(student_id, lesson_id, vocabulary_word):
     lesson = get_lesson(student_id, lesson_id)
     if lesson is None:
@@ -2818,13 +2852,16 @@ def home():
             mode = "lessons"
             lesson_feedback_target = "vocabulary"
             lesson_id = request.form.get("lesson_id")
-            lesson_error = add_lesson_vocabulary(
+            added_count, vocabulary_errors, batch_error = add_lesson_vocabulary_batch(
                 student_id,
                 lesson_id,
                 request.form.get("vocabulary_word"),
                 request.form.get("vocabulary_meaning"),
-            ) or ""
-            lesson_message = "Vocabulary added." if not lesson_error else ""
+            )
+            lesson_error = batch_error or " ".join(vocabulary_errors)
+            if added_count:
+                noun = "word" if added_count == 1 else "words"
+                lesson_message = f"Added {added_count} vocabulary {noun}."
             selected_lesson = get_lesson(student_id, lesson_id)
             lesson_vocabulary = get_lesson_vocabulary_entries(student_id, lesson_id)
             lessons = get_lessons(student_id)

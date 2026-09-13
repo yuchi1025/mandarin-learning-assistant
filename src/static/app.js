@@ -504,16 +504,12 @@ function bindAutoResizeTextareas() {
 
 function bindLessonVocabularyLookup() {
     const form = document.getElementById("lesson-vocabulary-form");
-    const meaningInput = document.getElementById("lesson-vocabulary-meaning");
     const loading = document.getElementById("lesson-vocabulary-loading");
-    if (!form || !meaningInput || !loading) {
+    if (!form || !loading) {
         return;
     }
 
     form.addEventListener("submit", function () {
-        if (meaningInput.value.trim()) {
-            return;
-        }
         const button = form.querySelector('button[type="submit"]');
         loading.hidden = false;
         form.setAttribute("aria-busy", "true");

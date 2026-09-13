@@ -87,9 +87,23 @@ def test_lesson_vocabulary_shows_local_ai_lookup_status():
 
     assert app_js.status_code == 200
     assert b"bindLessonVocabularyLookup" in app_js.data
-    assert b"meaningInput.value.trim()" in app_js.data
     assert b"loading.hidden = false" in app_js.data
     assert b'form.setAttribute("aria-busy", "true")' in app_js.data
+
+
+def test_lesson_vocabulary_form_does_not_request_an_english_meaning(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-13")
+
+    response = mandarin_app.app.test_client().get(
+        "/",
+        query_string={"mode": "lessons", "student_id": student["id"], "lesson_id": lesson["id"]},
+    )
+
+    assert response.status_code == 200
+    assert b'name="vocabulary_meaning"' not in response.data
+    assert b"English meaning" not in response.data
 
 
 def test_vocabulary_feedback_is_next_to_add_word_controls(monkeypatch, tmp_path):
@@ -113,10 +127,34 @@ def test_vocabulary_feedback_is_next_to_add_word_controls(monkeypatch, tmp_path)
 
     assert response.status_code == 200
     assert 'id="lesson-vocabulary"' in response_text
-    assert "Vocabulary added." in response_text
-    assert response_text.index('id="lesson-vocabulary"') < response_text.index("Vocabulary added.")
-    assert response_text.index("Vocabulary added.") < response_text.index('id="lesson-vocabulary-form"')
+    assert "Added 1 vocabulary word." in response_text
+    assert response_text.index('id="lesson-vocabulary"') < response_text.index("Added 1 vocabulary word.")
+    assert response_text.index("Added 1 vocabulary word.") < response_text.index('id="lesson-vocabulary-form"')
     assert '#lesson-vocabulary"' in response_text
+
+
+def test_lesson_vocabulary_form_adds_multiple_words_at_once(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-13", "Bulk vocabulary")
+
+    response = mandarin_app.app.test_client().post(
+        "/",
+        query_string={"mode": "lessons", "student_id": student["id"], "lesson_id": lesson["id"]},
+        data={
+            "form_type": "lesson-vocabulary-add",
+            "student_id": student["id"],
+            "lesson_id": lesson["id"],
+            "vocabulary_word": "学校\n朋友, 机场",
+        },
+    )
+    response_text = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert "Added 3 vocabulary words." in response_text
+    assert 'name="vocabulary_word"' in response_text
+    assert "Add up to 50 words at once." in response_text
+    assert all(word in response_text for word in ("学校", "朋友", "机场"))
 
 
 def test_long_lesson_content_remains_in_normal_document_flow(monkeypatch, tmp_path):
@@ -2447,6 +2485,68 @@ def test_lesson_vocabulary_persists_accepts_custom_words_and_rejects_invalid_inp
     assert entries[0]["traditional"] == "不存在"
     assert entries[0]["pinyin"] == "bù cún zài"
     assert entries[0]["english"] == "not to exist"
+
+
+def test_lesson_vocabulary_batch_accepts_newlines_commas_and_skips_duplicates(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-13")
+
+    added_count, errors, batch_error = mandarin_app.add_lesson_vocabulary_batch(
+        student["id"], lesson["id"], "学校 朋友，机场、学校"
+    )
+
+    assert added_count == 3
+    assert errors == []
+    assert batch_error == ""
+    assert [
+        entry["word"]
+        for entry in mandarin_app.get_lesson_vocabulary_entries(student["id"], lesson["id"])
+    ] == ["学校", "朋友", "机场"]
+
+
+def test_lesson_vocabulary_batch_parser_accepts_space_separated_traditional_words():
+    assert mandarin_app.parse_lesson_vocabulary_words("上車 上床 上課 上班 上學 上廁所") == [
+        "上車",
+        "上床",
+        "上課",
+        "上班",
+        "上學",
+        "上廁所",
+    ]
+
+
+def test_lesson_vocabulary_batch_reports_partial_success(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        mandarin_app,
+        "get_ai_explanation",
+        lambda query: (None, "Local AI is unavailable."),
+    )
+    student = mandarin_app.create_student("Alice")
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-13")
+
+    added_count, errors, batch_error = mandarin_app.add_lesson_vocabulary_batch(
+        student["id"], lesson["id"], "学校, 不存在"
+    )
+
+    assert added_count == 1
+    assert errors == ["不存在: Could not add this custom word. Local AI is unavailable."]
+    assert batch_error == ""
+
+
+def test_lesson_vocabulary_batch_rejects_one_meaning_for_multiple_words(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = mandarin_app.create_student("Alice")
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-13")
+
+    added_count, errors, batch_error = mandarin_app.add_lesson_vocabulary_batch(
+        student["id"], lesson["id"], "学校, 朋友", "school"
+    )
+
+    assert added_count == 0
+    assert errors == []
+    assert batch_error == "English meaning can only be used when adding one word."
 
 
 def test_custom_lesson_vocabulary_can_get_its_meaning_from_local_ai(monkeypatch, tmp_path):
