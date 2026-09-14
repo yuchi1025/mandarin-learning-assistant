@@ -15,6 +15,8 @@ PINYIN_WORD_OVERRIDES = {
     "星期": "xīng qí",
     "垃圾": "lè sè",
     "品质": "pǐn zhí",
+    "血": "xiě",
+    "危险": "wéi xiǎn",
 }
 
 
@@ -25,7 +27,7 @@ def load_entries():
 def test_dictionary_is_valid():
     entries = load_entries()
 
-    assert validate_entries(entries, expected_count=501) == []
+    assert validate_entries(entries, expected_count=503) == []
 
 
 def test_dictionary_words_are_unique():

@@ -6010,5 +6010,29 @@
       "我通过了考试。 (I passed the exam.)",
       "请通过安全检查。 (Please go through the security check.)"
     ]
+  },
+  {
+    "word": "血",
+    "traditional": "血",
+    "pinyin": "xiě",
+    "english": "blood",
+    "part_of_speech": "noun",
+    "explanation": "The red liquid that flows through the body. In everyday Taiwan Mandarin, 血 is pronounced xiě.",
+    "examples": [
+      "他的手流血了。 (His hand is bleeding.)",
+      "血是红色的。 (Blood is red.)"
+    ]
+  },
+  {
+    "word": "危险",
+    "traditional": "危險",
+    "pinyin": "wéi xiǎn",
+    "english": "dangerous; danger",
+    "part_of_speech": "adjective",
+    "explanation": "Not safe, or something that may cause harm. In Taiwan Mandarin, 危險 is pronounced wéi xiǎn.",
+    "examples": [
+      "这样做很危险。 (It is dangerous to do this.)",
+      "晚上一个人走很危险。 (Walking alone at night is dangerous.)"
+    ]
   }
 ]

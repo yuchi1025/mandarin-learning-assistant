@@ -23,6 +23,8 @@ PINYIN_WORD_OVERRIDES = {
     "星期": "xīng qí",
     "垃圾": "lè sè",
     "品质": "pǐn zhí",
+    "血": "xiě",
+    "危险": "wéi xiǎn",
 }
 
 

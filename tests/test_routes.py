@@ -283,7 +283,8 @@ def test_quiz_controls_land_on_the_quiz_card():
     response = client.get("/", query_string={"mode": "quiz"})
 
     assert b'id="quiz-practice"' in response.data
-    assert response.data.count(b"#quiz-practice") == 9
+    assert response.data.count(b"#quiz-practice") == 10
+    assert b'action="/#quiz-practice"' in response.data
 
 
 def test_learner_panel_precedes_mode_switch_and_search_guidance_is_mode_scoped():
@@ -426,7 +427,7 @@ def test_batch_search_ignores_common_list_prefixes():
     assert ai_queries == []
 
 
-def test_batch_mode_restores_a_query_without_logging_duplicate_progress(monkeypatch, tmp_path):
+def test_batch_mode_does_not_replay_a_query_from_the_url(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
     student = create_test_student()
     client = mandarin_app.app.test_client()
@@ -438,8 +439,19 @@ def test_batch_mode_restores_a_query_without_logging_duplicate_progress(monkeypa
     )
 
     assert response.status_code == 200
-    assert "机场".encode("utf-8") in response.data
+    assert "机场".encode("utf-8") not in response.data
+    assert b'data-ai-mode="batch"' not in response.data
     assert mandarin_app.get_progress_summary(student["id"])["total_searches"] == 1
+
+
+def test_batch_mode_restores_text_without_automatically_searching_it():
+    app_js = mandarin_app.app.test_client().get("/static/app.js")
+
+    assert app_js.status_code == 200
+    assert b"input.value = storedQuery" in app_js.data
+    assert b'params.delete("batch_query")' in app_js.data
+    assert b"window.history.replaceState" in app_js.data
+    assert b'params.set("batch_query", storedQuery)' not in app_js.data
 
 
 def test_convert_mode_converts_both_chinese_scripts():
@@ -2065,6 +2077,23 @@ def test_ai_result_accepts_equivalent_traditional_query_before_taiwan_phrase_con
 def test_sentence_pinyin_uses_phrase_override_for_jide():
     assert mandarin_app.to_sentence_pinyin("我不记得他的名字。") == "wǒ bú jì dé tā de míng zì。"
     assert mandarin_app.to_sentence_pinyin("我不記得他的名字。") == "wǒ bú jì dé tā de míng zì。"
+
+
+def test_taiwan_spoken_pinyin_is_used_for_blood():
+    entry = mandarin_app.DICTIONARY_ENTRIES_BY_WORD["血"]
+
+    assert entry["pinyin"] == "xiě"
+    assert mandarin_app.to_sentence_pinyin("血") == "xiě"
+    assert mandarin_app.to_sentence_pinyin("他的手流血了。") == "tā de shǒu liú xiě le。"
+
+
+def test_taiwan_pinyin_is_used_for_dangerous():
+    entry = mandarin_app.DICTIONARY_ENTRIES_BY_WORD["危险"]
+
+    assert entry["traditional"] == "危險"
+    assert entry["pinyin"] == "wéi xiǎn"
+    assert mandarin_app.to_sentence_pinyin("这样做很危险。") == "zhè yàng zuò hěn wéi xiǎn。"
+    assert mandarin_app.to_sentence_pinyin("這樣做很危險。") == "zhè yàng zuò hěn wéi xiǎn。"
 
 
 def test_sentence_pinyin_uses_tone_sandhi_for_bu_gou():

@@ -904,6 +904,7 @@
                 <p class="audio-status" id="audio-status" hidden></p>
                 <form
                     method="post"
+                    action="{{ url_for('home', _anchor='quiz-practice') }}"
                     class="quiz-form{% if listening_reveal %} quiz-reveal-form{% endif %}"
                     data-correct-answer="{{ quiz.correct_answer }}"
                     data-next-url="{{ url_for('home', mode='quiz', quiz_source=quiz_source, quiz_type=quiz_type, category=category, student_id=selected_student.id if selected_student else None) }}"

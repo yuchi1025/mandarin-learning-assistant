@@ -91,8 +91,8 @@ CATEGORY_BY_WORD.update({
         "food": "早餐 午餐 晚餐 水果 蔬菜 肉 鱼 鸡肉 牛肉 猪肉 汤 米饭 饺子 包子 甜 辣 咸 饿 饱 外送 信用卡 薪水 发票".split(),
         "people": "客厅 卧室 阳台 垃圾 干净 脏 坏 冷气 冰箱 洗衣机".split(),
         "study": "故事 节目 游戏".split(),
-        "descriptions": "免费".split(),
-        "health": "诊所 护士 感冒 发烧 咳嗽 头疼 肚子 牙齿 眼睛 健康".split(),
+        "descriptions": "免费 危险".split(),
+        "health": "诊所 护士 感冒 发烧 咳嗽 头疼 肚子 牙齿 眼睛 健康 血".split(),
         "technology": "歌曲 影片 网路 网站 密码 电池 耳机".split(),
     }.items()
     for word in words
@@ -145,6 +145,9 @@ PINYIN_PHRASE_OVERRIDES = {
     "品質": "pǐn zhí",
     "汤匙": "tāng chí",
     "湯匙": "tāng chí",
+    "血": "xiě",
+    "危险": "wéi xiǎn",
+    "危險": "wéi xiǎn",
 }
 PINYIN_OVERRIDE_PHRASES = sorted(PINYIN_PHRASE_OVERRIDES, key=len, reverse=True)
 BATCH_LIST_PREFIX_PATTERN = re.compile(
@@ -2738,11 +2741,6 @@ def home():
     conversation_feedback = None
     conversation_error = None
     conversation_turns = get_conversation_turns(student_id, conversation_id)
-    if request.method == "GET" and mode == "batch":
-        query = request.args.get("batch_query", "")
-        if query:
-            results, batch_missing, batch_ai_queries = batch_search_entries(query, category)
-            batch_entry_orders, batch_ai_orders = get_batch_card_orders(query, category)
     quiz_source = normalize_quiz_source(request.form.get("quiz_source") or request.args.get("quiz_source"))
     quiz_type = normalize_quiz_type(request.form.get("quiz_type") or request.args.get("quiz_type"))
     quiz_pool_words = request.form.getlist("quiz_pool_word") or request.args.getlist("quiz_pool_word")

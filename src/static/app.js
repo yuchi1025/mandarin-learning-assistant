@@ -578,10 +578,17 @@ function restoreBatchMode() {
 
     const params = new URLSearchParams(window.location.search);
     const storedQuery = window.localStorage.getItem(getBatchQueryStorageKey()) || "";
-    if (!input.value.trim() && storedQuery.trim() && !params.get("batch_query")) {
-        params.set("batch_query", storedQuery);
-        markInternalNavigation();
-        window.location.replace(`${window.location.pathname}?${params.toString()}`);
+    if (!input.value.trim() && storedQuery.trim()) {
+        input.value = storedQuery;
+    }
+    if (params.has("batch_query")) {
+        params.delete("batch_query");
+        const queryString = params.toString();
+        window.history.replaceState(
+            {},
+            "",
+            `${window.location.pathname}${queryString ? `?${queryString}` : ""}${window.location.hash}`
+        );
     }
 }
 
