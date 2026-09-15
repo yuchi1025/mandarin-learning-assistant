@@ -1431,7 +1431,7 @@ def test_listening_quiz_hides_word_and_pinyin_but_keeps_audio_target(monkeypatch
     assert b"Play Audio" in response.data
     assert b'class="quiz-word"' not in response.data
     assert "xué xí".encode("utf-8") not in response.data
-    assert b'data-speak="\xe5\xad\xa6\xe4\xb9\xa0"' in response.data
+    assert b'data-speak="\xe5\xad\xb8\xe7\xbf\x92"' in response.data
 
 
 def test_listening_quiz_scores_and_reveals_after_a_correct_first_answer(monkeypatch, tmp_path):
@@ -1752,7 +1752,7 @@ def test_quiz_mode_displays_both_chinese_scripts(monkeypatch):
     assert response.status_code == 200
     assert "机场 / 機場".encode("utf-8") in response.data
     assert "<span>机场 / 機場</span>".encode("utf-8") in response.data
-    assert b'data-speak="\xe6\x9c\xba\xe5\x9c\xba"' in response.data
+    assert b'data-speak="\xe6\xa9\x9f\xe5\xa0\xb4"' in response.data
     assert b"Play pronunciation for" in response.data
 
 
@@ -1781,6 +1781,8 @@ def test_traditional_search_displays_word_and_examples_traditional_first():
     assert "我通過了考試。 / 我通过了考试。" in response_text
     assert "我透過了考試" not in response_text
     assert "wǒ tōng guò le kǎo shì。" in response_text
+    assert 'data-speak="通過"' in response_text
+    assert 'data-speak="我通過了考試。"' in response_text
 
 
 def test_simplified_search_displays_word_and_examples_simplified_first():
@@ -1792,6 +1794,16 @@ def test_simplified_search_displays_word_and_examples_simplified_first():
     assert "<h2>通过</h2>" in response_text
     assert '<span class="traditional-word">通過</span>' in response_text
     assert "我通过了考试。 / 我通過了考試。" in response_text
+    assert 'data-speak="通过"' in response_text
+    assert 'data-speak="我通过了考试。"' in response_text
+
+
+def test_browser_audio_prefers_a_taiwan_mandarin_voice():
+    app_js = mandarin_app.app.test_client().get("/static/app.js")
+
+    assert app_js.status_code == 200
+    assert b'utterance.lang = "zh-TW"' in app_js.data
+    assert b'startsWith("zh-tw")' in app_js.data
 
 
 def test_vocabulary_views_use_stored_traditional_form_for_tongguo(monkeypatch, tmp_path):
@@ -2689,7 +2701,7 @@ def test_latest_lesson_pool_is_learner_scoped_and_works_for_quiz_types(monkeypat
     assert [entry["word"] for entry in mandarin_app.get_quiz_pool("lesson", ben["id"])] == ["机场"]
     assert quiz["word"] == "学校"
     assert b"Latest Lesson" in listening_response.data
-    assert 'data-speak="学校"'.encode("utf-8") in listening_response.data
+    assert 'data-speak="學校"'.encode("utf-8") in listening_response.data
     assert b'class="quiz-word"' not in listening_response.data
 
 

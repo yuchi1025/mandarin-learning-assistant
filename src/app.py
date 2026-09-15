@@ -27,7 +27,7 @@ OLLAMA_KEEP_ALIVE = os.getenv("OLLAMA_KEEP_ALIVE", "15m")
 OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "45"))
 OLLAMA_COMMAND = os.getenv("OLLAMA_COMMAND", "ollama")
 OLLAMA_AUTO_START = os.getenv("OLLAMA_AUTO_START", "1").lower() not in {"0", "false", "no"}
-TTS_VOICE = os.getenv("TTS_VOICE", "Tingting")
+TTS_VOICE = os.getenv("TTS_VOICE", "Meijia")
 TTS_COMMAND = os.getenv("TTS_COMMAND", "/usr/bin/say")
 AI_EXPLANATION_CACHE = {}
 OLLAMA_START_ATTEMPTED = False
@@ -1866,6 +1866,13 @@ def display_example_pinyin(text, query, vocabulary_word, vocabulary_traditional)
     return f"{simplified_pinyin} / {traditional_pinyin}"
 
 
+@app.template_filter("example_speech_text")
+def example_speech_text(text, query, vocabulary_word, vocabulary_traditional):
+    simplified, traditional = get_entry_sentence_forms(text, vocabulary_word, vocabulary_traditional)
+    preferred = traditional if query_prefers_traditional(query, vocabulary_word) else simplified
+    return to_speech_text(preferred)
+
+
 @app.template_filter("display_pinyin_pair")
 def display_pinyin_pair(pinyin, word, traditional=None, traditional_first=False):
     word_text = str(word or "").strip()
@@ -1892,8 +1899,10 @@ def add_query_display_fields(entry, query):
         entry.get("pinyin", ""), word, traditional, traditional_first
     )
     for example in entry.get("examples", []):
-        example["display_text"] = display_example_pair(example.get("text", ""), query, word, traditional)
-        example["display_pinyin"] = display_example_pinyin(example.get("text", ""), query, word, traditional)
+        example_text = example.get("text", "")
+        example["display_text"] = display_example_pair(example_text, query, word, traditional)
+        example["display_pinyin"] = display_example_pinyin(example_text, query, word, traditional)
+        example["display_speech_text"] = example_speech_text(example_text, query, word, traditional)
     return entry
 
 

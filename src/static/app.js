@@ -61,11 +61,14 @@ function speakMandarin(text) {
 
     getSpeechVoices().then(function (voices) {
         const utterance = new SpeechSynthesisUtterance(speechText);
-        utterance.lang = "zh-CN";
+        utterance.lang = "zh-TW";
         utterance.rate = 0.9;
         utterance.volume = 1;
 
-        const chineseVoice = voices.find(function (voice) {
+        const taiwanVoice = voices.find(function (voice) {
+            return voice.lang && voice.lang.replace("_", "-").toLowerCase().startsWith("zh-tw");
+        });
+        const chineseVoice = taiwanVoice || voices.find(function (voice) {
             return voice.lang && voice.lang.toLowerCase().startsWith("zh");
         });
 
@@ -176,7 +179,7 @@ function renderExample(sentence) {
             <button
                 type="button"
                 class="audio-button sentence-audio"
-                data-speak="${escapeHtml(sentence.speech_text || sentence.text)}"
+                data-speak="${escapeHtml(sentence.display_speech_text || sentence.speech_text || sentence.text)}"
                 aria-label="Play sentence audio"
                 title="Play sentence audio"
             >

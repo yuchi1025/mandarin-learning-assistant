@@ -201,8 +201,8 @@
                                 <button
                                     type="button"
                                     class="audio-button inline-audio-button"
-                                    data-speak="{{ item.word }}"
-                                    aria-label="Play pronunciation for {{ item.word }}"
+                                    data-speak="{{ item.traditional if traditional_first else item.word }}"
+                                    aria-label="Play pronunciation for {{ item.traditional if traditional_first else item.word }}"
                                     title="Play pronunciation"
                                 >
                                     <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon">
@@ -227,7 +227,7 @@
                                     <button
                                         type="button"
                                         class="audio-button sentence-audio"
-                                        data-speak="{{ sentence.speech_text }}"
+                                        data-speak="{{ sentence.text | example_speech_text(query, item.word, item.traditional) }}"
                                         aria-label="Play sentence audio"
                                         title="Play sentence audio"
                                     >
@@ -285,7 +285,7 @@
                                 <button
                                     type="button"
                                     class="audio-button inline-audio-button"
-                                    data-speak="{{ item.word }}"
+                                    data-speak="{{ item.traditional or item.word }}"
                                     aria-label="Play pronunciation for {{ item.word }}"
                                     title="Play pronunciation"
                                 >
@@ -416,7 +416,7 @@
                                             <span>{{ item.english }}</span>
                                         </div>
                                         <div class="lesson-vocabulary-actions">
-                                            <button type="button" class="audio-button inline-audio-button" data-speak="{{ item.word }}" aria-label="Play pronunciation for {{ item.word }}" title="Play pronunciation">
+                                            <button type="button" class="audio-button inline-audio-button" data-speak="{{ item.traditional or item.word }}" aria-label="Play pronunciation for {{ item.traditional or item.word }}" title="Play pronunciation">
                                                 <svg viewBox="0 0 24 24" aria-hidden="true" class="audio-icon"><path d="M3 10v4h4l5 4V6L7 10H3z"></path><path d="M16 8a5 5 0 0 1 0 8"></path><path d="M18.5 5.5a8.5 8.5 0 0 1 0 13"></path></svg>
                                             </button>
                                             <form method="post" action="{{ url_for('home', mode='lessons', student_id=selected_student.id, lesson_id=selected_lesson.id, _anchor='lesson-vocabulary') }}">
@@ -548,7 +548,7 @@
                         <button
                             type="button"
                             class="audio-button"
-                            data-speak="{{ sentence_target.word }}"
+                            data-speak="{{ sentence_target.traditional or sentence_target.word }}"
                             aria-label="Play pronunciation for {{ sentence_target.word }}"
                             title="Play pronunciation"
                         >
@@ -874,7 +874,7 @@
                     <button
                         type="button"
                         class="listening-play-button"
-                        data-speak="{{ quiz.word }}"
+                        data-speak="{{ quiz.traditional or quiz.word }}"
                         aria-label="Play Mandarin quiz audio"
                     >
                         Play Audio
@@ -885,7 +885,7 @@
                     <button
                         type="button"
                         class="audio-button inline-audio-button"
-                        data-speak="{{ quiz.word }}"
+                        data-speak="{{ quiz.traditional or quiz.word }}"
                         aria-label="Play pronunciation for {{ quiz.word }}"
                         title="Play pronunciation"
                     >
