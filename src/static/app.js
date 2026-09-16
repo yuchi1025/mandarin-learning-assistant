@@ -542,7 +542,7 @@ function rememberSelectedStudent() {
     if (!params.get("student_id") && hasRememberedStudent) {
         params.set("student_id", rememberedStudentId);
         markInternalNavigation();
-        window.location.replace(`${window.location.pathname}?${params.toString()}`);
+        window.location.replace(`${window.location.pathname}?${params.toString()}${window.location.hash}`);
     }
 }
 

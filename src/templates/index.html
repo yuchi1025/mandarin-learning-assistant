@@ -344,9 +344,9 @@
                     <p>Select a learner to keep lesson notes and vocabulary separate.</p>
                 </section>
             {% else %}
-                <section class="lesson-panel">
+                <section class="lesson-panel" id="lesson-create">
                     <h2>New Lesson</h2>
-                    <form method="post" action="{{ url_for('home', mode='lessons', student_id=selected_student.id, _anchor='lesson-editor') }}" class="lesson-form">
+                    <form method="post" action="{{ url_for('home', mode='lessons', student_id=selected_student.id, _anchor='lesson-create') }}" class="lesson-form">
                         <input type="hidden" name="form_type" value="lesson-create">
                         <input type="hidden" name="student_id" value="{{ selected_student.id }}">
                         <label for="lesson-date">Lesson date</label>

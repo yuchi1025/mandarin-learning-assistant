@@ -14,11 +14,12 @@ import urllib.request
 import uuid
 from datetime import date, datetime, timedelta
 
-from flask import after_this_request, Flask, jsonify, render_template, request, send_file, send_from_directory
+from flask import after_this_request, Flask, flash, get_flashed_messages, jsonify, redirect, render_template, request, send_file, send_from_directory, url_for
 from opencc import OpenCC
 from pypinyin import Style, lazy_pinyin
 
 app = Flask(__name__)
+app.secret_key = os.getenv("FLASK_SECRET_KEY") or os.urandom(32)
 ASSETS_DIR = Path(__file__).resolve().parent.parent / "assets"
 RECENT_QUIZ_LIMIT = 5
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/chat")
@@ -2734,6 +2735,11 @@ def home():
     lesson_message = ""
     lesson_error = ""
     lesson_feedback_target = "lesson"
+    if request.method == "GET" and mode == "lessons":
+        for target, message, error in get_flashed_messages(category_filter=["lesson"]):
+            lesson_feedback_target = target
+            lesson_message = message
+            lesson_error = error
     conversation_id = request.form.get("conversation_id") or request.args.get("conversation_id") or uuid.uuid4().hex
     default_conversation_prompt, default_conversation_prompt_english = get_daily_conversation_prompt()
     conversation_prompt = clean_generated_mandarin_sentence(
@@ -2836,9 +2842,9 @@ def home():
                     lesson_error = "Enter a valid lesson date."
                 else:
                     lesson_id = selected_lesson["id"]
-                    lesson_message = "Lesson created. Add vocabulary below."
-                    lessons = get_lessons(student_id)
-                    lesson_vocabulary = []
+                    flash(("lesson", "Lesson created. Add vocabulary below.", ""), "lesson")
+                    return redirect(url_for("home", mode="lessons", student_id=student_id,
+                                            lesson_id=lesson_id, _anchor="lesson-editor"))
         elif form_type == "lesson-update":
             mode = "lessons"
             lesson_id = request.form.get("lesson_id")
@@ -2849,7 +2855,9 @@ def home():
                 request.form.get("title"),
                 request.form.get("notes"),
             ):
-                lesson_message = "Lesson updated."
+                flash(("lesson", "Lesson updated.", ""), "lesson")
+                return redirect(url_for("home", mode="lessons", student_id=student_id,
+                                        lesson_id=lesson_id, _anchor="lesson-editor"))
             else:
                 lesson_error = "Enter a valid lesson date."
             selected_lesson = get_lesson(student_id, lesson_id)
@@ -2869,6 +2877,10 @@ def home():
             if added_count:
                 noun = "word" if added_count == 1 else "words"
                 lesson_message = f"Added {added_count} vocabulary {noun}."
+            if not lesson_error and added_count:
+                flash(("vocabulary", lesson_message, ""), "lesson")
+                return redirect(url_for("home", mode="lessons", student_id=student_id,
+                                        lesson_id=lesson_id, _anchor="lesson-vocabulary"))
             selected_lesson = get_lesson(student_id, lesson_id)
             lesson_vocabulary = get_lesson_vocabulary_entries(student_id, lesson_id)
             lessons = get_lessons(student_id)
@@ -2877,7 +2889,9 @@ def home():
             lesson_feedback_target = "vocabulary"
             lesson_id = request.form.get("lesson_id")
             if remove_lesson_vocabulary(student_id, lesson_id, request.form.get("vocabulary_word")):
-                lesson_message = "Vocabulary removed from this lesson."
+                flash(("vocabulary", "Vocabulary removed from this lesson.", ""), "lesson")
+                return redirect(url_for("home", mode="lessons", student_id=student_id,
+                                        lesson_id=lesson_id, _anchor="lesson-vocabulary"))
             else:
                 lesson_error = "Choose a valid lesson first."
             selected_lesson = get_lesson(student_id, lesson_id)

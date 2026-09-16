@@ -59,6 +59,13 @@ def test_lesson_notes_use_content_based_auto_resize():
     assert b"resize: none" in style_css.data
 
 
+def test_remembered_learner_navigation_preserves_section_fragment():
+    app_js = mandarin_app.app.test_client().get("/static/app.js")
+
+    assert app_js.status_code == 200
+    assert b'params.toString()}${window.location.hash}' in app_js.data
+
+
 def test_lesson_layout_has_stable_editor_targets_and_mobile_stacking(monkeypatch, tmp_path):
     use_temp_progress_db(monkeypatch, tmp_path)
     student = create_test_student()
@@ -71,10 +78,11 @@ def test_lesson_layout_has_stable_editor_targets_and_mobile_stacking(monkeypatch
     assert response.status_code == 200
     assert b'id="lesson-editor"' in response.data
     assert b'id="lesson-vocabulary"' in response.data
-    assert response.data.count(b"#lesson-editor") == 3
+    assert response.data.count(b"#lesson-editor") == 2
     assert response.data.count(b'action="/?mode=lessons&amp;student_id=1&amp;lesson_id=1#lesson-editor"') == 1
     assert response.data.count(b'action="/?mode=lessons&amp;student_id=1&amp;lesson_id=1#lesson-vocabulary"') == 1
-    assert b'action="/?mode=lessons&amp;student_id=1#lesson-editor"' in response.data
+    assert b'id="lesson-create"' in response.data
+    assert b'action="/?mode=lessons&amp;student_id=1#lesson-create"' in response.data
     assert b".lesson-panel-header," in style_css.data
     assert b".lesson-vocabulary-row," in style_css.data
     assert b".lesson-list-row {" in style_css.data
@@ -122,6 +130,7 @@ def test_vocabulary_feedback_is_next_to_add_word_controls(monkeypatch, tmp_path)
             "lesson_id": lesson["id"],
             "vocabulary_word": "学校",
         },
+        follow_redirects=True,
     )
     response_text = response.get_data(as_text=True)
 
@@ -147,6 +156,7 @@ def test_lesson_vocabulary_form_adds_multiple_words_at_once(monkeypatch, tmp_pat
             "lesson_id": lesson["id"],
             "vocabulary_word": "学校\n朋友, 机场",
         },
+        follow_redirects=True,
     )
     response_text = response.get_data(as_text=True)
 
@@ -155,6 +165,100 @@ def test_lesson_vocabulary_form_adds_multiple_words_at_once(monkeypatch, tmp_pat
     assert 'name="vocabulary_word"' in response_text
     assert "Add up to 50 words at once." in response_text
     assert all(word in response_text for word in ("学校", "朋友", "机场"))
+
+
+def test_lesson_create_redirects_to_selected_editor_and_refresh_does_not_repeat_it(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
+    client = mandarin_app.app.test_client()
+
+    response = client.post("/", data={
+        "form_type": "lesson-create", "student_id": student["id"],
+        "lesson_date": "2026-09-17", "title": "Travel", "notes": "Long notes. " * 100,
+    })
+    lesson = mandarin_app.get_lessons(student["id"])[0]
+    expected_url = f"/?mode=lessons&student_id={student['id']}&lesson_id={lesson['id']}#lesson-editor"
+
+    assert response.status_code == 302
+    assert response.headers["Location"] == expected_url
+    selected = client.get(response.headers["Location"])
+    assert b"Lesson created. Add vocabulary below." in selected.data
+    assert b'id="lesson-editor"' in selected.data
+    assert b'class="lesson-list-row selected"' in selected.data
+    assert b"Lesson created. Add vocabulary below." not in client.get(expected_url).data
+    assert len(mandarin_app.get_lessons(student["id"])) == 1
+
+
+def test_lesson_actions_redirect_to_the_same_learner_and_relevant_section(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
+    other_student = mandarin_app.create_student("Other learner")
+    other_lesson = mandarin_app.create_lesson(other_student["id"], "2026-09-16", "Other")
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-17", "Selected")
+    client = mandarin_app.app.test_client()
+    base = f"/?mode=lessons&student_id={student['id']}&lesson_id={lesson['id']}"
+
+    selected = client.get(f"{base}#lesson-editor")
+    assert b'class="lesson-list-row selected"' in selected.data
+    assert f"lesson_id={other_lesson['id']}".encode() not in selected.data
+
+    for words, expected_count in (("学校", 1), ("朋友, 机场", 3)):
+        added = client.post("/", data={
+            "form_type": "lesson-vocabulary-add", "student_id": student["id"],
+            "lesson_id": lesson["id"], "vocabulary_word": words,
+        })
+        assert added.status_code == 302
+        assert added.headers["Location"] == f"{base}#lesson-vocabulary"
+        assert f"Added {1 if expected_count == 1 else 2} vocabulary".encode() in client.get(added.headers["Location"]).data
+        assert len(mandarin_app.get_lesson_vocabulary_entries(student["id"], lesson["id"])) == expected_count
+        client.get(added.headers["Location"])
+        assert len(mandarin_app.get_lesson_vocabulary_entries(student["id"], lesson["id"])) == expected_count
+
+    removed = client.post("/", data={
+        "form_type": "lesson-vocabulary-remove", "student_id": student["id"],
+        "lesson_id": lesson["id"], "vocabulary_word": "学校",
+    })
+    assert removed.status_code == 302
+    assert removed.headers["Location"] == f"{base}#lesson-vocabulary"
+    assert b"Vocabulary removed from this lesson." in client.get(removed.headers["Location"]).data
+    assert [entry["word"] for entry in mandarin_app.get_lesson_vocabulary_entries(student["id"], lesson["id"])] == ["朋友", "机场"]
+
+    updated = client.post("/", data={
+        "form_type": "lesson-update", "student_id": student["id"],
+        "lesson_id": lesson["id"], "lesson_date": "2026-09-17",
+        "title": "Updated", "notes": "Long edited notes. " * 100,
+    })
+    assert updated.status_code == 302
+    assert updated.headers["Location"] == f"{base}#lesson-editor"
+    assert b"Lesson updated." in client.get(updated.headers["Location"]).data
+    assert mandarin_app.get_lesson(student["id"], lesson["id"])["title"] == "Updated"
+
+
+def test_lesson_validation_errors_stay_by_the_relevant_form(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
+    lesson = mandarin_app.create_lesson(student["id"], "2026-09-17")
+    client = mandarin_app.app.test_client()
+
+    invalid_create = client.post("/?mode=lessons", data={
+        "form_type": "lesson-create", "student_id": student["id"], "lesson_date": "invalid",
+    })
+    assert invalid_create.status_code == 200
+    assert b"Enter a valid lesson date." in invalid_create.data
+    assert b'id="lesson-create"' in invalid_create.data
+
+    duplicate = client.post("/?mode=lessons", data={
+        "form_type": "lesson-vocabulary-add", "student_id": student["id"],
+        "lesson_id": lesson["id"], "vocabulary_word": "学校 学校",
+    })
+    assert duplicate.status_code == 302
+    duplicate = client.post("/?mode=lessons", data={
+        "form_type": "lesson-vocabulary-add", "student_id": student["id"],
+        "lesson_id": lesson["id"], "vocabulary_word": "学校",
+    })
+    assert duplicate.status_code == 200
+    assert b"This word is already in the lesson." in duplicate.data
+    assert duplicate.data.index(b'id="lesson-vocabulary"') < duplicate.data.index(b"This word is already in the lesson.")
 
 
 def test_long_lesson_content_remains_in_normal_document_flow(monkeypatch, tmp_path):
@@ -2657,6 +2761,7 @@ def test_custom_lesson_vocabulary_works_in_lesson_practice_routes(monkeypatch, t
             "vocabulary_word": "測驗詞",
             "vocabulary_meaning": "test term",
         },
+        follow_redirects=True,
     )
     pool = mandarin_app.get_quiz_pool("lesson", student["id"])
     quiz = mandarin_app.build_quiz(question_word="测验词", pool_entries=pool)
@@ -2734,6 +2839,7 @@ def test_lesson_routes_and_progress_render_learner_scoped_content(monkeypatch, t
             "title": "Travel",
             "notes": "Practised airport vocabulary.",
         },
+        follow_redirects=True,
     )
     lesson = mandarin_app.get_lessons(student["id"])[0]
     add_response = client.post(
@@ -2744,6 +2850,7 @@ def test_lesson_routes_and_progress_render_learner_scoped_content(monkeypatch, t
             "lesson_id": lesson["id"],
             "vocabulary_word": "机场",
         },
+        follow_redirects=True,
     )
     progress_response = client.get("/", query_string={"mode": "progress", "student_id": student["id"]})
 

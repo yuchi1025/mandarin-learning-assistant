@@ -586,6 +586,7 @@ h1 {
     border-color: var(--accent);
 }
 
+#lesson-create,
 #lesson-editor,
 #lesson-vocabulary {
     scroll-margin-top: 16px;
