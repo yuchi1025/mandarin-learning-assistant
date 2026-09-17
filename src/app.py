@@ -147,6 +147,8 @@ PINYIN_PHRASE_OVERRIDES = {
     "汤匙": "tāng chí",
     "湯匙": "tāng chí",
     "血": "xiě",
+    "银行": "yín háng",
+    "銀行": "yín háng",
     "危险": "wéi xiǎn",
     "危險": "wéi xiǎn",
 }

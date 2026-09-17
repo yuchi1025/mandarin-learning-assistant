@@ -346,6 +346,22 @@ def test_hobby_uses_contextual_pronunciation_in_both_scripts():
     assert mandarin_app.display_pinyin_pair("ài hào", "爱好", "愛好") == "ài hào"
 
 
+def test_bank_uses_one_pronunciation_in_both_scripts_and_examples():
+    assert mandarin_app.to_sentence_pinyin("银行") == "yín háng"
+    assert mandarin_app.to_sentence_pinyin("銀行") == "yín háng"
+    assert mandarin_app.to_sentence_pinyin("我去銀行。") == "wǒ qù yín háng。"
+    assert mandarin_app.display_pinyin_pair("yín háng", "银行", "銀行") == "yín háng"
+
+    client = mandarin_app.app.test_client()
+    for query in ("银行", "銀行", "bank"):
+        response = client.post("/", data={"form_type": "search", "query": query})
+        response_text = response.get_data(as_text=True)
+        assert response.status_code == 200
+        assert "yín háng / yín xíng" not in response_text
+        assert "yín xíng" not in response_text
+        assert "yín háng" in response_text
+
+
 def test_sentence_pinyin_preserves_word_context_for_polyphonic_characters():
     assert mandarin_app.to_sentence_pinyin("我去银行。") == "wǒ qù yín háng。"
     assert mandarin_app.to_sentence_pinyin("我喜欢音乐。") == "wǒ xǐ huān yīn yuè。"
@@ -388,7 +404,27 @@ def test_quiz_controls_land_on_the_quiz_card():
 
     assert b'id="quiz-practice"' in response.data
     assert response.data.count(b"#quiz-practice") == 10
-    assert b'action="/#quiz-practice"' in response.data
+    assert b'action="/?mode=quiz&amp;quiz_source=all&amp;quiz_type=meaning&amp;category=all#quiz-practice"' in response.data
+
+
+def test_quiz_answer_keeps_mode_learner_and_source_in_the_form_url(monkeypatch, tmp_path):
+    use_temp_progress_db(monkeypatch, tmp_path)
+    student = create_test_student()
+    client = mandarin_app.app.test_client()
+
+    response = client.get("/", query_string={
+        "mode": "quiz", "quiz_source": "all", "quiz_type": "meaning",
+        "category": "places", "student_id": student["id"],
+    })
+    action = (
+        f'action="/?mode=quiz&amp;quiz_source=all&amp;quiz_type=meaning'
+        f'&amp;category=places&amp;student_id={student["id"]}#quiz-practice"'
+    )
+
+    assert response.status_code == 200
+    assert action.encode() in response.data
+    assert b'name="form_type" value="quiz"' in response.data
+    assert b'id="quiz-practice"' in response.data
 
 
 def test_learner_panel_precedes_mode_switch_and_search_guidance_is_mode_scoped():
