@@ -362,6 +362,23 @@ def test_bank_uses_one_pronunciation_in_both_scripts_and_examples():
         assert "yín háng" in response_text
 
 
+def test_taiwan_pronunciation_is_used_for_rest_and_examples():
+    entry = mandarin_app.DICTIONARY_ENTRIES_BY_WORD["休息"]
+
+    assert entry["pinyin"] == "xiū xí"
+    assert mandarin_app.to_sentence_pinyin("休息") == "xiū xí"
+    assert mandarin_app.to_sentence_pinyin("我想休息。") == "wǒ xiǎng xiū xí。"
+    assert mandarin_app.display_pinyin_pair("xiū xí", "休息", "休息") == "xiū xí"
+
+    response = mandarin_app.app.test_client().post(
+        "/", data={"form_type": "search", "query": "休息"}
+    )
+    response_text = response.get_data(as_text=True)
+    assert response.status_code == 200
+    assert "xiū xí" in response_text
+    assert "xiū xī" not in response_text
+
+
 def test_sentence_pinyin_preserves_word_context_for_polyphonic_characters():
     assert mandarin_app.to_sentence_pinyin("我去银行。") == "wǒ qù yín háng。"
     assert mandarin_app.to_sentence_pinyin("我喜欢音乐。") == "wǒ xǐ huān yīn yuè。"
@@ -2280,6 +2297,39 @@ def test_curated_ai_result_corrects_qiannian_meaning():
     assert result["word"] == "前年"
     assert result["english"] == "the year before last"
     assert "two years before" in result["explanation"]
+    assert result["examples"][0]["text"] == "前年我去了台南。"
+    assert result["examples"][1]["translation"] == "The year before last, we traveled around Taiwan."
+
+
+def test_ai_explanation_requests_taiwan_vocabulary_and_settings(monkeypatch):
+    captured = {}
+
+    def fake_request(system_prompt, user_prompt):
+        captured["system"] = system_prompt
+        return {
+            "word": "夜市",
+            "traditional": "夜市",
+            "english": "night market",
+            "part_of_speech": "noun",
+            "category": "places",
+            "explanation": "A market that opens in the evening.",
+            "examples": [
+                {"text": "我们去逛夜市。", "translation": "Let us visit the night market."},
+                {"text": "夜市有很多小吃。", "translation": "The night market has many snacks."},
+            ],
+        }, None
+
+    monkeypatch.setattr(mandarin_app, "request_ollama_json", fake_request)
+
+    result, error = mandarin_app.fetch_ai_explanation("夜市")
+
+    assert error is None
+    assert result["word"] == "夜市"
+    assert "natural Taiwan Mandarin" in captured["system"]
+    assert "Keep the simple explanation neutral" in captured["system"]
+    assert "捷運" in captured["system"]
+    assert "avoid mainland-only alternatives" in captured["system"]
+    assert "台南" in captured["system"]
 
 
 def test_ai_explanation_includes_traditional_form(monkeypatch):
@@ -2359,6 +2409,46 @@ def test_ai_explanation_retries_a_low_quality_result(monkeypatch):
     assert result["word"] == "作业"
     assert len(request_bodies) == 2
     assert "previous answer did not meet" in request_bodies[1]["messages"][1]["content"]
+
+
+def test_ai_explanation_retries_repeated_english_in_the_example_text(monkeypatch):
+    responses = iter([
+        {
+            "word": "怎么办",
+            "traditional": "怎麼辦",
+            "english": "what should we do?",
+            "part_of_speech": "expression",
+            "explanation": "Used to ask what action to take.",
+            "examples": [
+                {"text": "What should we do?", "translation": "What should we do?"},
+            ],
+        },
+        {
+            "word": "怎么办",
+            "traditional": "怎麼辦",
+            "english": "what should we do?",
+            "part_of_speech": "expression",
+            "explanation": "Used to ask what action to take.",
+            "examples": [
+                {"text": "我们现在怎么办？", "translation": "What should we do now?"},
+                {"text": "下雨了，怎么办？", "translation": "It is raining; what should we do?"},
+            ],
+        },
+    ])
+    prompts = []
+
+    def fake_request(system_prompt, user_prompt):
+        prompts.append(user_prompt)
+        return next(responses), None
+
+    monkeypatch.setattr(mandarin_app, "request_ollama_json", fake_request)
+
+    result, error = mandarin_app.fetch_ai_explanation("怎么办")
+
+    assert error is None
+    assert len(prompts) == 2
+    assert "previous answer did not meet" in prompts[1]
+    assert [example["text"] for example in result["examples"]] == ["我们现在怎么办？", "下雨了，怎么办？"]
 
 
 def test_ai_explanation_keeps_error_after_failed_repair_retry(monkeypatch):

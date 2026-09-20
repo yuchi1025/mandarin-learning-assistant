@@ -147,6 +147,7 @@ PINYIN_PHRASE_OVERRIDES = {
     "汤匙": "tāng chí",
     "湯匙": "tāng chí",
     "血": "xiě",
+    "休息": "xiū xí",
     "银行": "yín háng",
     "銀行": "yín háng",
     "危险": "wéi xiǎn",
@@ -2207,8 +2208,8 @@ def get_curated_ai_result(query):
         "part_of_speech": "time word",
         "explanation": "前年 means the year before last, two years before the current year.",
         "examples": [
-            make_structured_example("前年我去了北京。", "The year before last, I went to Beijing."),
-            make_structured_example("前年我们一起旅行。", "The year before last, we traveled together."),
+            make_structured_example("前年我去了台南。", "The year before last, I went to Tainan."),
+            make_structured_example("前年我们环岛旅行。", "The year before last, we traveled around Taiwan."),
         ],
     }
 
@@ -2285,6 +2286,11 @@ def fetch_ai_explanation(query):
         "Return JSON only with these keys: word, traditional, pinyin, english, part_of_speech, category, explanation, examples. "
         "Do not add extra keys. "
         "Use concise beginner-friendly English. "
+        "Use natural Taiwan Mandarin vocabulary and everyday Taiwan settings when appropriate. "
+        "Keep the simple explanation neutral; mention regional usage only when needed to clarify the meaning. "
+        "Prefer terms such as 捷運, 公車, 計程車, 超商, 外送, 影片, 網路, 冷氣, and 機車; "
+        "avoid mainland-only alternatives such as 地铁, 公交车, 出租车, 便利店, 外卖, 视频, 网络, 空调, and 摩托车. "
+        "Use Taiwan places such as 台北, 台南, 高雄, 花蓮, or 日月潭 when a place makes the example clearer. "
         "The word field must be the simplified Chinese form of the exact Mandarin word or phrase being explained, not a sentence. "
         "The traditional field must be the traditional Chinese form of the same word or phrase. "
         "If simplified and traditional are the same, use the same value for both fields. "
@@ -2300,7 +2306,8 @@ def fetch_ai_explanation(query):
             retry_instruction = (
                 "Your previous answer did not meet the required quality checks. "
                 "Correct it now: provide a real Chinese word or phrase, a non-empty English meaning, "
-                "and a non-empty beginner-friendly explanation. "
+                "a non-empty beginner-friendly explanation, and Chinese example text with a distinct "
+                "non-empty English translation. "
                 "For Chinese input, the word or traditional field must exactly match the input. "
             )
         user_prompt = (
@@ -2312,13 +2319,27 @@ def fetch_ai_explanation(query):
         if error:
             return None, error.replace("AI is", "AI explanation is", 1)
 
+        raw_examples = parsed.get("examples", [])
+        raw_examples = raw_examples if isinstance(raw_examples, list) else []
         examples = []
-        for example in parsed.get("examples", [])[:2]:
-            text = example.get("text", "").strip()
-            translation = example.get("translation", "").strip()
-            if not text:
+        invalid_example = False
+        for example in raw_examples[:2]:
+            if not isinstance(example, dict):
+                invalid_example = True
+                continue
+            text = str(example.get("text", "")).strip()
+            translation = str(example.get("translation", "")).strip()
+            if (
+                not contains_chinese(text)
+                or not translation
+                or text.casefold() == translation.casefold()
+            ):
+                invalid_example = True
                 continue
             examples.append(make_structured_example(text, translation))
+
+        if raw_examples and (invalid_example or not examples):
+            continue
 
         word = parsed.get("word", query).strip() or query
         traditional = parsed.get("traditional", word).strip() or word

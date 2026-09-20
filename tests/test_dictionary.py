@@ -16,6 +16,7 @@ PINYIN_WORD_OVERRIDES = {
     "垃圾": "lè sè",
     "品质": "pǐn zhí",
     "血": "xiě",
+    "休息": "xiū xí",
     "危险": "wéi xiǎn",
 }
 
@@ -30,6 +31,22 @@ def test_dictionary_is_valid():
     assert validate_entries(entries, expected_count=503) == []
 
 
+def test_dictionary_examples_avoid_generated_double_infinitives():
+    examples = [example for entry in load_entries() for example in entry["examples"]]
+
+    assert all("to to " not in example.lower() for example in examples)
+    assert all("we will to " not in example.lower() for example in examples)
+
+
+def test_everyday_examples_use_taiwan_places_and_contexts():
+    entries = {entry["word"]: entry for entry in load_entries()}
+
+    assert "桃园机场" in entries["机场"]["examples"][0]
+    assert "花莲" in entries["火车"]["examples"][0]
+    assert "台南" in entries["旅行"]["examples"][1]
+    assert "日月潭" in entries["地图"]["examples"][0]
+    assert "捷运站" in entries["地址"]["examples"][1]
+    assert "发票有没有中奖" in entries["发票"]["examples"][1]
 def test_dictionary_words_are_unique():
     entries = load_entries()
     words = [entry["word"] for entry in entries]

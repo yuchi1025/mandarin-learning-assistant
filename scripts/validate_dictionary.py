@@ -24,6 +24,7 @@ PINYIN_WORD_OVERRIDES = {
     "垃圾": "lè sè",
     "品质": "pǐn zhí",
     "血": "xiě",
+    "休息": "xiū xí",
     "危险": "wéi xiǎn",
 }
 
@@ -82,6 +83,8 @@ def validate_entries(entries, expected_count=None):
                 errors.append(
                     f"{label}: example {example_index} should include an English translation in parentheses."
                 )
+            elif "to to " in example.lower() or "we will to " in example.lower():
+                errors.append(f"{label}: example {example_index} contains malformed English.")
 
     duplicates = sorted(word for word, count in Counter(words).items() if word and count > 1)
     for word in duplicates:
