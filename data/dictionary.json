@@ -2191,8 +2191,8 @@
     "part_of_speech": "noun",
     "explanation": "A place where planes arrive and leave.",
     "examples": [
-      "我们几点去桃园机场？ (What time are we going to Taoyuan Airport?)",
-      "从台北车站到机场要多久？ (How long does it take from Taipei Main Station to the airport?)"
+      "我们几点去机场？ (What time are we going to the airport?)",
+      "机场离这里很远。 (The airport is far from here.)"
     ]
   },
   {
@@ -2203,8 +2203,8 @@
     "part_of_speech": "noun",
     "explanation": "A rail vehicle for travel.",
     "examples": [
-      "我坐火车去花莲。 (I take the train to Hualien.)",
-      "去台南的火车几点到？ (What time does the train to Tainan arrive?)"
+      "我每天坐火车上班。 (I take the train to work every day.)",
+      "火车几点到？ (What time does the train arrive?)"
     ]
   },
   {
@@ -2215,8 +2215,8 @@
     "part_of_speech": "noun",
     "explanation": "A vehicle that flies in the air.",
     "examples": [
-      "飞往高雄的飞机晚点了。 (The flight to Kaohsiung is delayed.)",
-      "我明天从桃园机场坐飞机。 (I will fly from Taoyuan Airport tomorrow.)"
+      "飞机晚点了。 (The airplane is delayed.)",
+      "我明天坐飞机。 (I will take a plane tomorrow.)"
     ]
   },
   {
@@ -2743,8 +2743,8 @@
     "part_of_speech": "verb",
     "explanation": "A common daily-use word meaning to travel; trip.",
     "examples": [
-      "我想去台湾旅行。 (I want to travel around Taiwan.)",
-      "我们周末去台南旅行。 (We are traveling to Tainan this weekend.)"
+      "我喜欢旅行。 (I like traveling.)",
+      "我们周末一起去旅行。 (We are taking a trip together this weekend.)"
     ]
   },
   {
@@ -2755,7 +2755,7 @@
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning park.",
     "examples": [
-      "大安森林公园在台北。 (Daan Forest Park is in Taipei.)",
+      "这个公园很大。 (This park is very large.)",
       "周末我们去公园散步。 (We are going for a walk in the park this weekend.)"
     ]
   },
@@ -2779,8 +2779,8 @@
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning address.",
     "examples": [
-      "请把台北的地址传给我。 (Please send me the address in Taipei.)",
-      "这个地址离捷运站很近。 (This address is close to the MRT station.)"
+      "请把地址传给我。 (Please send me the address.)",
+      "这个地址离车站很近。 (This address is close to the station.)"
     ]
   },
   {
@@ -2791,8 +2791,8 @@
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning map.",
     "examples": [
-      "我在地图上找日月潭。 (I am looking for Sun Moon Lake on the map.)",
-      "这张台湾地图很清楚。 (This map of Taiwan is very clear.)"
+      "我在地图上找这个地方。 (I am looking for this place on the map.)",
+      "这张地图很清楚。 (This map is very clear.)"
     ]
   },
   {
@@ -3475,8 +3475,8 @@
     "part_of_speech": "noun",
     "explanation": "A common daily-use word meaning city.",
     "examples": [
-      "台中是一个很方便的城市。 (Taichung is a very convenient city.)",
-      "我想去台湾不同的城市看看。 (I want to visit different cities in Taiwan.)"
+      "这个城市很方便。 (This city is very convenient.)",
+      "我想去不同的城市看看。 (I want to visit different cities.)"
     ]
   },
   {
@@ -4568,7 +4568,7 @@
     "explanation": "A common daily-use word meaning receipt; invoice.",
     "examples": [
       "请问可以开发票吗？ (Could I have a receipt, please?)",
-      "记得看看发票有没有中奖。 (Remember to check whether the receipt won a prize.)"
+      "请收好发票。 (Please keep the receipt.)"
     ]
   },
   {

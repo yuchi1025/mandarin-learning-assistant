@@ -38,15 +38,16 @@ def test_dictionary_examples_avoid_generated_double_infinitives():
     assert all("we will to " not in example.lower() for example in examples)
 
 
-def test_everyday_examples_use_taiwan_places_and_contexts():
+def test_everyday_examples_are_natural_and_geographically_neutral():
     entries = {entry["word"]: entry for entry in load_entries()}
 
-    assert "桃园机场" in entries["机场"]["examples"][0]
-    assert "花莲" in entries["火车"]["examples"][0]
-    assert "台南" in entries["旅行"]["examples"][1]
-    assert "日月潭" in entries["地图"]["examples"][0]
-    assert "捷运站" in entries["地址"]["examples"][1]
-    assert "发票有没有中奖" in entries["发票"]["examples"][1]
+    assert entries["机场"]["examples"][0] == "我们几点去机场？ (What time are we going to the airport?)"
+    assert entries["火车"]["examples"][0] == "我每天坐火车上班。 (I take the train to work every day.)"
+    assert entries["旅行"]["examples"][0] == "我喜欢旅行。 (I like traveling.)"
+    assert entries["地图"]["examples"][1] == "这张地图很清楚。 (This map is very clear.)"
+    assert entries["发票"]["examples"][1] == "请收好发票。 (Please keep the receipt.)"
+
+
 def test_dictionary_words_are_unique():
     entries = load_entries()
     words = [entry["word"] for entry in entries]

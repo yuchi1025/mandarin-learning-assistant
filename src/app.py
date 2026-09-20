@@ -2208,8 +2208,8 @@ def get_curated_ai_result(query):
         "part_of_speech": "time word",
         "explanation": "前年 means the year before last, two years before the current year.",
         "examples": [
-            make_structured_example("前年我去了台南。", "The year before last, I went to Tainan."),
-            make_structured_example("前年我们环岛旅行。", "The year before last, we traveled around Taiwan."),
+            make_structured_example("前年我搬家了。", "I moved the year before last."),
+            make_structured_example("前年我们一起旅行。", "The year before last, we traveled together."),
         ],
     }
 
@@ -2286,11 +2286,11 @@ def fetch_ai_explanation(query):
         "Return JSON only with these keys: word, traditional, pinyin, english, part_of_speech, category, explanation, examples. "
         "Do not add extra keys. "
         "Use concise beginner-friendly English. "
-        "Use natural Taiwan Mandarin vocabulary and everyday Taiwan settings when appropriate. "
+        "Use natural Taiwan Mandarin vocabulary when regional word choices differ. "
         "Keep the simple explanation neutral; mention regional usage only when needed to clarify the meaning. "
+        "Keep examples geographically neutral and do not force regional places or local contexts. "
         "Prefer terms such as 捷運, 公車, 計程車, 超商, 外送, 影片, 網路, 冷氣, and 機車; "
         "avoid mainland-only alternatives such as 地铁, 公交车, 出租车, 便利店, 外卖, 视频, 网络, 空调, and 摩托车. "
-        "Use Taiwan places such as 台北, 台南, 高雄, 花蓮, or 日月潭 when a place makes the example clearer. "
         "The word field must be the simplified Chinese form of the exact Mandarin word or phrase being explained, not a sentence. "
         "The traditional field must be the traditional Chinese form of the same word or phrase. "
         "If simplified and traditional are the same, use the same value for both fields. "

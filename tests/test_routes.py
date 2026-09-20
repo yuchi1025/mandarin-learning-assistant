@@ -2297,11 +2297,11 @@ def test_curated_ai_result_corrects_qiannian_meaning():
     assert result["word"] == "前年"
     assert result["english"] == "the year before last"
     assert "two years before" in result["explanation"]
-    assert result["examples"][0]["text"] == "前年我去了台南。"
-    assert result["examples"][1]["translation"] == "The year before last, we traveled around Taiwan."
+    assert result["examples"][0]["text"] == "前年我搬家了。"
+    assert result["examples"][1]["translation"] == "The year before last, we traveled together."
 
 
-def test_ai_explanation_requests_taiwan_vocabulary_and_settings(monkeypatch):
+def test_ai_explanation_requests_taiwan_vocabulary_and_neutral_examples(monkeypatch):
     captured = {}
 
     def fake_request(system_prompt, user_prompt):
@@ -2327,9 +2327,9 @@ def test_ai_explanation_requests_taiwan_vocabulary_and_settings(monkeypatch):
     assert result["word"] == "夜市"
     assert "natural Taiwan Mandarin" in captured["system"]
     assert "Keep the simple explanation neutral" in captured["system"]
+    assert "Keep examples geographically neutral" in captured["system"]
     assert "捷運" in captured["system"]
     assert "avoid mainland-only alternatives" in captured["system"]
-    assert "台南" in captured["system"]
 
 
 def test_ai_explanation_includes_traditional_form(monkeypatch):
