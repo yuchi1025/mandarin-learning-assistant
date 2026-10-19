@@ -17,6 +17,7 @@ PINYIN_WORD_OVERRIDES = {
     "品质": "pǐn zhí",
     "血": "xiě",
     "休息": "xiū xí",
+    "脏": "zāng",
     "危险": "wéi xiǎn",
 }
 

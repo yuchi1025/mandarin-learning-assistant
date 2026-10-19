@@ -379,6 +379,66 @@ def test_taiwan_pronunciation_is_used_for_rest_and_examples():
     assert "xiū xī" not in response_text
 
 
+def test_dirty_uses_first_tone_without_changing_organ_pronunciation():
+    entry = mandarin_app.DICTIONARY_ENTRIES_BY_WORD["脏"]
+
+    assert entry["traditional"] == "髒"
+    assert entry["pinyin"] == "zāng"
+    assert mandarin_app.to_sentence_pinyin("脏") == "zāng"
+    assert mandarin_app.to_sentence_pinyin("髒") == "zāng"
+    assert mandarin_app.to_sentence_pinyin("这个很脏。") == "zhè gè hěn zāng。"
+    assert mandarin_app.to_sentence_pinyin("這個很髒。") == "zhè gè hěn zāng。"
+    assert mandarin_app.display_pinyin_pair("zāng", "脏", "髒") == "zāng"
+    assert mandarin_app.to_sentence_pinyin("心脏") == "xīn zàng"
+    assert mandarin_app.to_sentence_pinyin("心臟") == "xīn zàng"
+    assert mandarin_app.to_sentence_pinyin("内脏") == "nèi zàng"
+    assert mandarin_app.to_sentence_pinyin("內臟") == "nèi zàng"
+
+    client = mandarin_app.app.test_client()
+    for query in ("脏", "髒", "dirty"):
+        response = client.post("/", data={"form_type": "search", "query": query})
+        response_text = response.get_data(as_text=True)
+        assert response.status_code == 200
+        assert "zāng / zàng" not in response_text
+        assert "zàng / zāng" not in response_text
+        assert "zāng" in response_text
+
+
+def test_taiwan_pronunciation_is_used_for_message():
+    assert mandarin_app.to_sentence_pinyin("讯息") == "xùn xí"
+    assert mandarin_app.to_sentence_pinyin("訊息") == "xùn xí"
+    assert mandarin_app.to_sentence_pinyin("我收到你的讯息了。") == "wǒ shōu dào nǐ de xùn xí le。"
+    assert mandarin_app.to_sentence_pinyin("我收到你的訊息了。") == "wǒ shōu dào nǐ de xùn xí le。"
+    assert mandarin_app.display_pinyin_pair("xùn xí", "讯息", "訊息") == "xùn xí"
+
+
+def test_accounting_uses_contextual_pronunciation_in_both_scripts():
+    assert mandarin_app.to_sentence_pinyin("会计") == "kuài jì"
+    assert mandarin_app.to_sentence_pinyin("會計") == "kuài jì"
+    assert mandarin_app.to_sentence_pinyin("她是会计。") == "tā shì kuài jì。"
+    assert mandarin_app.to_sentence_pinyin("她是會計。") == "tā shì kuài jì。"
+    assert mandarin_app.display_pinyin_pair("kuài jì", "会计", "會計") == "kuài jì"
+
+
+def test_sleep_uses_contextual_pronunciation_in_both_scripts():
+    entry = mandarin_app.DICTIONARY_ENTRIES_BY_WORD["睡觉"]
+
+    assert entry["pinyin"] == "shuì jiào"
+    assert mandarin_app.to_sentence_pinyin("睡觉") == "shuì jiào"
+    assert mandarin_app.to_sentence_pinyin("睡覺") == "shuì jiào"
+    assert mandarin_app.to_sentence_pinyin("孩子已经睡觉了。") == "hái zi yǐ jīng shuì jiào le。"
+    assert mandarin_app.to_sentence_pinyin("孩子已經睡覺了。") == "hái zi yǐ jīng shuì jiào le。"
+    assert mandarin_app.display_pinyin_pair("shuì jiào", "睡觉", "睡覺") == "shuì jiào"
+
+    client = mandarin_app.app.test_client()
+    for query in ("睡觉", "睡覺", "sleep"):
+        response = client.post("/", data={"form_type": "search", "query": query})
+        response_text = response.get_data(as_text=True)
+        assert response.status_code == 200
+        assert "shuì jué" not in response_text
+        assert "shuì jiào" in response_text
+
+
 def test_sentence_pinyin_preserves_word_context_for_polyphonic_characters():
     assert mandarin_app.to_sentence_pinyin("我去银行。") == "wǒ qù yín háng。"
     assert mandarin_app.to_sentence_pinyin("我喜欢音乐。") == "wǒ xǐ huān yīn yuè。"
