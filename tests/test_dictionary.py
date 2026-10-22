@@ -29,7 +29,7 @@ def load_entries():
 def test_dictionary_is_valid():
     entries = load_entries()
 
-    assert validate_entries(entries, expected_count=503) == []
+    assert validate_entries(entries, expected_count=504) == []
 
 
 def test_dictionary_examples_avoid_generated_double_infinitives():

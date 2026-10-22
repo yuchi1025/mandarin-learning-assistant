@@ -74,7 +74,7 @@ CATEGORY_WORDS = {
     "food": "多少钱 买 卖 商店 超市 餐厅 水 咖啡 茶 饭 面条 苹果 香蕉 鸡蛋 牛奶 钱 卡 现金 票 产品 菜单 点菜 服务生 付款 找钱 价格 颜色 红色 白色 黑色".split(),
     "people": "家 人 男人 女人 孩子 爸爸 妈妈 哥哥 姐姐 弟弟 妹妹 房间 厨房 洗手间 门 窗户 桌子 椅子 教练".split(),
     "study": "学习 工作 下班 上班 学校 公司 医院 老师 学生 同事 书 考试 作业 课堂 同学 课程 老板 会议 专案 邮件 文件 经理 办公室".split(),
-    "descriptions": "累 开心 热 冷 好吃 好喝 漂亮 贵 便宜 快 慢 远 近 忙 空 新 旧 大 小 多 少 重要 可能 不同 容易 困难 安全 小心 疼".split(),
+    "descriptions": "累 开心 热 冷 好吃 好喝 漂亮 贵 便宜 快 慢 远 近 忙 空 新 旧 大 小 多 少 重要 可能 不同 容易 困难 安全 小心 疼 不够".split(),
     "grammar": "为什么 因为".split(),
     "health": "天气 雨 太阳 药 身体 生病 医生 预约 过敏".split(),
     "technology": "手机 电脑 电视 电影 音乐 电话 消息 照片 新闻 报纸 语言 中文 英文".split(),
@@ -150,6 +150,9 @@ PINYIN_PHRASE_OVERRIDES = {
     "休息": "xiū xí",
     "讯息": "xùn xí",
     "訊息": "xùn xí",
+    "冲突": "chōng tú",
+    "衝突": "chōng tú",
+    "解法": "jiě fǎ",
     "会计": "kuài jì",
     "會計": "kuài jì",
     "内脏": "nèi zàng",
@@ -2226,6 +2229,30 @@ def get_curated_ai_result(query):
     }
 
 
+AI_RESPONSE_ARTIFACT_MARKERS = (
+    "```",
+    "return json",
+    "the word field must",
+    "set part_of_speech",
+    "set category",
+    "keep the simple explanation",
+    "keep examples geographically",
+    "prefer terms such as",
+    "avoid mainland-only alternatives",
+    "unable to fulfill this request",
+)
+
+
+def is_clean_ai_text(value, max_length):
+    if not isinstance(value, str):
+        return False
+    text = value.strip()
+    if not text or len(text) > max_length:
+        return False
+    normalized = text.casefold()
+    return not any(marker in normalized for marker in AI_RESPONSE_ARTIFACT_MARKERS)
+
+
 def validate_ai_result(query, result):
     word = result.get("word", "").strip()
     traditional = result.get("traditional", word).strip() or word
@@ -2244,7 +2271,7 @@ def validate_ai_result(query, result):
     if word in {"我是", "你是", "他是", "她是"}:
         return False
 
-    if not explanation:
+    if not is_clean_ai_text(english, 160) or not is_clean_ai_text(explanation, 600):
         return False
 
     if query_is_chinese:
@@ -2330,6 +2357,8 @@ def fetch_ai_explanation(query):
         parsed, error = request_ollama_json(system_prompt, user_prompt)
         if error:
             return None, error.replace("AI is", "AI explanation is", 1)
+        if not isinstance(parsed, dict):
+            continue
 
         raw_examples = parsed.get("examples", [])
         raw_examples = raw_examples if isinstance(raw_examples, list) else []
@@ -2339,34 +2368,48 @@ def fetch_ai_explanation(query):
             if not isinstance(example, dict):
                 invalid_example = True
                 continue
-            text = str(example.get("text", "")).strip()
-            translation = str(example.get("translation", "")).strip()
+            text = example.get("text", "")
+            translation = example.get("translation", "")
             if (
-                not contains_chinese(text)
-                or not translation
+                not is_clean_ai_text(text, 100)
+                or not contains_chinese(text)
+                or not is_clean_ai_text(translation, 300)
                 or text.casefold() == translation.casefold()
             ):
                 invalid_example = True
                 continue
+            text = text.strip()
+            translation = translation.strip()
             examples.append(make_structured_example(text, translation))
 
         if raw_examples and (invalid_example or not examples):
             continue
 
-        word = parsed.get("word", query).strip() or query
-        traditional = parsed.get("traditional", word).strip() or word
+        parsed_word = parsed.get("word", query)
+        word = parsed_word.strip() if isinstance(parsed_word, str) else query
+        word = word or query
+        parsed_traditional = parsed.get("traditional", word)
+        traditional = parsed_traditional.strip() if isinstance(parsed_traditional, str) else word
+        traditional = traditional or word
         word, traditional = normalize_ai_word_forms(query, word, traditional)
-        pinyin = to_sentence_pinyin(word) if contains_chinese(word) else parsed.get("pinyin", "").strip()
+        parsed_pinyin = parsed.get("pinyin", "")
+        pinyin = to_sentence_pinyin(word) if contains_chinese(word) else (
+            parsed_pinyin.strip() if isinstance(parsed_pinyin, str) else ""
+        )
+        parsed_english = parsed.get("english", "")
+        english = parsed_english.strip() if isinstance(parsed_english, str) else ""
+        parsed_explanation = parsed.get("explanation", "")
+        explanation = parsed_explanation.strip() if isinstance(parsed_explanation, str) else ""
 
         ai_result = {
             "word": word,
             "traditional": traditional,
             "pinyin": pinyin,
             "display_pinyin": display_pinyin_pair(pinyin, word, traditional),
-            "english": parsed.get("english", "").strip(),
+            "english": english,
             "part_of_speech": normalize_part_of_speech(parsed.get("part_of_speech", "word")),
             "category": normalize_entry_category(parsed.get("category")),
-            "explanation": parsed.get("explanation", "").strip(),
+            "explanation": explanation,
             "examples": examples,
         }
 

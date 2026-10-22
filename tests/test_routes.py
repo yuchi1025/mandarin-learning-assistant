@@ -439,6 +439,18 @@ def test_sleep_uses_contextual_pronunciation_in_both_scripts():
         assert "shuì jiào" in response_text
 
 
+def test_solution_and_conflict_use_contextual_pronunciations():
+    assert mandarin_app.to_sentence_pinyin("解法") == "jiě fǎ"
+    assert mandarin_app.to_sentence_pinyin("这个解法很好。") == "zhè gè jiě fǎ hěn hǎo。"
+    assert mandarin_app.display_pinyin_pair("jiě fǎ", "解法", "解法") == "jiě fǎ"
+
+    assert mandarin_app.to_sentence_pinyin("冲突") == "chōng tú"
+    assert mandarin_app.to_sentence_pinyin("衝突") == "chōng tú"
+    assert mandarin_app.to_sentence_pinyin("他们发生了冲突。") == "tā men fā shēng le chōng tú。"
+    assert mandarin_app.to_sentence_pinyin("他們發生了衝突。") == "tā men fā shēng le chōng tú。"
+    assert mandarin_app.display_pinyin_pair("chōng tú", "冲突", "衝突") == "chōng tú"
+
+
 def test_sentence_pinyin_preserves_word_context_for_polyphonic_characters():
     assert mandarin_app.to_sentence_pinyin("我去银行。") == "wǒ qù yín háng。"
     assert mandarin_app.to_sentence_pinyin("我喜欢音乐。") == "wǒ xǐ huān yīn yuè。"
@@ -2509,6 +2521,52 @@ def test_ai_explanation_retries_repeated_english_in_the_example_text(monkeypatch
     assert len(prompts) == 2
     assert "previous answer did not meet" in prompts[1]
     assert [example["text"] for example in result["examples"]] == ["我们现在怎么办？", "下雨了，怎么办？"]
+
+
+def test_ai_explanation_retries_prompt_text_leaking_into_an_example(monkeypatch):
+    contaminated_translation = (
+        "Finally, please pack all the things up. ```json``` Keep the simple explanation neutral; "
+        "mention regional usage only when needed. The word field must be the simplified Chinese form."
+    )
+    responses = iter([
+        {
+            "word": "包好",
+            "traditional": "包好",
+            "english": "to pack securely",
+            "part_of_speech": "verb",
+            "explanation": "To finish packing something securely.",
+            "examples": [
+                {"text": "最后请把东西都包好。", "translation": contaminated_translation},
+                {"text": "出门前要把礼物包好。", "translation": "Wrap the gift before leaving."},
+            ],
+        },
+        {
+            "word": "包好",
+            "traditional": "包好",
+            "english": "to pack securely",
+            "part_of_speech": "verb",
+            "explanation": "To finish packing something securely.",
+            "examples": [
+                {"text": "最后请把东西都包好。", "translation": "Finally, please pack everything."},
+                {"text": "出门前要把礼物包好。", "translation": "Wrap the gift before leaving."},
+            ],
+        },
+    ])
+    prompts = []
+
+    def fake_request(system_prompt, user_prompt):
+        prompts.append(user_prompt)
+        return next(responses), None
+
+    monkeypatch.setattr(mandarin_app, "request_ollama_json", fake_request)
+
+    result, error = mandarin_app.fetch_ai_explanation("包好")
+
+    assert error is None
+    assert len(prompts) == 2
+    assert "previous answer did not meet" in prompts[1]
+    assert result["examples"][0]["translation"] == "Finally, please pack everything."
+    assert "```" not in result["examples"][0]["translation"]
 
 
 def test_ai_explanation_keeps_error_after_failed_repair_retry(monkeypatch):

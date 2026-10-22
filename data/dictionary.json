@@ -6034,5 +6034,17 @@
       "这样做很危险。 (It is dangerous to do this.)",
       "晚上一个人走很危险。 (Walking alone at night is dangerous.)"
     ]
+  },
+  {
+    "word": "不够",
+    "traditional": "不夠",
+    "pinyin": "bù gòu",
+    "english": "not enough; insufficient",
+    "part_of_speech": "adjective",
+    "explanation": "Less than what is needed.",
+    "examples": [
+      "钱不够。 (There is not enough money.)",
+      "时间不够。 (There is not enough time.)"
+    ]
   }
 ]

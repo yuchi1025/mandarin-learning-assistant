@@ -23,6 +23,11 @@ def test_exact_traditional_chinese_match_returns_simplified_entry():
     assert words_for("洗手間") == ["洗手间"]
 
 
+def test_not_enough_is_searchable_in_both_scripts_and_english():
+    for query in ("不够", "不夠", "bu gou", "bù gòu", "not enough", "insufficient"):
+        assert words_for(query) == ["不够"]
+
+
 def test_exact_pinyin_match_returns_only_exact_word():
     assert words_for("zuo bian") == ["左边"]
 
